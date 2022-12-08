@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"name": "✨ root",
+			"path": "."
+		},
+		{
+			"name": "🚀 app",
+			"path": "app"
+		},
+		{
+			"name": "🚀 react",
+			"path": "app/src/react/packages/react"
+		},
+		{
+			"name": "🚀 react-dom",
+			"path": "app/src/react/packages/react-dom"
+		},
+		{
+			"name": "🚀 react-reconciler",
+			"path": "app/src/react/packages/react-reconciler"
+		},
+		{
+			"name": "🚀 scheduler",
+			"path": "app/src/react/packages/scheduler"
+		}
+	],
+	"settings": {
+		"javascript.validate.enable": false
+	}
+}
