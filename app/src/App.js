@@ -1,9 +1,12 @@
-function App() {
+import "./examples/KeyWithIndex.css";
+import KeyWithIndex from "./examples/KeyWithIndex";
+
+const App = () => {
   return (
     <div>
-      <span>App</span>
+      <KeyWithIndex />
     </div>
   );
-}
+};
 
 export default App;
