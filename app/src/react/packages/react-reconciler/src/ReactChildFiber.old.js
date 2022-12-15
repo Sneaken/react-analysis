@@ -7,38 +7,39 @@
  * @flow
  */
 
-import type {ReactElement} from 'shared/ReactElementType';
-import type {ReactPortal} from 'shared/ReactTypes';
-import type {Fiber} from './ReactInternalTypes';
-import type {Lanes} from './ReactFiberLane.old';
+import type {ReactElement} from 'shared/ReactElementType'
+import type {ReactPortal} from 'shared/ReactTypes'
+import type {Fiber} from './ReactInternalTypes'
+import type {Lanes} from './ReactFiberLane.old'
 
-import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
-import {Placement, ChildDeletion, Forked} from './ReactFiberFlags';
+import getComponentNameFromFiber
+  from 'react-reconciler/src/getComponentNameFromFiber'
+import {ChildDeletion, Forked, Placement} from './ReactFiberFlags'
 import {
   getIteratorFn,
   REACT_ELEMENT_TYPE,
   REACT_FRAGMENT_TYPE,
-  REACT_PORTAL_TYPE,
   REACT_LAZY_TYPE,
-} from 'shared/ReactSymbols';
-import {ClassComponent, HostText, HostPortal, Fragment} from './ReactWorkTags';
-import isArray from 'shared/isArray';
-import {warnAboutStringRefs} from 'shared/ReactFeatureFlags';
-import {checkPropStringCoercion} from 'shared/CheckStringCoercion';
+  REACT_PORTAL_TYPE,
+} from 'shared/ReactSymbols'
+import {ClassComponent, Fragment, HostPortal, HostText} from './ReactWorkTags'
+import isArray from 'shared/isArray'
+import {warnAboutStringRefs} from 'shared/ReactFeatureFlags'
+import {checkPropStringCoercion} from 'shared/CheckStringCoercion'
 
 import {
-  createWorkInProgress,
-  resetWorkInProgress,
   createFiberFromElement,
   createFiberFromFragment,
-  createFiberFromText,
   createFiberFromPortal,
-} from './ReactFiber.old';
-import {emptyRefsObject} from './ReactFiberClassComponent.old';
-import {isCompatibleFamilyForHotReloading} from './ReactFiberHotReloading.old';
-import {StrictLegacyMode} from './ReactTypeOfMode';
-import {getIsHydrating} from './ReactFiberHydrationContext.old';
-import {pushTreeFork} from './ReactFiberTreeContext.old';
+  createFiberFromText,
+  createWorkInProgress,
+  resetWorkInProgress,
+} from './ReactFiber.old'
+import {emptyRefsObject} from './ReactFiberClassComponent.old'
+import {isCompatibleFamilyForHotReloading} from './ReactFiberHotReloading.old'
+import {StrictLegacyMode} from './ReactTypeOfMode'
+import {getIsHydrating} from './ReactFiberHydrationContext.old'
+import {pushTreeFork} from './ReactFiberTreeContext.old'
 
 let didWarnAboutMaps;
 let didWarnAboutGenerators;
@@ -305,13 +306,18 @@ function ChildReconciler(shouldTrackSideEffects) {
     // instead.
     const existingChildren: Map<string | number, Fiber> = new Map();
 
+    // 这个是旧的fiber节点
     let existingChild = currentFirstChild;
+    // 只要旧fiber节点一直存在旧一直遍历
     while (existingChild !== null) {
       if (existingChild.key !== null) {
+        // 如果 fiber 节点 存在 key, 那就 通过 key => fiber 的形式缓存起来
         existingChildren.set(existingChild.key, existingChild);
       } else {
+        // 否则 就用 index 缓存
         existingChildren.set(existingChild.index, existingChild);
       }
+      // 交给兄弟节点按层遍历
       existingChild = existingChild.sibling;
     }
     return existingChildren;
@@ -632,6 +638,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       (typeof newChild === 'string' && newChild !== '') ||
       typeof newChild === 'number'
     ) {
+      // 如果是文字节点直接 走 create or update
       // Text nodes don't have keys, so we neither have to check the old nor
       // new node for the key. If both are text nodes, they match.
       const matchedFiber = existingChildren.get(newIdx) || null;
@@ -641,6 +648,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     if (typeof newChild === 'object' && newChild !== null) {
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE: {
+          // 如果 $$typeof 是 Fragment, 走 create or update
           const matchedFiber =
             existingChildren.get(
               newChild.key === null ? newIdx : newChild.key,
@@ -648,6 +656,7 @@ function ChildReconciler(shouldTrackSideEffects) {
           return updateElement(returnFiber, matchedFiber, newChild, lanes);
         }
         case REACT_PORTAL_TYPE: {
+          // 如果 $$typeof 是 Portal, 走 create or update
           const matchedFiber =
             existingChildren.get(
               newChild.key === null ? newIdx : newChild.key,
@@ -667,6 +676,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       }
 
       if (isArray(newChild) || getIteratorFn(newChild)) {
+        // 如果 newChild 是可迭代对象 走 Fragment 的 create or update
         const matchedFiber = existingChildren.get(newIdx) || null;
         return updateFragment(returnFiber, matchedFiber, newChild, lanes, null);
       }
@@ -774,13 +784,19 @@ function ChildReconciler(shouldTrackSideEffects) {
     let lastPlacedIndex = 0;
     let newIdx = 0;
     let nextOldFiber = null;
+    // old fiber 还存在并且新节点还没遍历完
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       if (oldFiber.index > newIdx) {
+        // 节点变少了
         nextOldFiber = oldFiber;
         oldFiber = null;
       } else {
         nextOldFiber = oldFiber.sibling;
       }
+      // 如果新节点是文字节点时，当 newChild 存在 key 则 return null, 否则 update
+      // 如果新节点存在 $$typeof 时, 如果 key 变化了 则 return null 否则 update
+      // 如果新节点是可迭代对象时，如果 old fiber 存在 key 则 return null 否则 update
+      // 其余情况 return null
       const newFiber = updateSlot(
         returnFiber,
         oldFiber,
@@ -820,6 +836,9 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (newIdx === newChildren.length) {
+      // 新节点遍历完了
+      // old fiber !== null, 说明节点变少
+      // old fiber === null, 说明 节点数量没变
       // We've reached the end of the new children. We can delete the rest.
       deleteRemainingChildren(returnFiber, oldFiber);
       if (getIsHydrating()) {
@@ -830,6 +849,8 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (oldFiber === null) {
+      // 新节点没遍历完，但是 old fiber 遍历完了
+      // 说明 节点数量变多了
       // If we don't have any more existing children we can choose a fast path
       // since the rest will all be insertions.
       for (; newIdx < newChildren.length; newIdx++) {
@@ -853,11 +874,16 @@ function ChildReconciler(shouldTrackSideEffects) {
       return resultingFirstChild;
     }
 
+    // break 跳过来的, 一般都是 key 发生了变化
+
+    // 根据 key（优先） 或者 index 来缓存节点
     // Add all children to a key map for quick lookups.
     const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
 
     // Keep scanning and use the map to restore deleted items as moves.
+    // 遍历新的子节点
     for (; newIdx < newChildren.length; newIdx++) {
+      // 依次更新旧map存储的节点
       const newFiber = updateFromMap(
         existingChildren,
         returnFiber,
@@ -868,6 +894,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       if (newFiber !== null) {
         if (shouldTrackSideEffects) {
           if (newFiber.alternate !== null) {
+            // 如果某个节点被重用，那么就需要被从删除候选中移除
             // The new fiber is a work in progress, but if there exists a
             // current, that means that we reused the fiber. We need to delete
             // it from the child list so that we don't add it to the deletion
@@ -888,9 +915,10 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (shouldTrackSideEffects) {
+      // 这里是所有未被重用的节点，标记删除
       // Any existing children that weren't consumed above were deleted. We need
       // to add them to the deletion list.
-      existingChildren.forEach(child => deleteChild(returnFiber, child));
+      existingChildren.forEach((child) => deleteChild(returnFiber, child));
     }
 
     if (getIsHydrating()) {
@@ -1092,7 +1120,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     if (shouldTrackSideEffects) {
       // Any existing children that weren't consumed above were deleted. We need
       // to add them to the deletion list.
-      existingChildren.forEach(child => deleteChild(returnFiber, child));
+      existingChildren.forEach((child) => deleteChild(returnFiber, child));
     }
 
     if (getIsHydrating()) {
@@ -1141,6 +1169,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         const elementType = element.type;
         if (elementType === REACT_FRAGMENT_TYPE) {
           if (child.tag === Fragment) {
+            //删除兄弟节点
             deleteRemainingChildren(returnFiber, child.sibling);
             const existing = useFiber(child, element.props.children);
             existing.return = returnFiber;
@@ -1177,15 +1206,19 @@ function ChildReconciler(shouldTrackSideEffects) {
             return existing;
           }
         }
+        // 代码执行到这里代表：key相同但是type不同
+        // 将该fiber及其兄弟fiber标记为删除
         // Didn't match.
         deleteRemainingChildren(returnFiber, child);
         break;
       } else {
+        // key不同，将该fiber标记为删除
         deleteChild(returnFiber, child);
       }
       child = child.sibling;
     }
 
+    // 没有DOM节点就创建新的Fiber
     if (element.type === REACT_FRAGMENT_TYPE) {
       const created = createFiberFromFragment(
         element.props.children,
