@@ -55,7 +55,10 @@ const KeyWithIndex = () => {
       <button onClick={splice}>splice(2, 0)</button>
       <ul>
         {list.map((item, index) => {
-          return <Li key={item.id} val={item.val}></Li>;
+          // 用 index 作为 key 为什么子组件的数据会紊乱?
+          // - key 没发生改变所以 子组件是被错误的复用了, 而子组件内部的 sibling 也被错误的复用了, 所以就只更新了 props
+          // - 如果用 id 作为 key, 子组件会在 map(existingChildren) 中复用, 所以子组件的状态是正常的
+          return <Li key={index} val={item.val}></Li>;
         })}
       </ul>
     </div>

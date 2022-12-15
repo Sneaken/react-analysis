@@ -767,7 +767,7 @@ function ChildReconciler(shouldTrackSideEffects) {
 
     // const _debug = true;
     const _debug = false;
-    const _debugFlag = returnFiber.type === 'ul';
+    const _debugFlag = returnFiber.type === 'ul' || returnFiber.type === 'li';
     const _console =
       _debug && _debugFlag
         ? console
@@ -812,6 +812,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         newChildren[newIdx],
         lanes,
       );
+      _console.log('节点是否复用', !!newFiber.alternate);
       if (newFiber === null) {
         // TODO: This breaks on empty slots like null children. That's
         // unfortunate because it triggers the slow path all the time. We need
