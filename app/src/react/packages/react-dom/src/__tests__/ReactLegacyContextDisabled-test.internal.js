@@ -158,7 +158,7 @@ describe('ReactLegacyContextDisabled', () => {
 
     class RenderPropConsumer extends React.Component {
       render() {
-        return <Ctx.Consumer>{value => formatValue(value)}</Ctx.Consumer>;
+        return <Ctx.Consumer>{(value) => formatValue(value)}</Ctx.Consumer>;
       }
     }
 
@@ -224,7 +224,7 @@ describe('ReactLegacyContextDisabled', () => {
       container,
     );
     expect(container.textContent).toBe('bbb');
-    if (gate(flags => flags.enableLazyContextPropagation)) {
+    if (gate((flags) => flags.enableLazyContextPropagation)) {
       // In the lazy propagation implementation, we don't check if context
       // changed until after shouldComponentUpdate is run.
       expect(lifecycleContextLog).toEqual(['b', 'b', 'b']);

@@ -102,7 +102,7 @@ describe('ReactFunctionComponent', () => {
     function FunctionComponentWithChildContext() {
       return null;
     }
-    FunctionComponentWithChildContext.getDerivedStateFromProps = function() {};
+    FunctionComponentWithChildContext.getDerivedStateFromProps = function () {};
 
     const container = document.createElement('div');
 
@@ -138,7 +138,7 @@ describe('ReactFunctionComponent', () => {
 
   it('should not throw when stateless component returns undefined', () => {
     function NotAComponent() {}
-    expect(function() {
+    expect(function () {
       ReactTestUtils.renderIntoDocument(
         <div>
           <NotAComponent />
@@ -152,7 +152,7 @@ describe('ReactFunctionComponent', () => {
       return <div ref="me" />;
     }
 
-    expect(function() {
+    expect(function () {
       ReactTestUtils.renderIntoDocument(<Child test="test" />);
     }).toThrowError(
       __DEV__
@@ -212,7 +212,7 @@ describe('ReactFunctionComponent', () => {
           <Indirection>
             <FunctionComponent
               name="A"
-              ref={arg => {
+              ref={(arg) => {
                 expect(arg).toBe(null);
               }}
             />
@@ -323,7 +323,7 @@ describe('ReactFunctionComponent', () => {
         };
       }
       render() {
-        return <Child ref={function() {}} />;
+        return <Child ref={function () {}} />;
       }
     }
 
@@ -400,7 +400,7 @@ describe('ReactFunctionComponent', () => {
   });
 
   it('should work with arrow functions', () => {
-    let Child = function() {
+    let Child = function () {
       return <div />;
     };
     // Will create a new bound function without a prototype, much like a native
@@ -411,7 +411,7 @@ describe('ReactFunctionComponent', () => {
   });
 
   it('should allow simple functions to return null', () => {
-    const Child = function() {
+    const Child = function () {
       return null;
     };
     expect(() => ReactTestUtils.renderIntoDocument(<Child />)).not.toThrow();

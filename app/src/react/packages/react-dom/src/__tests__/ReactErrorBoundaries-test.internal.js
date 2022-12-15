@@ -1869,7 +1869,7 @@ describe('ReactErrorBoundaries', () => {
     const container = document.createElement('div');
     ReactDOM.render(
       <ErrorBoundary>
-        <Stateful ref={inst => (statefulInst = inst)} />
+        <Stateful ref={(inst) => (statefulInst = inst)} />
       </ErrorBoundary>,
       container,
     );
@@ -2054,7 +2054,7 @@ describe('ReactErrorBoundaries', () => {
     ReactDOM.render(
       <ErrorBoundary>
         <BrokenComponentDidMountErrorBoundary
-          renderError={error => (
+          renderError={(error) => (
             <div>We should never catch our own error: {error.message}.</div>
           )}
         />
@@ -2460,7 +2460,7 @@ describe('ReactErrorBoundaries', () => {
       throw evilError;
     };
     Object.defineProperty(Throws, 'displayName', {
-      get: function() {
+      get: function () {
         throw new Error('gotta catch em all');
       },
     });
@@ -2595,7 +2595,7 @@ describe('ReactErrorBoundaries', () => {
     }
 
     class LocalBrokenCallbackRef extends React.Component {
-      _ref = ref => {
+      _ref = (ref) => {
         Scheduler.unstable_yieldValue('LocalBrokenCallbackRef ref ' + !!ref);
         if (ref === null) {
           throw Error('Expected');

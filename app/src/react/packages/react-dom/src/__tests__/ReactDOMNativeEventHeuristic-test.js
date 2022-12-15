@@ -305,7 +305,7 @@ describe('ReactDOMNativeEventHeuristic-test', () => {
       expect(container.textContent).toEqual('not hovered');
 
       expect(Scheduler).toFlushAndYieldThrough(['hovered']);
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         expect(container.textContent).toEqual('hovered');
       } else {
         expect(container.textContent).toEqual('not hovered');
@@ -358,7 +358,7 @@ describe('ReactDOMNativeEventHeuristic-test', () => {
       const [count, setCount] = React.useState(0);
       return (
         <div
-          ref={el => {
+          ref={(el) => {
             target = el;
             if (target !== null) {
               el.onclick = () => {

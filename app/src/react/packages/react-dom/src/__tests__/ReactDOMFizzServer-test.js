@@ -42,13 +42,13 @@ describe('ReactDOMFizzServer', () => {
     }
     Stream = require('stream');
     Suspense = React.Suspense;
-    if (gate(flags => flags.enableSuspenseList)) {
+    if (gate((flags) => flags.enableSuspenseList)) {
       SuspenseList = React.SuspenseList;
     }
 
     PropTypes = require('prop-types');
 
-    if (gate(flags => flags.source)) {
+    if (gate((flags) => flags.source)) {
       // The `with-selector` module composes the main `use-sync-external-store`
       // entrypoint. In the compiled artifacts, this is resolved to the `shim`
       // implementation by our build config, but when running the tests against
@@ -59,8 +59,8 @@ describe('ReactDOMFizzServer', () => {
       );
     }
     useSyncExternalStore = React.useSyncExternalStore;
-    useSyncExternalStoreWithSelector = require('use-sync-external-store/with-selector')
-      .useSyncExternalStoreWithSelector;
+    useSyncExternalStoreWithSelector =
+      require('use-sync-external-store/with-selector').useSyncExternalStoreWithSelector;
 
     textCache = new Map();
 
@@ -80,10 +80,10 @@ describe('ReactDOMFizzServer', () => {
 
     writable = new Stream.PassThrough();
     writable.setEncoding('utf8');
-    writable.on('data', chunk => {
+    writable.on('data', (chunk) => {
       buffer += chunk;
     });
-    writable.on('error', error => {
+    writable.on('error', (error) => {
       hasErrored = true;
       fatalError = error;
     });
@@ -109,7 +109,7 @@ describe('ReactDOMFizzServer', () => {
 
   function componentStack(components) {
     return components
-      .map(component => `\n    in ${component} (at **)`)
+      .map((component) => `\n    in ${component} (at **)`)
       .join('');
   }
 
@@ -117,7 +117,7 @@ describe('ReactDOMFizzServer', () => {
     await callback();
     // Await one turn around the event loop.
     // This assumes that we'll flush everything we have so far.
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       setImmediate(resolve);
     });
     if (hasErrored) {
@@ -197,7 +197,7 @@ describe('ReactDOMFizzServer', () => {
       const thenable = record.value;
       record.status = 'resolved';
       record.value = text;
-      thenable.pings.forEach(t => t());
+      thenable.pings.forEach((t) => t());
     }
   }
 
@@ -213,7 +213,7 @@ describe('ReactDOMFizzServer', () => {
       const thenable = record.value;
       record.status = 'rejected';
       record.value = error;
-      thenable.pings.forEach(t => t());
+      thenable.pings.forEach((t) => t());
     }
   }
 
@@ -267,14 +267,14 @@ describe('ReactDOMFizzServer', () => {
   it('should asynchronously load a lazy component', async () => {
     let resolveA;
     const LazyA = React.lazy(() => {
-      return new Promise(r => {
+      return new Promise((r) => {
         resolveA = r;
       });
     });
 
     let resolveB;
     const LazyB = React.lazy(() => {
-      return new Promise(r => {
+      return new Promise((r) => {
         resolveB = r;
       });
     });
@@ -334,7 +334,7 @@ describe('ReactDOMFizzServer', () => {
   it('#23331: does not warn about hydration mismatches if something suspended in an earlier sibling', async () => {
     const makeApp = () => {
       let resolve;
-      const imports = new Promise(r => {
+      const imports = new Promise((r) => {
         resolve = () => r({default: () => <span id="async">async</span>});
       });
       const Lazy = React.lazy(() => imports);
@@ -402,7 +402,7 @@ describe('ReactDOMFizzServer', () => {
     try {
       let resolve;
       const Lazy = React.lazy(() => {
-        return new Promise(r => {
+        return new Promise((r) => {
           resolve = r;
         });
       });
@@ -449,7 +449,7 @@ describe('ReactDOMFizzServer', () => {
 
     let bootstrapped = false;
     const errors = [];
-    window.__INIT__ = function() {
+    window.__INIT__ = function () {
       bootstrapped = true;
       // Attempt to hydrate the content.
       ReactDOMClient.hydrateRoot(container, <App isClient={true} />, {
@@ -526,7 +526,7 @@ describe('ReactDOMFizzServer', () => {
   it('should asynchronously load a lazy element', async () => {
     let resolveElement;
     const lazyElement = React.lazy(() => {
-      return new Promise(r => {
+      return new Promise((r) => {
         resolveElement = r;
       });
     });
@@ -838,7 +838,7 @@ describe('ReactDOMFizzServer', () => {
     }
 
     let bootstrapped = false;
-    window.__INIT__ = function() {
+    window.__INIT__ = function () {
       bootstrapped = true;
       // Attempt to hydrate the content.
       ReactDOMClient.hydrateRoot(container, <App />);
@@ -1455,7 +1455,7 @@ describe('ReactDOMFizzServer', () => {
   function normalizeCodeLocInfo(str) {
     return (
       str &&
-      str.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function(m, name) {
+      str.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function (m, name) {
         return '\n    in ' + name + ' (at **)';
       })
     );
@@ -1468,7 +1468,7 @@ describe('ReactDOMFizzServer', () => {
       // Intentionally trigger a key warning here.
       return (
         <div>
-          {children.map(t => (
+          {children.map((t) => (
             <span>{t}</span>
           ))}
         </div>
@@ -1636,7 +1636,9 @@ describe('ReactDOMFizzServer', () => {
 
     function PrintA() {
       return (
-        <ContextA.Consumer>{value => <Text text={value} />}</ContextA.Consumer>
+        <ContextA.Consumer>
+          {(value) => <Text text={value} />}
+        </ContextA.Consumer>
       );
     }
 
@@ -1701,7 +1703,9 @@ describe('ReactDOMFizzServer', () => {
 
     function PrintA() {
       return (
-        <ContextA.Consumer>{value => <Text text={value} />}</ContextA.Consumer>
+        <ContextA.Consumer>
+          {(value) => <Text text={value} />}
+        </ContextA.Consumer>
       );
     }
 
@@ -1907,13 +1911,13 @@ describe('ReactDOMFizzServer', () => {
     };
     const promiseRes = {};
     const promises = {
-      0: new Promise(res => {
+      0: new Promise((res) => {
         promiseRes[0] = () => {
           resolved[0] = true;
           res();
         };
       }),
-      1: new Promise(res => {
+      1: new Promise((res) => {
         promiseRes[1] = () => {
           resolved[1] = true;
           res();
@@ -3047,7 +3051,7 @@ describe('ReactDOMFizzServer', () => {
     const mappedJSX = Immutable.fromJS([
       {name: 'a', value: 'a'},
       {name: 'b', value: 'b'},
-    ]).map(item => <li key={item.get('value')}>{item.get('name')}</li>);
+    ]).map((item) => <li key={item.get('value')}>{item.get('name')}</li>);
 
     await act(async () => {
       const {pipe} = ReactDOMFizzServer.renderToPipeableStream(
@@ -3085,17 +3089,15 @@ describe('ReactDOMFizzServer', () => {
     let abort;
     const loggedErrors = [];
     await act(async () => {
-      const {
-        pipe,
-        abort: abortImpl,
-      } = ReactDOMFizzServer.renderToPipeableStream(<App />, {
-        onError(error) {
-          // In this test we contrive erroring with strings so we push the error whereas in most
-          // other tests we contrive erroring with Errors and push the message.
-          loggedErrors.push(error);
-          return 'a digest';
-        },
-      });
+      const {pipe, abort: abortImpl} =
+        ReactDOMFizzServer.renderToPipeableStream(<App />, {
+          onError(error) {
+            // In this test we contrive erroring with strings so we push the error whereas in most
+            // other tests we contrive erroring with Errors and push the message.
+            loggedErrors.push(error);
+            return 'a digest';
+          },
+        });
       abort = abortImpl;
       pipe(writable);
     });
@@ -3172,15 +3174,13 @@ describe('ReactDOMFizzServer', () => {
     let abort;
     const loggedErrors = [];
     await act(async () => {
-      const {
-        pipe,
-        abort: abortImpl,
-      } = ReactDOMFizzServer.renderToPipeableStream(<App />, {
-        onError(error) {
-          loggedErrors.push(error.message);
-          return 'a digest';
-        },
-      });
+      const {pipe, abort: abortImpl} =
+        ReactDOMFizzServer.renderToPipeableStream(<App />, {
+          onError(error) {
+            loggedErrors.push(error.message);
+            return 'a digest';
+          },
+        });
       abort = abortImpl;
       pipe(writable);
     });
@@ -3463,7 +3463,7 @@ describe('ReactDOMFizzServer', () => {
   it('#24384: Suspending should halt hydration warnings and not emit any if hydration completes successfully after unsuspending', async () => {
     const makeApp = () => {
       let resolve, resolved;
-      const promise = new Promise(r => {
+      const promise = new Promise((r) => {
         resolve = () => {
           resolved = true;
           return r();
@@ -3539,7 +3539,7 @@ describe('ReactDOMFizzServer', () => {
   it('#24384: Suspending should halt hydration warnings but still emit hydration warnings after unsuspending if mismatches are genuine', async () => {
     const makeApp = () => {
       let resolve, resolved;
-      const promise = new Promise(r => {
+      const promise = new Promise((r) => {
         resolve = () => {
           resolved = true;
           return r();
@@ -3913,7 +3913,7 @@ describe('ReactDOMFizzServer', () => {
     function ComponentThatSuspendsOnClient() {
       if (isClient && !isResolved) {
         if (promise === null) {
-          promise = new Promise(resolve => {
+          promise = new Promise((resolve) => {
             unsuspend = () => {
               isResolved = true;
               resolve();
@@ -4036,7 +4036,7 @@ describe('ReactDOMFizzServer', () => {
     function ComponentThatSuspendsOnClient() {
       if (isClient && !isResolved) {
         if (promise === null) {
-          promise = new Promise(resolve => {
+          promise = new Promise((resolve) => {
             unsuspend = () => {
               isResolved = true;
               resolve();
@@ -4191,7 +4191,7 @@ describe('ReactDOMFizzServer', () => {
     // To force performWork to start before resolving AsyncText but before piping we need to wait until
     // after scheduleWork which currently uses setImmediate to delay performWork
     function afterImmediate() {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setImmediate(resolve);
       });
     }
@@ -4717,7 +4717,7 @@ describe('ReactDOMFizzServer', () => {
         expect(Scheduler).toFlushAndYield([]);
         expect(errors).toEqual(
           [
-            gate(flags => flags.enableClientRenderFallbackOnTextMismatch)
+            gate((flags) => flags.enableClientRenderFallbackOnTextMismatch)
               ? 'Text content does not match server-rendered HTML.'
               : null,
             'Hydration failed because the initial UI does not match what was rendered on the server.',

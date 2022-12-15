@@ -193,7 +193,7 @@ describe('ReactDOMTestSelectors', () => {
         createTestNameSelector('match'),
       ]);
       expect(matches).toHaveLength(2);
-      expect(matches.map(m => m.id).sort()).toEqual(['match2', 'match3']);
+      expect(matches.map((m) => m.id).sort()).toEqual(['match2', 'match3']);
 
       matches = findAllNodes(document.body, [
         createComponentSelector(Outer),
@@ -244,7 +244,7 @@ describe('ReactDOMTestSelectors', () => {
         createTestNameSelector('match'),
       ]);
       expect(matches).toHaveLength(3);
-      expect(matches.map(m => m.id).sort()).toEqual([
+      expect(matches.map((m) => m.id).sort()).toEqual([
         'match1',
         'match2',
         'match3',
@@ -558,7 +558,7 @@ No matching component was found for:
     // Stub out getBoundingClientRect for the specified target.
     // This API is required by the test selectors but it isn't implemented by jsdom.
     function setBoundingClientRect(target, {x, y, width, height}) {
-      target.getBoundingClientRect = function() {
+      target.getBoundingClientRect = function () {
         return {
           width,
           height,
@@ -1046,7 +1046,7 @@ No matching component was found for:
     it('should successfully focus the first focusable element even if application logic interferes', () => {
       const ref = React.createRef(null);
 
-      const handleFocus = jest.fn(event => {
+      const handleFocus = jest.fn((event) => {
         event.target.blur();
       });
 
@@ -1134,7 +1134,7 @@ No matching component was found for:
     // Stub out getBoundingClientRect for the specified target.
     // This API is required by the test selectors but it isn't implemented by jsdom.
     function setBoundingClientRect(target, {x, y, width, height}) {
-      target.getBoundingClientRect = function() {
+      target.getBoundingClientRect = function () {
         return {
           width,
           height,

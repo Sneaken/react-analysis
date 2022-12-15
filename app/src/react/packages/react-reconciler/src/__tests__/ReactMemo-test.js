@@ -202,7 +202,7 @@ describe('memo', () => {
         const {useEffect, useState} = React;
 
         let setSimpleMemoStep;
-        const SimpleMemo = React.memo(props => {
+        const SimpleMemo = React.memo((props) => {
           const [step, setStep] = useState(0);
           setSimpleMemoStep = setStep;
 
@@ -236,7 +236,7 @@ describe('memo', () => {
         );
 
         let setMemoWithIndirectionStep;
-        const MemoWithIndirection = React.memo(props => {
+        const MemoWithIndirection = React.memo((props) => {
           return <Indirection props={props} />;
         });
         function Indirection({props}) {
@@ -464,9 +464,7 @@ describe('memo', () => {
       });
 
       it('warns if the first argument is undefined', () => {
-        expect(() =>
-          memo(),
-        ).toErrorDev(
+        expect(() => memo()).toErrorDev(
           'memo: The first argument must be a component. Instead ' +
             'received: undefined',
           {withoutStack: true},
@@ -474,9 +472,7 @@ describe('memo', () => {
       });
 
       it('warns if the first argument is null', () => {
-        expect(() =>
-          memo(null),
-        ).toErrorDev(
+        expect(() => memo(null)).toErrorDev(
           'memo: The first argument must be a component. Instead ' +
             'received: null',
           {withoutStack: true},
@@ -654,7 +650,7 @@ describe('memo', () => {
     });
 
     it('should fall back to showing something meaningful if no displayName or name are present', () => {
-      const MemoComponent = React.memo(props => <div {...props} />);
+      const MemoComponent = React.memo((props) => <div {...props} />);
       MemoComponent.propTypes = {
         required: PropTypes.string.isRequired,
       };
@@ -709,7 +705,7 @@ describe('memo', () => {
     });
 
     it('should pass displayName to an anonymous inner component so it shows up in component stacks', () => {
-      const MemoComponent = React.memo(props => {
+      const MemoComponent = React.memo((props) => {
         return <div {...props} />;
       });
       MemoComponent.displayName = 'Memo';

@@ -185,7 +185,7 @@ function coerceRef(
       ) {
         return current.ref;
       }
-      const ref = function(value) {
+      const ref = function (value) {
         let refs = resolvedInst.refs;
         if (refs === emptyRefsObject) {
           // This is a lazy pooled frozen object, so we need to initialize.
@@ -890,7 +890,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     if (shouldTrackSideEffects) {
       // Any existing children that weren't consumed above were deleted. We need
       // to add them to the deletion list.
-      existingChildren.forEach(child => deleteChild(returnFiber, child));
+      existingChildren.forEach((child) => deleteChild(returnFiber, child));
     }
 
     if (getIsHydrating()) {
@@ -1092,7 +1092,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     if (shouldTrackSideEffects) {
       // Any existing children that weren't consumed above were deleted. We need
       // to add them to the deletion list.
-      existingChildren.forEach(child => deleteChild(returnFiber, child));
+      existingChildren.forEach((child) => deleteChild(returnFiber, child));
     }
 
     if (getIsHydrating()) {

@@ -10,7 +10,8 @@
 'use strict';
 
 // Polyfills for test environment
-global.ReadableStream = require('web-streams-polyfill/ponyfill/es6').ReadableStream;
+global.ReadableStream =
+  require('web-streams-polyfill/ponyfill/es6').ReadableStream;
 global.TextEncoder = require('util').TextEncoder;
 
 let React;
@@ -98,7 +99,7 @@ describe('ReactDOMFizzServer', () => {
     it('emits all HTML as one unit if we wait until the end to start', async () => {
       let hasLoaded = false;
       let resolve;
-      const promise = new Promise(r => (resolve = r));
+      const promise = new Promise((r) => (resolve = r));
       function Wait() {
         if (!hasLoaded) {
           throw promise;
@@ -233,7 +234,7 @@ describe('ReactDOMFizzServer', () => {
       let resolve;
       let isComplete = false;
       let rendered = false;
-      const promise = new Promise(r => (resolve = r));
+      const promise = new Promise((r) => (resolve = r));
       function Wait() {
         if (!hasLoaded) {
           throw promise;
@@ -318,7 +319,7 @@ describe('ReactDOMFizzServer', () => {
 
     // @gate experimental
     it('Supports custom abort reasons with a string', async () => {
-      const promise = new Promise(r => {});
+      const promise = new Promise((r) => {});
       function Wait() {
         throw promise;
       }
@@ -360,7 +361,7 @@ describe('ReactDOMFizzServer', () => {
 
     // @gate experimental
     it('Supports custom abort reasons with an Error', async () => {
-      const promise = new Promise(r => {});
+      const promise = new Promise((r) => {});
       function Wait() {
         throw promise;
       }

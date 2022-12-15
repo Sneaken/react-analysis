@@ -81,7 +81,7 @@ describe('ReactDOMHooks', () => {
 
     const Example = ({inputRef, labelRef}) => {
       const [text, setText] = useState('');
-      const handleInput = useCallback(event => {
+      const handleInput = useCallback((event) => {
         setText(event.target.value);
       });
 
@@ -114,7 +114,7 @@ describe('ReactDOMHooks', () => {
 
     const Example = ({inputRef, labelRef}) => {
       const [text, setText] = useState('');
-      const handleInput = useCallback(event => {
+      const handleInput = useCallback((event) => {
         setText(event.target.value);
       });
 

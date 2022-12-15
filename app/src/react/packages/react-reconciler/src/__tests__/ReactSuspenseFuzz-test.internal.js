@@ -67,7 +67,7 @@ describe('ReactSuspenseFuzz', () => {
             });
           });
           return () => {
-            cleanUps.forEach(cleanUp => cleanUp());
+            cleanUps.forEach((cleanUp) => cleanUp());
           };
         }
       }, [updates]);
@@ -97,7 +97,7 @@ describe('ReactSuspenseFuzz', () => {
             });
           });
           return () => {
-            cleanUps.forEach(cleanUp => cleanUp());
+            cleanUps.forEach((cleanUp) => cleanUp());
           };
         }
       }, [updates]);
@@ -169,7 +169,7 @@ describe('ReactSuspenseFuzz', () => {
       resolveAllTasks();
       const expectedOutput = expectedRoot.getChildrenAsJSX();
 
-      gate(flags => {
+      gate((flags) => {
         resetCache();
         ReactNoop.renderLegacySyncRoot(children);
         resolveAllTasks();

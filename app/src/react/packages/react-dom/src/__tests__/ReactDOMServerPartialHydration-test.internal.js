@@ -23,7 +23,7 @@ let usingPartialRenderer;
 
 function normalizeCodeLocInfo(strOrErr) {
   if (strOrErr && strOrErr.replace) {
-    return strOrErr.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function(m, name) {
+    return strOrErr.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function (m, name) {
       return '\n    in ' + name + ' (at **)';
     });
   }
@@ -107,7 +107,7 @@ describe('ReactDOMServerPartialHydration', () => {
     ReactDOMServer = require('react-dom/server');
     Scheduler = require('scheduler');
     Suspense = React.Suspense;
-    if (gate(flags => flags.enableSuspenseList)) {
+    if (gate((flags) => flags.enableSuspenseList)) {
       SuspenseList = React.SuspenseList;
     }
 
@@ -132,7 +132,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('hydrates a parent even if a child Suspense boundary is blocked', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child() {
@@ -189,7 +189,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('can hydrate siblings of a suspended component without errors', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     function Child() {
       if (suspend) {
         throw promise;
@@ -253,7 +253,7 @@ describe('ReactDOMServerPartialHydration', () => {
     let client = false;
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => {
+    const promise = new Promise((resolvePromise) => {
       resolve = () => {
         suspend = false;
         resolvePromise();
@@ -374,7 +374,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('calls the hydration callbacks after hydration or deletion', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     function Child() {
       if (suspend) {
         throw promise;
@@ -545,7 +545,7 @@ describe('ReactDOMServerPartialHydration', () => {
     const ref = React.createRef();
     let shouldSuspend = false;
     let resolve;
-    const promise = new Promise(res => {
+    const promise = new Promise((res) => {
       resolve = () => {
         shouldSuspend = false;
         res();
@@ -712,7 +712,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('warns and replaces the boundary content in legacy mode', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child() {
@@ -768,7 +768,7 @@ describe('ReactDOMServerPartialHydration', () => {
     // This is a new node.
     expect(span).not.toBe(span2);
 
-    if (gate(flags => flags.dfsEffectsRefactor)) {
+    if (gate((flags) => flags.dfsEffectsRefactor)) {
       // The effects list refactor causes this to be null because the Suspense Offscreen's child
       // is null. However, since we can't hydrate Suspense in legacy this change in behavior is ok
       expect(ref.current).toBe(null);
@@ -903,7 +903,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('blocks updates to hydrate the content first if props have changed', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({text}) {
@@ -977,7 +977,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('blocks updates to hydrate the content first if props changed at idle priority', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({text}) {
@@ -1052,7 +1052,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('shows the fallback if props have changed before hydration completes and is still suspended', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({text}) {
@@ -1136,7 +1136,7 @@ describe('ReactDOMServerPartialHydration', () => {
     // This should be a noop.
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({text}) {
@@ -1220,7 +1220,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('clears nested suspense boundaries if they did not hydrate yet', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({text}) {
@@ -1305,7 +1305,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('hydrates first if props changed but we are able to resolve within a timeout', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({text}) {
@@ -1384,7 +1384,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('warns but works if setState is called before commit in a dehydrated component', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     let updateText;
 
@@ -1454,7 +1454,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('blocks the update to hydrate first if context has changed', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
     const Context = React.createContext(null);
 
@@ -1538,7 +1538,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('shows the fallback if context has changed before hydration completes and is still suspended', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
     const Context = React.createContext(null);
 
@@ -1631,7 +1631,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
   it('replaces the fallback with client content if it is not rendered by the server', async () => {
     let suspend = false;
-    const promise = new Promise(resolvePromise => {});
+    const promise = new Promise((resolvePromise) => {});
     const ref = React.createRef();
 
     function Child() {
@@ -1697,7 +1697,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
   it('replaces the fallback within the suspended time if there is a nested suspense', async () => {
     let suspend = false;
-    const promise = new Promise(resolvePromise => {});
+    const promise = new Promise((resolvePromise) => {});
     const ref = React.createRef();
 
     function Child() {
@@ -1774,7 +1774,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
   it('replaces the fallback within the suspended time if there is a nested suspense in a nested suspense', async () => {
     let suspend = false;
-    const promise = new Promise(resolvePromise => {});
+    const promise = new Promise((resolvePromise) => {});
     const ref = React.createRef();
 
     function Child() {
@@ -1855,7 +1855,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('shows inserted items in a SuspenseList before content is hydrated', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({children}) {
@@ -1941,7 +1941,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('shows is able to hydrate boundaries even if others in a list are pending', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child({children}) {
@@ -2017,7 +2017,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('clears server boundaries when SuspenseList runs out of time hydrating', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     const ref = React.createRef();
 
@@ -2084,7 +2084,7 @@ describe('ReactDOMServerPartialHydration', () => {
     suspend = true;
 
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         expect(Scheduler).toFlushAndYieldThrough(['Before', 'After']);
       } else {
         expect(Scheduler).toFlushAndYieldThrough(['Before']);
@@ -2114,7 +2114,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('clears server boundaries when SuspenseList suspends last row hydrating', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     function Child({children}) {
       if (suspend) {
@@ -2295,7 +2295,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
   it('regenerates if it cannot hydrate before changes to props/context expire', async () => {
     let suspend = false;
-    const promise = new Promise(resolvePromise => {});
+    const promise = new Promise((resolvePromise) => {});
     const ref = React.createRef();
     const ClassName = React.createContext(null);
 
@@ -2388,7 +2388,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('does not invoke an event on a hydrated node until it commits', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     function Sibling({text}) {
       if (suspend) {
@@ -2461,7 +2461,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
     if (
       gate(
-        flags =>
+        (flags) =>
           flags.enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay,
       )
     ) {
@@ -2480,7 +2480,7 @@ describe('ReactDOMServerPartialHydration', () => {
     let suspend = false;
     let isServerRendering = true;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     function Sibling({text}) {
       if (suspend) {
@@ -2554,7 +2554,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
     if (
       gate(
-        flags =>
+        (flags) =>
           flags.enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay,
       )
     ) {
@@ -2569,7 +2569,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('invokes discrete events on nested suspense boundaries in a root (legacy system)', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     let clicks = 0;
 
@@ -2644,7 +2644,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
     if (
       gate(
-        flags =>
+        (flags) =>
           flags.enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay,
       )
     ) {
@@ -2661,7 +2661,7 @@ describe('ReactDOMServerPartialHydration', () => {
     let suspend = false;
     let isServerRendering = true;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     const onEvent = jest.fn();
     const setClick = ReactDOM.unstable_createEventHandle('click');
@@ -2738,7 +2738,7 @@ describe('ReactDOMServerPartialHydration', () => {
     });
     if (
       gate(
-        flags =>
+        (flags) =>
           flags.enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay,
       )
     ) {
@@ -2753,7 +2753,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('does not invoke the parent of dehydrated boundary event', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     let clicksOnParent = 0;
     let clicksOnChild = 0;
@@ -2764,7 +2764,7 @@ describe('ReactDOMServerPartialHydration', () => {
       } else {
         return (
           <span
-            onClick={e => {
+            onClick={(e) => {
               // The stopPropagation is showing an example why invoking
               // the event on only a parent might not be correct.
               e.stopPropagation();
@@ -2819,7 +2819,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
     if (
       gate(
-        flags =>
+        (flags) =>
           flags.enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay,
       )
     ) {
@@ -2837,7 +2837,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('does not invoke an event on a parent tree when a subtree is dehydrated', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     let clicks = 0;
     const childSlotRef = React.createRef();
@@ -2907,7 +2907,7 @@ describe('ReactDOMServerPartialHydration', () => {
     // We're now full hydrated.
     if (
       gate(
-        flags =>
+        (flags) =>
           flags.enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay,
       )
     ) {
@@ -2922,10 +2922,14 @@ describe('ReactDOMServerPartialHydration', () => {
   it('blocks only on the last continuous event (legacy system)', async () => {
     let suspend1 = false;
     let resolve1;
-    const promise1 = new Promise(resolvePromise => (resolve1 = resolvePromise));
+    const promise1 = new Promise(
+      (resolvePromise) => (resolve1 = resolvePromise),
+    );
     let suspend2 = false;
     let resolve2;
-    const promise2 = new Promise(resolvePromise => (resolve2 = resolvePromise));
+    const promise2 = new Promise(
+      (resolvePromise) => (resolve2 = resolvePromise),
+    );
 
     function First({text}) {
       if (suspend1) {
@@ -3025,7 +3029,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('finishes normal pri work before continuing to hydrate a retry', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
     const ref = React.createRef();
 
     function Child() {
@@ -3108,7 +3112,7 @@ describe('ReactDOMServerPartialHydration', () => {
   it('regression test: does not overfire non-bubbling browser events', async () => {
     let suspend = false;
     let resolve;
-    const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+    const promise = new Promise((resolvePromise) => (resolve = resolvePromise));
 
     function Sibling({text}) {
       if (suspend) {
@@ -3185,7 +3189,7 @@ describe('ReactDOMServerPartialHydration', () => {
 
     if (
       gate(
-        flags =>
+        (flags) =>
           flags.enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay,
       )
     ) {

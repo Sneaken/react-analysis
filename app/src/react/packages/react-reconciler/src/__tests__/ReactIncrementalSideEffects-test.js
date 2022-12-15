@@ -24,7 +24,7 @@ describe('ReactIncrementalSideEffects', () => {
   });
 
   function div(...children) {
-    children = children.map(c =>
+    children = children.map((c) =>
       typeof c === 'string' ? {text: c, hidden: false} : c,
     );
     return {type: 'div', children, prop: undefined, hidden: false};
@@ -74,7 +74,7 @@ describe('ReactIncrementalSideEffects', () => {
     expect(ReactNoop.getChildren()).toEqual([div(span(), span())]);
   });
 
-  it('can update child nodes of a fragment', function() {
+  it('can update child nodes of a fragment', function () {
     function Bar(props) {
       return <span>{props.text}</span>;
     }
@@ -110,7 +110,7 @@ describe('ReactIncrementalSideEffects', () => {
     ]);
   });
 
-  it('can update child nodes rendering into text nodes', function() {
+  it('can update child nodes rendering into text nodes', function () {
     function Bar(props) {
       return props.text;
     }
@@ -135,7 +135,7 @@ describe('ReactIncrementalSideEffects', () => {
     expect(ReactNoop.getChildren()).toEqual([div('World', 'World', '!')]);
   });
 
-  it('can deletes children either components, host or text', function() {
+  it('can deletes children either components, host or text', function () {
     function Bar(props) {
       return <span prop={props.children} />;
     }
@@ -161,7 +161,7 @@ describe('ReactIncrementalSideEffects', () => {
     expect(ReactNoop.getChildren()).toEqual([div()]);
   });
 
-  it('can delete a child that changes type - implicit keys', function() {
+  it('can delete a child that changes type - implicit keys', function () {
     let unmounted = false;
 
     class ClassComponent extends React.Component {
@@ -213,7 +213,7 @@ describe('ReactIncrementalSideEffects', () => {
     expect(ReactNoop.getChildren()).toEqual([div('Trail')]);
   });
 
-  it('can delete a child that changes type - explicit keys', function() {
+  it('can delete a child that changes type - explicit keys', function () {
     let unmounted = false;
 
     class ClassComponent extends React.Component {
@@ -264,9 +264,8 @@ describe('ReactIncrementalSideEffects', () => {
       return <span prop={props.children} />;
     }
 
-    const portalContainer = ReactNoop.getOrCreateRootContainer(
-      'portalContainer',
-    );
+    const portalContainer =
+      ReactNoop.getOrCreateRootContainer('portalContainer');
     function Foo(props) {
       return ReactNoop.createPortal(
         props.show ? [<div key="a" />, <Bar key="b">Hello</Bar>, 'World'] : [],
@@ -340,9 +339,8 @@ describe('ReactIncrementalSideEffects', () => {
       return <span prop={props.children} />;
     }
 
-    const portalContainer = ReactNoop.getOrCreateRootContainer(
-      'portalContainer',
-    );
+    const portalContainer =
+      ReactNoop.getOrCreateRootContainer('portalContainer');
     function Foo(props) {
       return ReactNoop.createPortal(
         [<div key="a" />, <Bar key="b">Hello</Bar>, 'World'],
@@ -409,7 +407,7 @@ describe('ReactIncrementalSideEffects', () => {
       div(div(span('Hello'), span('Hello')), span('Yo')),
     ]);
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo text="World" />);
       });
@@ -644,7 +642,7 @@ describe('ReactIncrementalSideEffects', () => {
       Scheduler.unstable_yieldValue('Foo');
       return <span prop={props.step} />;
     }
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo step={1} />);
       });
@@ -659,7 +657,7 @@ describe('ReactIncrementalSideEffects', () => {
     ReactNoop.flushNextYield();
     expect(ReactNoop.getChildrenAsJSX()).toEqual(<span prop={1} />);
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo step={2} />);
       });
@@ -672,7 +670,7 @@ describe('ReactIncrementalSideEffects', () => {
     // This time, before we commit the tree, we update the root component with
     // new props
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo step={3} />);
       });
@@ -786,7 +784,7 @@ describe('ReactIncrementalSideEffects', () => {
     expect(innerSpanA).toBe(innerSpanB);
   });
 
-  xit('can defer side-effects and reuse them later - complex', function() {
+  xit('can defer side-effects and reuse them later - complex', function () {
     let ops = [];
 
     class Bar extends React.Component {
@@ -1234,9 +1232,9 @@ describe('ReactIncrementalSideEffects', () => {
     function Foo(props) {
       return props.show ? (
         <div>
-          <ClassComponent ref={n => ops.push(n)} />
-          <FunctionComponent ref={n => ops.push(n)} />
-          <div ref={n => ops.push(n)} />
+          <ClassComponent ref={(n) => ops.push(n)} />
+          <FunctionComponent ref={(n) => ops.push(n)} />
+          <div ref={(n) => ops.push(n)} />
         </div>
       ) : null;
     }

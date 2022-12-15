@@ -30,13 +30,13 @@ describe('ReactDOMFizzServer', () => {
     const writable = new Stream.PassThrough();
     writable.setEncoding('utf8');
     const output = {result: '', error: undefined};
-    writable.on('data', chunk => {
+    writable.on('data', (chunk) => {
       output.result += chunk;
     });
-    writable.on('error', error => {
+    writable.on('error', (error) => {
       output.error = error;
     });
-    const completed = new Promise(resolve => {
+    const completed = new Promise((resolve) => {
       writable.on('finish', () => {
         resolve();
       });
@@ -121,7 +121,7 @@ describe('ReactDOMFizzServer', () => {
   it('emits all HTML as one unit if we wait until the end to start', async () => {
     let hasLoaded = false;
     let resolve;
-    const promise = new Promise(r => (resolve = r));
+    const promise = new Promise((r) => (resolve = r));
     function Wait() {
       if (!hasLoaded) {
         throw promise;
@@ -377,7 +377,7 @@ describe('ReactDOMFizzServer', () => {
       get() {
         if (this.resolved) return this.resolved;
         if (this.pending) return this.pending;
-        return (this.pending = new Promise(resolve => {
+        return (this.pending = new Promise((resolve) => {
           setTimeout(() => {
             delete this.pending;
             this.resolved = 'OK';
@@ -428,7 +428,7 @@ describe('ReactDOMFizzServer', () => {
       get() {
         if (this.resolved) return this.resolved;
         if (this.pending) return this.pending;
-        return (this.pending = new Promise(resolve => {
+        return (this.pending = new Promise((resolve) => {
           setTimeout(() => {
             delete this.pending;
             this.resolved = 'OK';
@@ -503,7 +503,7 @@ describe('ReactDOMFizzServer', () => {
       get() {
         if (this.resolved) return this.resolved;
         if (this.pending) return this.pending;
-        return (this.pending = new Promise(resolve => {
+        return (this.pending = new Promise((resolve) => {
           setTimeout(() => {
             delete this.pending;
             this.resolved = 'OK';
@@ -561,7 +561,7 @@ describe('ReactDOMFizzServer', () => {
     let resolve;
     let isComplete = false;
     let rendered = false;
-    const promise = new Promise(r => (resolve = r));
+    const promise = new Promise((r) => (resolve = r));
     function Wait() {
       if (!hasLoaded) {
         throw promise;

@@ -49,10 +49,10 @@ describe('ReactDOMFizzServerHydrationWarning', () => {
 
     writable = new Stream.PassThrough();
     writable.setEncoding('utf8');
-    writable.on('data', chunk => {
+    writable.on('data', (chunk) => {
       buffer += chunk;
     });
-    writable.on('error', error => {
+    writable.on('error', (error) => {
       hasErrored = true;
       fatalError = error;
     });
@@ -62,7 +62,7 @@ describe('ReactDOMFizzServerHydrationWarning', () => {
     await callback();
     // Await one turn around the event loop.
     // This assumes that we'll flush everything we have so far.
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       setImmediate(resolve);
     });
     if (hasErrored) {

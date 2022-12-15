@@ -182,7 +182,7 @@ describe('ReactDOMSuspensePlaceholder', () => {
     const log = [];
     const Lazy = React.lazy(
       () =>
-        new Promise(resolve =>
+        new Promise((resolve) =>
           resolve({
             default() {
               return 'lazy';

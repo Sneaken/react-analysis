@@ -525,13 +525,13 @@ export function findHostInstanceWithNoPortals(
   return hostFiber.stateNode;
 }
 
-let shouldErrorImpl = fiber => null;
+let shouldErrorImpl = (fiber) => null;
 
 export function shouldError(fiber: Fiber): ?boolean {
   return shouldErrorImpl(fiber);
 }
 
-let shouldSuspendImpl = fiber => false;
+let shouldSuspendImpl = (fiber) => false;
 
 export function shouldSuspend(fiber: Fiber): boolean {
   return shouldSuspendImpl(fiber);
@@ -780,11 +780,11 @@ if (__DEV__) {
     }
   };
 
-  setErrorHandler = (newShouldErrorImpl: Fiber => ?boolean) => {
+  setErrorHandler = (newShouldErrorImpl: (Fiber) => ?boolean) => {
     shouldErrorImpl = newShouldErrorImpl;
   };
 
-  setSuspenseHandler = (newShouldSuspendImpl: Fiber => boolean) => {
+  setSuspenseHandler = (newShouldSuspendImpl: (Fiber) => boolean) => {
     shouldSuspendImpl = newShouldSuspendImpl;
   };
 }

@@ -33,7 +33,7 @@ describe('ReactExpiration', () => {
 
     const textCache = new Map();
 
-    readText = text => {
+    readText = (text) => {
       const record = textCache.get(text);
       if (record !== undefined) {
         switch (record.status) {
@@ -46,7 +46,7 @@ describe('ReactExpiration', () => {
         }
       } else {
         let ping;
-        const promise = new Promise(resolve => (ping = resolve));
+        const promise = new Promise((resolve) => (ping = resolve));
         const newRecord = {
           status: 'pending',
           ping: ping,
@@ -57,7 +57,7 @@ describe('ReactExpiration', () => {
       }
     };
 
-    resolveText = text => {
+    resolveText = (text) => {
       const record = textCache.get(text);
       if (record !== undefined) {
         if (record.status === 'pending') {
@@ -119,7 +119,7 @@ describe('ReactExpiration', () => {
   }
 
   it('increases priority of updates as time progresses', () => {
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<span prop="done" />);
       });
@@ -166,7 +166,7 @@ describe('ReactExpiration', () => {
 
     // First, show what happens for updates in two separate events.
     // Schedule an update.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<TextClass text="A" />);
       });
@@ -227,7 +227,7 @@ describe('ReactExpiration', () => {
 
       // First, show what happens for updates in two separate events.
       // Schedule an update.
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           ReactNoop.render(<TextClass text="A" />);
         });
@@ -305,7 +305,7 @@ describe('ReactExpiration', () => {
     }
 
     // Initial mount
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<App />);
       });
@@ -324,12 +324,12 @@ describe('ReactExpiration', () => {
     ]);
 
     // Partial update
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
-        subscribers.forEach(s => s.setState({text: '1'}));
+        subscribers.forEach((s) => s.setState({text: '1'}));
       });
     } else {
-      subscribers.forEach(s => s.setState({text: '1'}));
+      subscribers.forEach((s) => s.setState({text: '1'}));
     }
     expect(Scheduler).toFlushAndYieldThrough([
       '1 [A] [render]',
@@ -339,7 +339,7 @@ describe('ReactExpiration', () => {
     // Before the update can finish, update again. Even though no time has
     // advanced, this update should be given a different expiration time than
     // the currently rendering one. So, C and D should render with 1, not 2.
-    subscribers.forEach(s => s.setState({text: '2'}));
+    subscribers.forEach((s) => s.setState({text: '2'}));
     expect(Scheduler).toFlushAndYieldThrough([
       '1 [C] [render]',
       '1 [D] [render]',
@@ -360,7 +360,7 @@ describe('ReactExpiration', () => {
       );
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         root.render(<App />);
       });
@@ -394,7 +394,7 @@ describe('ReactExpiration', () => {
         </>
       );
     }
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         root.render(<App />);
       });
@@ -428,7 +428,7 @@ describe('ReactExpiration', () => {
     // current time.
     ReactNoop = require('react-noop-renderer');
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render('Hi');
       });
@@ -457,7 +457,7 @@ describe('ReactExpiration', () => {
     // Before scheduling an update, advance the current time.
     Scheduler.unstable_advanceTime(10000);
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render('Hi');
       });
@@ -484,10 +484,10 @@ describe('ReactExpiration', () => {
       const [normalPri, setNormalPri] = useState(0);
       updateSyncPri = () => {
         ReactNoop.flushSync(() => {
-          setHighPri(n => n + 1);
+          setHighPri((n) => n + 1);
         });
       };
-      updateNormalPri = () => setNormalPri(n => n + 1);
+      updateNormalPri = () => setNormalPri((n) => n + 1);
       return (
         <>
           <Text text={'Sync pri: ' + highPri} />
@@ -506,7 +506,7 @@ describe('ReactExpiration', () => {
 
     // First demonstrate what happens when there's no starvation
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           updateNormalPri();
         });
@@ -530,7 +530,7 @@ describe('ReactExpiration', () => {
 
     // Do the same thing, but starve the first update
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           updateNormalPri();
         });
@@ -562,10 +562,10 @@ describe('ReactExpiration', () => {
     function App() {
       const [syncPri, setSyncPri] = useState(0);
       const [highPri, setIdlePri] = useState(0);
-      updateSyncPri = () => ReactNoop.flushSync(() => setSyncPri(n => n + 1));
+      updateSyncPri = () => ReactNoop.flushSync(() => setSyncPri((n) => n + 1));
       updateIdlePri = () =>
         ReactNoop.idleUpdates(() => {
-          setIdlePri(n => n + 1);
+          setIdlePri((n) => n + 1);
         });
       return (
         <>
@@ -692,7 +692,7 @@ describe('ReactExpiration', () => {
     expect(root).toMatchRenderedOutput('A0BC');
 
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           root.render(<App step={1} />);
         });

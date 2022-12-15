@@ -1819,7 +1819,7 @@ describe('ReactLegacyErrorBoundaries', () => {
     const container = document.createElement('div');
     ReactDOM.render(
       <ErrorBoundary>
-        <Stateful ref={inst => (statefulInst = inst)} />
+        <Stateful ref={(inst) => (statefulInst = inst)} />
       </ErrorBoundary>,
       container,
     );
@@ -1946,7 +1946,7 @@ describe('ReactLegacyErrorBoundaries', () => {
     ReactDOM.render(
       <ErrorBoundary>
         <BrokenComponentDidMountErrorBoundary
-          renderError={error => (
+          renderError={(error) => (
             <div>We should never catch our own error: {error.message}.</div>
           )}
         />

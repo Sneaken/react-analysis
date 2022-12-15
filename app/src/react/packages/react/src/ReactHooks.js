@@ -18,8 +18,8 @@ import type {
 
 import ReactCurrentDispatcher from './ReactCurrentDispatcher';
 
-type BasicStateAction<S> = (S => S) | S;
-type Dispatch<A> = A => void;
+type BasicStateAction<S> = ((S) => S) | S;
+type Dispatch<A> = (A) => void;
 
 function resolveDispatcher() {
   const dispatcher = ReactCurrentDispatcher.current;
@@ -87,7 +87,7 @@ export function useState<S>(
 export function useReducer<S, I, A>(
   reducer: (S, A) => S,
   initialArg: I,
-  init?: I => S,
+  init?: (I) => S,
 ): [S, Dispatch<A>] {
   const dispatcher = resolveDispatcher();
   return dispatcher.useReducer(reducer, initialArg, init);

@@ -7,7 +7,7 @@
  * @flow
  */
 
-type RendererTask = boolean => RendererTask | null;
+type RendererTask = (boolean) => RendererTask | null;
 
 const ReactCurrentActQueue = {
   current: (null: null | Array<RendererTask>),

@@ -41,7 +41,7 @@ describe('ReactDOMServerHydration', () => {
   function normalizeCodeLocInfo(str) {
     return (
       typeof str === 'string' &&
-      str.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function(m, name) {
+      str.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function (m, name) {
         return '\n    in ' + name + ' (at **)';
       })
     );
@@ -86,7 +86,7 @@ describe('ReactDOMServerHydration', () => {
           </div>
         );
       }
-      if (gate(flags => flags.enableClientRenderFallbackOnTextMismatch)) {
+      if (gate((flags) => flags.enableClientRenderFallbackOnTextMismatch)) {
         expect(testMismatch(Mismatch)).toMatchInlineSnapshot(`
           Array [
             "Warning: Text content did not match. Server: \\"server\\" Client: \\"client\\"
@@ -357,7 +357,7 @@ describe('ReactDOMServerHydration', () => {
         function Mismatch({isClient}) {
           return <div className="parent">{isClient && 'only'}</div>;
         }
-        if (gate(flags => flags.enableClientRenderFallbackOnTextMismatch)) {
+        if (gate((flags) => flags.enableClientRenderFallbackOnTextMismatch)) {
           expect(testMismatch(Mismatch)).toMatchInlineSnapshot(`
             Array [
               "Warning: Text content did not match. Server: \\"\\" Client: \\"only\\"
@@ -641,7 +641,7 @@ describe('ReactDOMServerHydration', () => {
   describe('special nodes', () => {
     describe('Suspense', () => {
       function Never() {
-        throw new Promise(resolve => {});
+        throw new Promise((resolve) => {});
       }
 
       // @gate __DEV__

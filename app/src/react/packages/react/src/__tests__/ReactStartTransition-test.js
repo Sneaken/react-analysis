@@ -56,8 +56,8 @@ describe('ReactStartTransition', () => {
     expect(() => {
       act(() => {
         React.startTransition(() => {
-          subs.forEach(setState => {
-            setState(state => state + 1);
+          subs.forEach((setState) => {
+            setState((state) => state + 1);
           });
         });
       });
@@ -73,8 +73,8 @@ describe('ReactStartTransition', () => {
     expect(() => {
       act(() => {
         triggerHookTransition(() => {
-          subs.forEach(setState => {
-            setState(state => state + 1);
+          subs.forEach((setState) => {
+            setState((state) => state + 1);
           });
         });
       });

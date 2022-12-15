@@ -377,16 +377,12 @@ export function listenToNativeEventForNonManagedEventTarget(
   }
 }
 
-const listeningMarker =
-  '_reactListening' +
-  Math.random()
-    .toString(36)
-    .slice(2);
+const listeningMarker = '_reactListening' + Math.random().toString(36).slice(2);
 
 export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
   if (!(rootContainerElement: any)[listeningMarker]) {
     (rootContainerElement: any)[listeningMarker] = true;
-    allNativeEvents.forEach(domEventName => {
+    allNativeEvents.forEach((domEventName) => {
       // We handle selectionchange separately because it
       // doesn't bubble and needs to be on the document.
       if (domEventName !== 'selectionchange') {
@@ -461,7 +457,7 @@ function addTrappedEventListener(
   // need support for such browsers.
   if (enableLegacyFBSupport && isDeferredListenerForLegacyFBSupport) {
     const originalListener = listener;
-    listener = function(...p) {
+    listener = function (...p) {
       removeEventListener(
         targetContainer,
         domEventName,
@@ -680,11 +676,10 @@ export function accumulateSinglePhaseListeners(
 
       // createEventHandle listeners
       if (enableCreateEventHandleAPI) {
-        const eventHandlerListeners = getEventHandlerListeners(
-          lastHostComponent,
-        );
+        const eventHandlerListeners =
+          getEventHandlerListeners(lastHostComponent);
         if (eventHandlerListeners !== null) {
-          eventHandlerListeners.forEach(entry => {
+          eventHandlerListeners.forEach((entry) => {
             if (
               entry.type === nativeEventType &&
               entry.capture === inCapturePhase
@@ -719,11 +714,10 @@ export function accumulateSinglePhaseListeners(
     ) {
       // Scopes
       const reactScopeInstance = stateNode;
-      const eventHandlerListeners = getEventHandlerListeners(
-        reactScopeInstance,
-      );
+      const eventHandlerListeners =
+        getEventHandlerListeners(reactScopeInstance);
       if (eventHandlerListeners !== null) {
-        eventHandlerListeners.forEach(entry => {
+        eventHandlerListeners.forEach((entry) => {
           if (
             entry.type === nativeEventType &&
             entry.capture === inCapturePhase
@@ -951,7 +945,7 @@ export function accumulateEventHandleNonManagedNodeListeners(
 
   const eventListeners = getEventHandlerListeners(currentTarget);
   if (eventListeners !== null) {
-    eventListeners.forEach(entry => {
+    eventListeners.forEach((entry) => {
       if (entry.type === reactEventType && entry.capture === inCapturePhase) {
         listeners.push(
           createDispatchListener(null, entry.callback, currentTarget),

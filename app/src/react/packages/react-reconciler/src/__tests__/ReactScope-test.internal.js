@@ -272,7 +272,9 @@ describe('ReactScope', () => {
     it('correctly works with suspended boundaries that are hydrated', async () => {
       let suspend = false;
       let resolve;
-      const promise = new Promise(resolvePromise => (resolve = resolvePromise));
+      const promise = new Promise(
+        (resolvePromise) => (resolve = resolvePromise),
+      );
       const ref = React.createRef();
       const TestScope = React.unstable_Scope;
       const scopeRef = React.createRef();
@@ -368,7 +370,7 @@ describe('ReactScope', () => {
       }
 
       const renderer = ReactTestRenderer.create(<Test toggle={true} />, {
-        createNodeMock: element => {
+        createNodeMock: (element) => {
           return element;
         },
       });
@@ -405,7 +407,7 @@ describe('ReactScope', () => {
       }
 
       const renderer = ReactTestRenderer.create(<Test toggle={true} />, {
-        createNodeMock: element => {
+        createNodeMock: (element) => {
           return element;
         },
       });
@@ -451,7 +453,7 @@ describe('ReactScope', () => {
       }
 
       const renderer = ReactTestRenderer.create(<Test toggle={true} />, {
-        createNodeMock: element => {
+        createNodeMock: (element) => {
           return element;
         },
       });

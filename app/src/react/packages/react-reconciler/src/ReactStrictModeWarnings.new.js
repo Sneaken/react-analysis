@@ -42,9 +42,9 @@ if (__DEV__) {
     return maybeStrictRoot;
   };
 
-  const setToSortedString = set => {
+  const setToSortedString = (set) => {
     const array = [];
-    set.forEach(value => {
+    set.forEach((value) => {
       array.push(value);
     });
     return array.sort().join(', ');
@@ -117,7 +117,7 @@ if (__DEV__) {
     // We do an initial pass to gather component names
     const componentWillMountUniqueNames = new Set();
     if (pendingComponentWillMountWarnings.length > 0) {
-      pendingComponentWillMountWarnings.forEach(fiber => {
+      pendingComponentWillMountWarnings.forEach((fiber) => {
         componentWillMountUniqueNames.add(
           getComponentNameFromFiber(fiber) || 'Component',
         );
@@ -128,7 +128,7 @@ if (__DEV__) {
 
     const UNSAFE_componentWillMountUniqueNames = new Set();
     if (pendingUNSAFE_ComponentWillMountWarnings.length > 0) {
-      pendingUNSAFE_ComponentWillMountWarnings.forEach(fiber => {
+      pendingUNSAFE_ComponentWillMountWarnings.forEach((fiber) => {
         UNSAFE_componentWillMountUniqueNames.add(
           getComponentNameFromFiber(fiber) || 'Component',
         );
@@ -139,7 +139,7 @@ if (__DEV__) {
 
     const componentWillReceivePropsUniqueNames = new Set();
     if (pendingComponentWillReceivePropsWarnings.length > 0) {
-      pendingComponentWillReceivePropsWarnings.forEach(fiber => {
+      pendingComponentWillReceivePropsWarnings.forEach((fiber) => {
         componentWillReceivePropsUniqueNames.add(
           getComponentNameFromFiber(fiber) || 'Component',
         );
@@ -151,7 +151,7 @@ if (__DEV__) {
 
     const UNSAFE_componentWillReceivePropsUniqueNames = new Set();
     if (pendingUNSAFE_ComponentWillReceivePropsWarnings.length > 0) {
-      pendingUNSAFE_ComponentWillReceivePropsWarnings.forEach(fiber => {
+      pendingUNSAFE_ComponentWillReceivePropsWarnings.forEach((fiber) => {
         UNSAFE_componentWillReceivePropsUniqueNames.add(
           getComponentNameFromFiber(fiber) || 'Component',
         );
@@ -163,7 +163,7 @@ if (__DEV__) {
 
     const componentWillUpdateUniqueNames = new Set();
     if (pendingComponentWillUpdateWarnings.length > 0) {
-      pendingComponentWillUpdateWarnings.forEach(fiber => {
+      pendingComponentWillUpdateWarnings.forEach((fiber) => {
         componentWillUpdateUniqueNames.add(
           getComponentNameFromFiber(fiber) || 'Component',
         );
@@ -175,7 +175,7 @@ if (__DEV__) {
 
     const UNSAFE_componentWillUpdateUniqueNames = new Set();
     if (pendingUNSAFE_ComponentWillUpdateWarnings.length > 0) {
-      pendingUNSAFE_ComponentWillUpdateWarnings.forEach(fiber => {
+      pendingUNSAFE_ComponentWillUpdateWarnings.forEach((fiber) => {
         UNSAFE_componentWillUpdateUniqueNames.add(
           getComponentNameFromFiber(fiber) || 'Component',
         );
@@ -332,7 +332,7 @@ if (__DEV__) {
         const firstFiber = fiberArray[0];
 
         const uniqueNames = new Set();
-        fiberArray.forEach(fiber => {
+        fiberArray.forEach((fiber) => {
           uniqueNames.add(getComponentNameFromFiber(fiber) || 'Component');
           didWarnAboutLegacyContext.add(fiber.type);
         });

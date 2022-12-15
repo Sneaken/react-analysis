@@ -34,7 +34,7 @@ function escape(key: string): string {
     '=': '=0',
     ':': '=2',
   };
-  const escapedString = key.replace(escapeRegex, function(match) {
+  const escapedString = key.replace(escapeRegex, function (match) {
     return escaperLookup[match];
   });
 
@@ -119,7 +119,7 @@ function mapIntoArray(
       if (childKey != null) {
         escapedChildKey = escapeUserProvidedKey(childKey) + '/';
       }
-      mapIntoArray(mappedChild, array, escapedChildKey, '', c => c);
+      mapIntoArray(mappedChild, array, escapedChildKey, '', (c) => c);
     } else if (mappedChild != null) {
       if (isValidElement(mappedChild)) {
         if (__DEV__) {
@@ -247,7 +247,7 @@ function mapChildren(
   }
   const result = [];
   let count = 0;
-  mapIntoArray(children, result, '', '', function(child) {
+  mapIntoArray(children, result, '', '', function (child) {
     return func.call(context, child, count++);
   });
   return result;
@@ -292,7 +292,7 @@ function forEachChildren(
 ): void {
   mapChildren(
     children,
-    function() {
+    function () {
       forEachFunc.apply(this, arguments);
       // Don't return anything.
     },
@@ -307,7 +307,7 @@ function forEachChildren(
  * See https://reactjs.org/docs/react-api.html#reactchildrentoarray
  */
 function toArray(children: ?ReactNodeList): Array<React$Node> {
-  return mapChildren(children, child => child) || [];
+  return mapChildren(children, (child) => child) || [];
 }
 
 /**

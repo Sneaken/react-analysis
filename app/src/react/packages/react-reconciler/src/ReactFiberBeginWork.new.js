@@ -703,9 +703,8 @@ function updateOffscreenComponent(
       }
 
       // Schedule this fiber to re-render at offscreen priority. Then bailout.
-      workInProgress.lanes = workInProgress.childLanes = laneToLanes(
-        OffscreenLane,
-      );
+      workInProgress.lanes = workInProgress.childLanes =
+        laneToLanes(OffscreenLane);
       const nextState: OffscreenState = {
         baseLanes: nextBaseLanes,
         cachePool: spawnedCachePool,
@@ -1317,7 +1316,8 @@ function updateHostRoot(current, workInProgress, renderLanes) {
       pendingSuspenseBoundaries: nextState.pendingSuspenseBoundaries,
       transitions: nextState.transitions,
     };
-    const updateQueue: UpdateQueue<RootState> = (workInProgress.updateQueue: any);
+    const updateQueue: UpdateQueue<RootState> =
+      (workInProgress.updateQueue: any);
     // `baseState` can always be the last state because the root doesn't
     // have reducer functions so it doesn't need rebasing.
     updateQueue.baseState = overrideState;
@@ -1489,9 +1489,8 @@ function mountLazyComponent(
     case FunctionComponent: {
       if (__DEV__) {
         validateFunctionComponentInDev(workInProgress, Component);
-        workInProgress.type = Component = resolveFunctionForHotReloading(
-          Component,
-        );
+        workInProgress.type = Component =
+          resolveFunctionForHotReloading(Component);
       }
       child = updateFunctionComponent(
         null,
@@ -1504,9 +1503,8 @@ function mountLazyComponent(
     }
     case ClassComponent: {
       if (__DEV__) {
-        workInProgress.type = Component = resolveClassForHotReloading(
-          Component,
-        );
+        workInProgress.type = Component =
+          resolveClassForHotReloading(Component);
       }
       child = updateClassComponent(
         null,
@@ -1519,9 +1517,8 @@ function mountLazyComponent(
     }
     case ForwardRef: {
       if (__DEV__) {
-        workInProgress.type = Component = resolveForwardRefForHotReloading(
-          Component,
-        );
+        workInProgress.type = Component =
+          resolveForwardRefForHotReloading(Component);
       }
       child = updateForwardRef(
         null,
@@ -2089,9 +2086,8 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
         renderLanes,
       );
       const primaryChildFragment: Fiber = (workInProgress.child: any);
-      primaryChildFragment.memoizedState = mountSuspenseOffscreenState(
-        renderLanes,
-      );
+      primaryChildFragment.memoizedState =
+        mountSuspenseOffscreenState(renderLanes);
       workInProgress.memoizedState = SUSPENDED_MARKER;
       if (enableTransitionTracing) {
         const currentTransitions = getSuspendedTransitions();
@@ -2118,9 +2114,8 @@ function updateSuspenseComponent(current, workInProgress, renderLanes) {
         renderLanes,
       );
       const primaryChildFragment: Fiber = (workInProgress.child: any);
-      primaryChildFragment.memoizedState = mountSuspenseOffscreenState(
-        renderLanes,
-      );
+      primaryChildFragment.memoizedState =
+        mountSuspenseOffscreenState(renderLanes);
       workInProgress.memoizedState = SUSPENDED_MARKER;
 
       // Since nothing actually suspended, there will nothing to ping this to
@@ -2586,9 +2581,8 @@ function updateDehydratedSuspenseComponent(
       // client side render instead.
       let digest, message, stack;
       if (__DEV__) {
-        ({digest, message, stack} = getSuspenseInstanceFallbackErrorDetails(
-          suspenseInstance,
-        ));
+        ({digest, message, stack} =
+          getSuspenseInstanceFallbackErrorDetails(suspenseInstance));
       } else {
         ({digest} = getSuspenseInstanceFallbackErrorDetails(suspenseInstance));
       }
@@ -2755,17 +2749,17 @@ function updateDehydratedSuspenseComponent(
       // Therefore we now have to render the fallback.
       const nextPrimaryChildren = nextProps.children;
       const nextFallbackChildren = nextProps.fallback;
-      const fallbackChildFragment = mountSuspenseFallbackAfterRetryWithoutHydrating(
-        current,
-        workInProgress,
-        nextPrimaryChildren,
-        nextFallbackChildren,
-        renderLanes,
-      );
+      const fallbackChildFragment =
+        mountSuspenseFallbackAfterRetryWithoutHydrating(
+          current,
+          workInProgress,
+          nextPrimaryChildren,
+          nextFallbackChildren,
+          renderLanes,
+        );
       const primaryChildFragment: Fiber = (workInProgress.child: any);
-      primaryChildFragment.memoizedState = mountSuspenseOffscreenState(
-        renderLanes,
-      );
+      primaryChildFragment.memoizedState =
+        mountSuspenseOffscreenState(renderLanes);
       workInProgress.memoizedState = SUSPENDED_MARKER;
       return fallbackChildFragment;
     }

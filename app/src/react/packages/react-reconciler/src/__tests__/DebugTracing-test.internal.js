@@ -32,10 +32,10 @@ describe('DebugTracing', () => {
 
     const groups = [];
 
-    spyOnDevAndProd(console, 'log').and.callFake(message => {
+    spyOnDevAndProd(console, 'log').and.callFake((message) => {
       logs.push(`log: ${message.replace(/%c/g, '')}`);
     });
-    spyOnDevAndProd(console, 'group').and.callFake(message => {
+    spyOnDevAndProd(console, 'group').and.callFake((message) => {
       logs.push(`group: ${message.replace(/%c/g, '')}`);
       groups.push(message);
     });
@@ -141,7 +141,7 @@ describe('DebugTracing', () => {
   it('should log concurrent render with suspense', async () => {
     let isResolved = false;
     let resolveFakeSuspensePromise;
-    const fakeSuspensePromise = new Promise(resolve => {
+    const fakeSuspensePromise = new Promise((resolve) => {
       resolveFakeSuspensePromise = () => {
         resolve();
         isResolved = true;

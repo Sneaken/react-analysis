@@ -82,7 +82,7 @@ class TestRefsComponent extends React.Component {
   }
 }
 
-const expectClickLogsLengthToBe = function(instance, length) {
+const expectClickLogsLengthToBe = function (instance, length) {
   const clickLogs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
     instance,
     'clickLogDiv',
@@ -111,7 +111,7 @@ describe('reactiverefs', () => {
   /**
    * Render a TestRefsComponent and ensure that the main refs are wired up.
    */
-  const renderTestRefsComponent = function() {
+  const renderTestRefsComponent = function () {
     container = document.createElement('div');
     document.body.appendChild(container);
     const testRefsComponent = ReactDOM.render(<TestRefsComponent />, container);
@@ -387,7 +387,7 @@ describe('root level refs', () => {
     let inst = null;
 
     // host node
-    let ref = jest.fn(value => (inst = value));
+    let ref = jest.fn((value) => (inst = value));
     const container = document.createElement('div');
     let result = ReactDOM.render(<div ref={ref} />, container);
     expect(ref).toHaveBeenCalledTimes(1);
@@ -408,7 +408,7 @@ describe('root level refs', () => {
     }
 
     inst = null;
-    ref = jest.fn(value => (inst = value));
+    ref = jest.fn((value) => (inst = value));
     result = ReactDOM.render(<Comp ref={ref} />, container);
 
     expect(ref).toHaveBeenCalledTimes(1);
@@ -425,9 +425,9 @@ describe('root level refs', () => {
 
     // fragment
     inst = null;
-    ref = jest.fn(value => (inst = value));
+    ref = jest.fn((value) => (inst = value));
     let divInst = null;
-    const ref2 = jest.fn(value => (divInst = value));
+    const ref2 = jest.fn((value) => (divInst = value));
     result = ReactDOM.render(
       [
         <Comp ref={ref} key="a" />,
@@ -479,7 +479,7 @@ describe('creating element with ref in constructor', () => {
   it('throws an error', () => {
     ReactTestUtils = require('react-dom/test-utils');
 
-    expect(function() {
+    expect(function () {
       ReactTestUtils.renderIntoDocument(<RefTest />);
     }).toThrowError(
       'Element ref was specified as a string (p) but no owner was set. This could happen for one of' +

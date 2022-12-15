@@ -42,7 +42,7 @@ describe('ReactErrorLoggingRecovery', () => {
   const originalConsoleError = console.error;
 
   beforeEach(() => {
-    console.error = error => {
+    console.error = (error) => {
       if (
         typeof error === 'string' &&
         error.includes('ReactDOM.render is no longer supported in React 18')
@@ -58,7 +58,7 @@ describe('ReactErrorLoggingRecovery', () => {
     console.error = originalConsoleError;
   });
 
-  it('should recover from errors in console.error', function() {
+  it('should recover from errors in console.error', function () {
     const div = document.createElement('div');
     let didCatch = false;
     try {

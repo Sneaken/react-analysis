@@ -32,11 +32,8 @@ function initModules() {
   };
 }
 
-const {
-  resetModules,
-  itRenders,
-  itThrowsWhenRendering,
-} = ReactDOMServerIntegrationUtils(initModules);
+const {resetModules, itRenders, itThrowsWhenRendering} =
+  ReactDOMServerIntegrationUtils(initModules);
 
 describe('ReactDOMServerIntegrationSelect', () => {
   let options;
@@ -68,14 +65,14 @@ describe('ReactDOMServerIntegrationSelect', () => {
     expect(element.getAttribute('value')).toBe(null);
     expect(element.getAttribute('defaultValue')).toBe(null);
 
-    ['foo', 'bar', 'baz'].forEach(value => {
+    ['foo', 'bar', 'baz'].forEach((value) => {
       const expectedValue = selected.indexOf(value) !== -1;
       const option = element.querySelector(`#${value}`);
       expect(option.selected).toBe(expectedValue);
     });
   };
 
-  itRenders('a select with a value and an onChange', async render => {
+  itRenders('a select with a value and an onChange', async (render) => {
     const e = await render(
       <select value="bar" onChange={() => {}}>
         {options}
@@ -84,7 +81,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
     expectSelectValue(e, 'bar');
   });
 
-  itRenders('a select with a value and readOnly', async render => {
+  itRenders('a select with a value and readOnly', async (render) => {
     const e = await render(
       <select value="bar" readOnly={true}>
         {options}
@@ -93,16 +90,19 @@ describe('ReactDOMServerIntegrationSelect', () => {
     expectSelectValue(e, 'bar');
   });
 
-  itRenders('a select with a multiple values and an onChange', async render => {
-    const e = await render(
-      <select value={['bar', 'baz']} multiple={true} onChange={() => {}}>
-        {options}
-      </select>,
-    );
-    expectSelectValue(e, ['bar', 'baz']);
-  });
+  itRenders(
+    'a select with a multiple values and an onChange',
+    async (render) => {
+      const e = await render(
+        <select value={['bar', 'baz']} multiple={true} onChange={() => {}}>
+          {options}
+        </select>,
+      );
+      expectSelectValue(e, ['bar', 'baz']);
+    },
+  );
 
-  itRenders('a select with a multiple values and readOnly', async render => {
+  itRenders('a select with a multiple values and readOnly', async (render) => {
     const e = await render(
       <select value={['bar', 'baz']} multiple={true} readOnly={true}>
         {options}
@@ -111,19 +111,22 @@ describe('ReactDOMServerIntegrationSelect', () => {
     expectSelectValue(e, ['bar', 'baz']);
   });
 
-  itRenders('a select with a value and no onChange/readOnly', async render => {
-    // this configuration should raise a dev warning that value without
-    // onChange or readOnly is a mistake.
-    const e = await render(<select value="bar">{options}</select>, 1);
-    expectSelectValue(e, 'bar');
-  });
+  itRenders(
+    'a select with a value and no onChange/readOnly',
+    async (render) => {
+      // this configuration should raise a dev warning that value without
+      // onChange or readOnly is a mistake.
+      const e = await render(<select value="bar">{options}</select>, 1);
+      expectSelectValue(e, 'bar');
+    },
+  );
 
-  itRenders('a select with a defaultValue', async render => {
+  itRenders('a select with a defaultValue', async (render) => {
     const e = await render(<select defaultValue="bar">{options}</select>);
     expectSelectValue(e, 'bar');
   });
 
-  itRenders('a select value overriding defaultValue', async render => {
+  itRenders('a select value overriding defaultValue', async (render) => {
     const e = await render(
       <select value="bar" defaultValue="baz" readOnly={true}>
         {options}
@@ -135,7 +138,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
 
   itRenders(
     'a select with options that use dangerouslySetInnerHTML',
-    async render => {
+    async (render) => {
       const e = await render(
         <select defaultValue="baz" value="bar" readOnly={true}>
           <option
@@ -169,7 +172,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
 
   itThrowsWhenRendering(
     'a select with option that uses dangerouslySetInnerHTML and 0 as child',
-    async render => {
+    async (render) => {
       await render(
         <select defaultValue="baz" value="foo" readOnly={true}>
           <option
@@ -189,7 +192,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
 
   itThrowsWhenRendering(
     'a select with option that uses dangerouslySetInnerHTML and empty string as child',
-    async render => {
+    async (render) => {
       await render(
         <select defaultValue="baz" value="foo" readOnly={true}>
           <option
@@ -209,7 +212,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
 
   itRenders(
     'a select value overriding defaultValue no matter the prop order',
-    async render => {
+    async (render) => {
       const e = await render(
         <select defaultValue="baz" value="bar" readOnly={true}>
           {options}
@@ -220,7 +223,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
     },
   );
 
-  itRenders('a select option with flattened children', async render => {
+  itRenders('a select option with flattened children', async (render) => {
     const e = await render(
       <select value="bar" readOnly={true}>
         <option value="bar">A {'B'}</option>
@@ -234,7 +237,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
 
   itRenders(
     'a select option with flattened children no value',
-    async render => {
+    async (render) => {
       const e = await render(
         <select value="A B" readOnly={true}>
           <option>A {'B'}</option>
@@ -249,7 +252,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
 
   itRenders(
     'a boolean true select value match the string "true"',
-    async render => {
+    async (render) => {
       const e = await render(
         <select value={true} readOnly={true}>
           <option value="first">First</option>
@@ -264,7 +267,7 @@ describe('ReactDOMServerIntegrationSelect', () => {
 
   itRenders(
     'a missing select value does not match the string "undefined"',
-    async render => {
+    async (render) => {
       const e = await render(
         <select readOnly={true}>
           <option value="first">First</option>

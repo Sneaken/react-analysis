@@ -42,14 +42,14 @@ describe('ChangeEventPlugin', () => {
     // - calling 'window.postMessage' should actually fire postmessage handlers
     const originalAddEventListener = global.addEventListener;
     let postMessageCallback;
-    global.addEventListener = function(eventName, callback, useCapture) {
+    global.addEventListener = function (eventName, callback, useCapture) {
       if (eventName === 'message') {
         postMessageCallback = callback;
       } else {
         originalAddEventListener(eventName, callback, useCapture);
       }
     };
-    global.postMessage = function(messageKey, targetOrigin) {
+    global.postMessage = function (messageKey, targetOrigin) {
       const postMessageEvent = {source: window, data: messageKey};
       if (postMessageCallback) {
         postMessageCallback(postMessageEvent);
@@ -368,7 +368,7 @@ describe('ChangeEventPlugin', () => {
     }
 
     let input;
-    ['text', 'number', 'range'].forEach(type => {
+    ['text', 'number', 'range'].forEach((type) => {
       called = 0;
       input = ReactDOM.render(<input type={type} onChange={cb} />, container);
       // Should be ignored (no change):
@@ -472,7 +472,7 @@ describe('ChangeEventPlugin', () => {
     // https://github.com/facebook/react/issues/10196
     try {
       originalCreateElement = document.createElement;
-      document.createElement = function() {
+      document.createElement = function () {
         const node = originalCreateElement.apply(this, arguments);
         Object.defineProperty(node, 'value', {
           get() {},
@@ -503,14 +503,14 @@ describe('ChangeEventPlugin', () => {
 
       class ControlledInput extends React.Component {
         state = {value: 'initial'};
-        onChange = event => this.setState({value: event.target.value});
+        onChange = (event) => this.setState({value: event.target.value});
         render() {
           Scheduler.unstable_yieldValue(`render: ${this.state.value}`);
           const controlledValue =
             this.state.value === 'changed' ? 'changed [!]' : this.state.value;
           return (
             <input
-              ref={el => (input = el)}
+              ref={(el) => (input = el)}
               type="text"
               value={controlledValue}
               onChange={this.onChange}
@@ -545,7 +545,7 @@ describe('ChangeEventPlugin', () => {
 
       class ControlledInput extends React.Component {
         state = {checked: false};
-        onChange = event => {
+        onChange = (event) => {
           this.setState({checked: event.target.checked});
         };
         render() {
@@ -555,7 +555,7 @@ describe('ChangeEventPlugin', () => {
             : this.state.checked;
           return (
             <input
-              ref={el => (input = el)}
+              ref={(el) => (input = el)}
               type="checkbox"
               checked={controlledValue}
               onChange={this.onChange}
@@ -600,14 +600,14 @@ describe('ChangeEventPlugin', () => {
 
       class ControlledTextarea extends React.Component {
         state = {value: 'initial'};
-        onChange = event => this.setState({value: event.target.value});
+        onChange = (event) => this.setState({value: event.target.value});
         render() {
           Scheduler.unstable_yieldValue(`render: ${this.state.value}`);
           const controlledValue =
             this.state.value === 'changed' ? 'changed [!]' : this.state.value;
           return (
             <textarea
-              ref={el => (textarea = el)}
+              ref={(el) => (textarea = el)}
               type="text"
               value={controlledValue}
               onChange={this.onChange}
@@ -642,7 +642,7 @@ describe('ChangeEventPlugin', () => {
 
       class ControlledInput extends React.Component {
         state = {value: 'initial'};
-        onChange = event => this.setState({value: event.target.value});
+        onChange = (event) => this.setState({value: event.target.value});
         render() {
           Scheduler.unstable_yieldValue(`render: ${this.state.value}`);
           const controlledValue =
@@ -650,7 +650,7 @@ describe('ChangeEventPlugin', () => {
           return (
             <div onChange={this.onChange}>
               <input
-                ref={el => (input = el)}
+                ref={(el) => (input = el)}
                 type="text"
                 value={controlledValue}
                 onChange={() => {
@@ -688,7 +688,7 @@ describe('ChangeEventPlugin', () => {
 
       class ControlledInput extends React.Component {
         state = {value: 'initial'};
-        onChange = event => this.setState({value: event.target.value});
+        onChange = (event) => this.setState({value: event.target.value});
         reset = () => {
           this.setState({value: ''});
         };
@@ -698,7 +698,7 @@ describe('ChangeEventPlugin', () => {
             this.state.value === 'changed' ? 'changed [!]' : this.state.value;
           return (
             <input
-              ref={el => (input = el)}
+              ref={(el) => (input = el)}
               type="text"
               value={controlledValue}
               onChange={this.onChange}

@@ -75,7 +75,7 @@ function updateOptions(
 ) {
   type IndexableHTMLOptionsCollection = HTMLOptionsCollection & {
     [key: number]: HTMLOptionElement,
-    ...,
+    ...
   };
   const options: IndexableHTMLOptionsCollection = node.options;
 

@@ -393,11 +393,8 @@ export const scheduleMicrotask: any =
   typeof queueMicrotask === 'function'
     ? queueMicrotask
     : typeof localPromise !== 'undefined'
-    ? callback =>
-        localPromise
-          .resolve(null)
-          .then(callback)
-          .catch(handleErrorInNextTick)
+    ? (callback) =>
+        localPromise.resolve(null).then(callback).catch(handleErrorInNextTick)
     : scheduleTimeout; // TODO: Determine the best fallback here.
 
 function handleErrorInNextTick(error) {
@@ -1284,7 +1281,7 @@ export function setupIntersectionObserver(
   unobserve: (instance: Instance) => void,
 |} {
   const rectRatioCache: Map<Instance, RectRatio> = new Map();
-  targets.forEach(target => {
+  targets.forEach((target) => {
     rectRatioCache.set(target, {
       rect: getBoundingRect(target),
       ratio: 0,
@@ -1292,7 +1289,7 @@ export function setupIntersectionObserver(
   });
 
   const handleIntersection = (entries: Array<IntersectionObserverEntry>) => {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const {boundingClientRect, intersectionRatio, target} = entry;
       rectRatioCache.set(target, {
         rect: {
@@ -1309,20 +1306,20 @@ export function setupIntersectionObserver(
   };
 
   const observer = new IntersectionObserver(handleIntersection, options);
-  targets.forEach(target => {
+  targets.forEach((target) => {
     observer.observe((target: any));
   });
 
   return {
     disconnect: () => observer.disconnect(),
-    observe: target => {
+    observe: (target) => {
       rectRatioCache.set(target, {
         rect: getBoundingRect(target),
         ratio: 0,
       });
       observer.observe((target: any));
     },
-    unobserve: target => {
+    unobserve: (target) => {
       rectRatioCache.delete(target);
       observer.unobserve((target: any));
     },

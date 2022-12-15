@@ -118,7 +118,7 @@ function legacyCreateRootFromDOMContainer(
   if (isHydrationContainer) {
     if (typeof callback === 'function') {
       const originalCallback = callback;
-      callback = function() {
+      callback = function () {
         const instance = getPublicRootInstance(root);
         originalCallback.call(instance);
       };
@@ -155,7 +155,7 @@ function legacyCreateRootFromDOMContainer(
 
     if (typeof callback === 'function') {
       const originalCallback = callback;
-      callback = function() {
+      callback = function () {
         const instance = getPublicRootInstance(root);
         originalCallback.call(instance);
       };
@@ -227,7 +227,7 @@ function legacyRenderSubtreeIntoContainer(
     root = maybeRoot;
     if (typeof callback === 'function') {
       const originalCallback = callback;
-      callback = function() {
+      callback = function () {
         const instance = getPublicRootInstance(root);
         originalCallback.call(instance);
       };

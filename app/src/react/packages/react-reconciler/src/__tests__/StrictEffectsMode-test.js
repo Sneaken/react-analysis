@@ -25,7 +25,7 @@ describe('StrictEffectsMode', () => {
 
   function supportsDoubleInvokeEffects() {
     return gate(
-      flags =>
+      (flags) =>
         flags.build === 'development' &&
         flags.enableStrictEffects &&
         flags.createRootStrictEffectsByDefault &&

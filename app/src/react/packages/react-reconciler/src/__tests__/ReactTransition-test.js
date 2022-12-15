@@ -69,7 +69,7 @@ describe('ReactTransition', () => {
           const thenable = record.value;
           record.status = 'resolved';
           record.value = text;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
       reject(text, error) {
@@ -84,7 +84,7 @@ describe('ReactTransition', () => {
           const thenable = record.value;
           record.status = 'rejected';
           record.value = error;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
     };
@@ -209,7 +209,7 @@ describe('ReactTransition', () => {
         const [isContentPending, startContentChange] = useTransition();
         const [label, setLabel] = useState('A');
         const [contents, setContents] = useState('A');
-        update = value => {
+        update = (value) => {
           ReactNoop.discreteUpdates(() => {
             setLabel(value);
             startContentChange(() => {
@@ -330,7 +330,7 @@ describe('ReactTransition', () => {
           contents: 'A',
         };
         render() {
-          update = value => {
+          update = (value) => {
             ReactNoop.discreteUpdates(() => {
               this.setState({label: value});
               startTransition(() => {
@@ -776,8 +776,8 @@ describe('ReactTransition', () => {
       const [normalPri, setNormalPri] = useState(0);
       const [transitionPri, setTransitionPri] = useState(0);
       updateTransitionPri = () =>
-        startTransition(() => setTransitionPri(n => n + 1));
-      updateNormalPri = () => setNormalPri(n => n + 1);
+        startTransition(() => setTransitionPri((n) => n + 1));
+      updateNormalPri = () => setNormalPri((n) => n + 1);
 
       useLayoutEffect(() => {
         Scheduler.unstable_yieldValue('Commit');
@@ -833,7 +833,7 @@ describe('ReactTransition', () => {
       const [normalPri, setNormalPri] = useState(0);
 
       updateTransitionPri = () => startTransition(() => setTransitionPri(true));
-      updateNormalPri = () => setNormalPri(n => n + 1);
+      updateNormalPri = () => setNormalPri((n) => n + 1);
 
       useLayoutEffect(() => {
         Scheduler.unstable_yieldValue('Commit');
@@ -895,8 +895,8 @@ describe('ReactTransition', () => {
       const [transitionPri, setTransitionPri] = useState(0);
       const [normalPri, setNormalPri] = useState(0);
       updateTransitionPri = () =>
-        startTransition(() => setTransitionPri(n => n + 1));
-      updateNormalPri = () => setNormalPri(n => n + 1);
+        startTransition(() => setTransitionPri((n) => n + 1));
+      updateNormalPri = () => setNormalPri((n) => n + 1);
 
       useLayoutEffect(() => {
         Scheduler.unstable_yieldValue('Commit');

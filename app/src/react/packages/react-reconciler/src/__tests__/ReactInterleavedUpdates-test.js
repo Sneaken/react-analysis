@@ -57,7 +57,7 @@ describe('ReactInterleavedUpdates', () => {
     expect(root).toMatchRenderedOutput('000');
 
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           updateChildren(1);
         });
@@ -69,7 +69,7 @@ describe('ReactInterleavedUpdates', () => {
 
       // In an interleaved event, schedule an update on each of the children.
       // Including the two that haven't rendered yet.
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           updateChildren(2);
         });

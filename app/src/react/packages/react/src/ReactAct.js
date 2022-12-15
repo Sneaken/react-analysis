@@ -70,7 +70,7 @@ export function act<T>(callback: () => T | Thenable<T>): Thenable<T> {
         then(resolve, reject) {
           wasAwaited = true;
           thenableResult.then(
-            returnValue => {
+            (returnValue) => {
               popActScope(prevActScopeDepth);
               if (actScopeDepth === 0) {
                 // We've exited the outermost act scope. Recursively flush the
@@ -80,7 +80,7 @@ export function act<T>(callback: () => T | Thenable<T>): Thenable<T> {
                 resolve(returnValue);
               }
             },
-            error => {
+            (error) => {
               // The callback threw an error.
               popActScope(prevActScopeDepth);
               reject(error);
@@ -168,8 +168,8 @@ function popActScope(prevActScopeDepth) {
 
 function recursivelyFlushAsyncActWork<T>(
   returnValue: T,
-  resolve: T => mixed,
-  reject: mixed => mixed,
+  resolve: (T) => mixed,
+  reject: (mixed) => mixed,
 ) {
   if (__DEV__) {
     const queue = ReactCurrentActQueue.current;

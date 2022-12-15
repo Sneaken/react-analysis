@@ -71,7 +71,7 @@ var isHostTimeoutScheduled = false;
 
 let currentMockTime: number = 0;
 let scheduledCallback: ((boolean, number) => void) | null = null;
-let scheduledTimeout: (number => void) | null = null;
+let scheduledTimeout: ((number) => void) | null = null;
 let timeoutTime: number = -1;
 let yieldedValues: Array<mixed> | null = null;
 let expectedNumberOfYields: number = -1;
@@ -275,7 +275,7 @@ function unstable_next(eventHandler) {
 
 function unstable_wrapCallback(callback) {
   var parentPriorityLevel = currentPriorityLevel;
-  return function() {
+  return function () {
     // This is a fork of runWithPriority, inlined for performance.
     var previousPriorityLevel = currentPriorityLevel;
     currentPriorityLevel = parentPriorityLevel;
@@ -405,11 +405,11 @@ function unstable_getCurrentPriorityLevel() {
   return currentPriorityLevel;
 }
 
-function requestHostCallback(callback: boolean => void) {
+function requestHostCallback(callback: (boolean) => void) {
   scheduledCallback = callback;
 }
 
-function requestHostTimeout(callback: number => void, ms: number) {
+function requestHostTimeout(callback: (number) => void, ms: number) {
   scheduledTimeout = callback;
   timeoutTime = currentMockTime + ms;
 }

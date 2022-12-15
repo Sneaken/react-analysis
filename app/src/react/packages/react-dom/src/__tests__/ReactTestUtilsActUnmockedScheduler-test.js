@@ -71,7 +71,7 @@ it('flushes effects on every call', () => {
       yields.push(ctr);
     });
     return (
-      <button id="button" onClick={() => setCtr(x => x + 1)}>
+      <button id="button" onClick={() => setCtr((x) => x + 1)}>
         {ctr}
       </button>
     );
@@ -108,7 +108,7 @@ it("should keep flushing effects until they're done", () => {
     const [ctr, setCtr] = React.useState(0);
     React.useEffect(() => {
       if (ctr < 5) {
-        setCtr(x => x + 1);
+        setCtr((x) => x + 1);
       }
     });
     return ctr;
@@ -150,7 +150,7 @@ it('can handle cascading promises', async () => {
     const [state, setState] = React.useState(0);
     async function ticker() {
       await null;
-      setState(x => x + 1);
+      setState((x) => x + 1);
     }
     React.useEffect(() => {
       yields.push(state);

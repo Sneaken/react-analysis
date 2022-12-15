@@ -155,7 +155,7 @@ describe('ReactProfiler DevTools integration', () => {
     // for updates.
     Scheduler.unstable_advanceTime(10000);
     // Schedule an update.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         root.update(<Text text="B" />);
       });

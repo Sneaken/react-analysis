@@ -24,7 +24,7 @@ describe('ReactIncrementalReflection', () => {
   });
 
   function div(...children) {
-    children = children.map(c =>
+    children = children.map((c) =>
       typeof c === 'string' ? {text: c, hidden: false} : c,
     );
     return {type: 'div', children, prop: undefined, hidden: false};
@@ -63,7 +63,7 @@ describe('ReactIncrementalReflection', () => {
       return <Component />;
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo />);
       });
@@ -117,7 +117,7 @@ describe('ReactIncrementalReflection', () => {
 
     expect(instances[0]._isMounted()).toBe(true);
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo mount={false} />);
       });
@@ -187,11 +187,11 @@ describe('ReactIncrementalReflection', () => {
       render() {
         Scheduler.unstable_yieldValue('render');
         return this.props.step < 2 ? (
-          <span ref={ref => (this.span = ref)} />
+          <span ref={(ref) => (this.span = ref)} />
         ) : this.props.step === 2 ? (
-          <div ref={ref => (this.div = ref)} />
+          <div ref={(ref) => (this.div = ref)} />
         ) : this.props.step === 3 ? null : this.props.step === 4 ? (
-          <div ref={ref => (this.span = ref)} />
+          <div ref={(ref) => (this.span = ref)} />
         ) : null;
       }
     }
@@ -206,7 +206,7 @@ describe('ReactIncrementalReflection', () => {
       return [<Component key="a" step={props.step} />, <Sibling key="b" />];
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo step={0} />);
       });
@@ -246,7 +246,7 @@ describe('ReactIncrementalReflection', () => {
 
     // The next step will render a new host node but won't get committed yet.
     // We expect this to mutate the original Fiber.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo step={2} />);
       });
@@ -273,7 +273,7 @@ describe('ReactIncrementalReflection', () => {
     expect(ReactNoop.findInstance(classInstance)).toBe(hostDiv);
 
     // Render to null but don't commit it yet.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo step={3} />);
       });

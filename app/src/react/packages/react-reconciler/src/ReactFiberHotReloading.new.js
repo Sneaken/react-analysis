@@ -50,7 +50,7 @@ export type RefreshUpdate = {|
 |};
 
 // Resolves type to a family.
-type RefreshHandler = any => Family | void;
+type RefreshHandler = (any) => Family | void;
 
 // Used by React Refresh runtime through DevTools Global Hook.
 export type SetRefreshHandler = (handler: RefreshHandler | null) => void;
@@ -350,7 +350,7 @@ export const findHostInstancesForRefresh: FindHostInstancesForRefresh = (
 ): Set<Instance> => {
   if (__DEV__) {
     const hostInstances = new Set();
-    const types = new Set(families.map(family => family.current));
+    const types = new Set(families.map((family) => family.current));
     findHostInstancesForMatchingFibersRecursively(
       root.current,
       types,

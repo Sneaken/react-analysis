@@ -54,7 +54,7 @@ describe('useSyncExternalStore', () => {
       set(text) {
         currentState = text;
         ReactNoop.batchedUpdates(() => {
-          listeners.forEach(listener => listener());
+          listeners.forEach((listener) => listener());
         });
       },
       subscribe(listener) {

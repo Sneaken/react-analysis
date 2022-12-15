@@ -77,7 +77,7 @@ describe('ReactSuspenseEffectsSemantics', () => {
           const thenable = record.value;
           record.status = 'resolved';
           record.value = text;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
       reject(text, error) {
@@ -92,7 +92,7 @@ describe('ReactSuspenseEffectsSemantics', () => {
           const thenable = record.value;
           record.status = 'rejected';
           record.value = error;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
     };
@@ -2533,7 +2533,7 @@ describe('ReactSuspenseEffectsSemantics', () => {
       const refObject = React.useRef(null);
 
       const manualRef = React.useMemo(() => ({current: null}), []);
-      const refCallback = React.useCallback(value => {
+      const refCallback = React.useCallback((value) => {
         Scheduler.unstable_yieldValue(
           `RefCheckerOuter refCallback value? ${value != null}`,
         );
@@ -2544,13 +2544,15 @@ describe('ReactSuspenseEffectsSemantics', () => {
 
       React.useLayoutEffect(() => {
         Scheduler.unstable_yieldValue(
-          `RefCheckerOuter create layout refObject? ${refObject.current !=
-            null} refCallback? ${manualRef.current != null}`,
+          `RefCheckerOuter create layout refObject? ${
+            refObject.current != null
+          } refCallback? ${manualRef.current != null}`,
         );
         return () => {
           Scheduler.unstable_yieldValue(
-            `RefCheckerOuter destroy layout refObject? ${refObject.current !=
-              null} refCallback? ${manualRef.current != null}`,
+            `RefCheckerOuter destroy layout refObject? ${
+              refObject.current != null
+            } refCallback? ${manualRef.current != null}`,
           );
         };
       }, []);
@@ -2571,13 +2573,15 @@ describe('ReactSuspenseEffectsSemantics', () => {
       Scheduler.unstable_yieldValue(`RefCheckerInner:${text} render`);
       React.useLayoutEffect(() => {
         Scheduler.unstable_yieldValue(
-          `RefCheckerInner:${text} create layout ref? ${forwardedRef.current !=
-            null}`,
+          `RefCheckerInner:${text} create layout ref? ${
+            forwardedRef.current != null
+          }`,
         );
         return () => {
           Scheduler.unstable_yieldValue(
-            `RefCheckerInner:${text} destroy layout ref? ${forwardedRef.current !=
-              null}`,
+            `RefCheckerInner:${text} destroy layout ref? ${
+              forwardedRef.current != null
+            }`,
           );
         };
       }, []);
@@ -2984,8 +2988,9 @@ describe('ReactSuspenseEffectsSemantics', () => {
           );
           return () => {
             Scheduler.unstable_yieldValue(
-              `RefChecker destroy layout ref? ${forwardedRef.current ===
-                'test'}`,
+              `RefChecker destroy layout ref? ${
+                forwardedRef.current === 'test'
+              }`,
             );
           };
         }, []);
@@ -3079,7 +3084,7 @@ describe('ReactSuspenseEffectsSemantics', () => {
 
         function ThrowsInRefCallback() {
           Scheduler.unstable_yieldValue('ThrowsInRefCallback render');
-          const refCallback = React.useCallback(value => {
+          const refCallback = React.useCallback((value) => {
             Scheduler.unstable_yieldValue(
               'ThrowsInRefCallback refCallback ref? ' + !!value,
             );

@@ -18,7 +18,7 @@ if (canUseDOM) {
     const options = {};
     // $FlowFixMe: Ignore Flow complaining about needing a value
     Object.defineProperty(options, 'passive', {
-      get: function() {
+      get: function () {
         passiveBrowserEventsSupported = true;
       },
     });

@@ -46,7 +46,7 @@ export function processTransitionCallbacks(
     if (pendingTransitions !== null) {
       const transitionStart = pendingTransitions.transitionStart;
       if (transitionStart !== null) {
-        transitionStart.forEach(transition => {
+        transitionStart.forEach((transition) => {
           if (callbacks.onTransitionStart != null) {
             callbacks.onTransitionStart(
               transition.transitionName,
@@ -58,7 +58,7 @@ export function processTransitionCallbacks(
 
       const transitionComplete = pendingTransitions.transitionComplete;
       if (transitionComplete !== null) {
-        transitionComplete.forEach(transition => {
+        transitionComplete.forEach((transition) => {
           if (callbacks.onTransitionComplete != null) {
             callbacks.onTransitionComplete(
               transition.transitionName,

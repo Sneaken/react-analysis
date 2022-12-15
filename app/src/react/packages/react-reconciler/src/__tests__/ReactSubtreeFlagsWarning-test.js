@@ -53,7 +53,7 @@ describe('ReactSuspenseWithNoopRenderer', () => {
           const thenable = record.value;
           record.status = 'resolved';
           record.value = text;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
       reject(text, error) {
@@ -68,7 +68,7 @@ describe('ReactSuspenseWithNoopRenderer', () => {
           const thenable = record.value;
           record.status = 'rejected';
           record.value = error;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
     };

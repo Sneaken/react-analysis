@@ -36,13 +36,13 @@ describe('updaters', () => {
     mockDevToolsHook = {
       injectInternals: jest.fn(() => {}),
       isDevToolsPresent: true,
-      onCommitRoot: jest.fn(fiberRoot => {
+      onCommitRoot: jest.fn((fiberRoot) => {
         if (onCommitRootShouldYield) {
           Scheduler.unstable_yieldValue('onCommitRoot');
         }
         const schedulerTags = [];
         const schedulerTypes = [];
-        fiberRoot.memoizedUpdaters.forEach(fiber => {
+        fiberRoot.memoizedUpdaters.forEach((fiber) => {
           schedulerTags.push(fiber.tag);
           schedulerTypes.push(fiber.elementType);
         });
@@ -127,12 +127,12 @@ describe('updaters', () => {
     );
     const SchedulingComponentA = () => {
       const [count, setCount] = React.useState(0);
-      scheduleForA = () => setCount(prevCount => prevCount + 1);
+      scheduleForA = () => setCount((prevCount) => prevCount + 1);
       return <Child count={count} />;
     };
     const SchedulingComponentB = () => {
       const [count, setCount] = React.useState(0);
-      scheduleForB = () => setCount(prevCount => prevCount + 1);
+      scheduleForB = () => setCount((prevCount) => prevCount + 1);
       return <Child count={count} />;
     };
     const Child = () => null;
@@ -198,13 +198,13 @@ describe('updaters', () => {
       Scheduler.unstable_yieldValue(`CascadingChild ${count}`);
       React.useLayoutEffect(() => {
         if (cascade === 'active') {
-          setCount(prevCount => prevCount + 1);
+          setCount((prevCount) => prevCount + 1);
         }
         return () => {};
       }, [cascade]);
       React.useEffect(() => {
         if (cascade === 'passive') {
-          setCount(prevCount => prevCount + 1);
+          setCount((prevCount) => prevCount + 1);
         }
         return () => {};
       }, [cascade]);
@@ -259,14 +259,14 @@ describe('updaters', () => {
     Scheduler.unstable_flushAll();
   });
 
-  it('should cover suspense pings', async done => {
+  it('should cover suspense pings', async (done) => {
     let data = null;
     let resolver = null;
     let promise = null;
     const fakeCacheRead = () => {
       if (data === null) {
-        promise = new Promise(resolve => {
-          resolver = resolvedData => {
+        promise = new Promise((resolve) => {
+          resolver = (resolvedData) => {
             data = resolvedData;
             resolve(resolvedData);
           };
@@ -387,7 +387,7 @@ describe('updaters', () => {
 
     const SyncPriorityUpdater = () => {
       const [count, setCount] = React.useState(0);
-      triggerSyncPriorityUpdate = () => setCount(prevCount => prevCount + 1);
+      triggerSyncPriorityUpdate = () => setCount((prevCount) => prevCount + 1);
       Scheduler.unstable_yieldValue(`SyncPriorityUpdater ${count}`);
       return <Yield value={`HighPriority ${count}`} />;
     };
@@ -395,7 +395,7 @@ describe('updaters', () => {
       const [count, setCount] = React.useState(0);
       triggerLowPriorityUpdate = () => {
         React.startTransition(() => {
-          setCount(prevCount => prevCount + 1);
+          setCount((prevCount) => prevCount + 1);
         });
       };
       Scheduler.unstable_yieldValue(`LowPriorityUpdater ${count}`);

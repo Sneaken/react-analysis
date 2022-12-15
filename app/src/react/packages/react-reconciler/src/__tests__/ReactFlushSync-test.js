@@ -41,7 +41,7 @@ describe('ReactFlushSync', () => {
 
     const root = ReactNoop.createRoot();
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           root.render(<App />);
         });

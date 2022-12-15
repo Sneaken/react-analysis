@@ -823,7 +823,7 @@ export function movePendingFibersToMemoized(root: FiberRoot, lanes: Lanes) {
 
     const updaters = pendingUpdatersLaneMap[index];
     if (updaters.size > 0) {
-      updaters.forEach(fiber => {
+      updaters.forEach((fiber) => {
         const alternate = fiber.alternate;
         if (alternate === null || !memoizedUpdaters.has(alternate)) {
           memoizedUpdaters.add(fiber);
@@ -868,7 +868,7 @@ export function getTransitionsForLanes(
     const lane = 1 << index;
     const transitions = root.transitionLanes[index];
     if (transitions !== null) {
-      transitions.forEach(transition => {
+      transitions.forEach((transition) => {
         transitionsForLanes.push(transition);
       });
     }

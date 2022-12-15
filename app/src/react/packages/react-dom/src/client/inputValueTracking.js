@@ -77,10 +77,10 @@ function trackValueOnNode(node: any): ?ValueTracker {
   const {get, set} = descriptor;
   Object.defineProperty(node, valueField, {
     configurable: true,
-    get: function() {
+    get: function () {
       return get.call(this);
     },
-    set: function(value) {
+    set: function (value) {
       if (__DEV__) {
         checkFormFieldValueStringCoercion(value);
       }

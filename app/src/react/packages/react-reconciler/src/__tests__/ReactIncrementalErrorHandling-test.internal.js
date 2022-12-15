@@ -30,7 +30,7 @@ describe('ReactIncrementalErrorHandling', () => {
   });
 
   function div(...children) {
-    children = children.map(c => (typeof c === 'string' ? {text: c} : c));
+    children = children.map((c) => (typeof c === 'string' ? {text: c} : c));
     return {type: 'div', children, prop: undefined, hidden: false};
   }
 
@@ -41,7 +41,7 @@ describe('ReactIncrementalErrorHandling', () => {
   function normalizeCodeLocInfo(str) {
     return (
       str &&
-      str.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function(m, name) {
+      str.replace(/\n +(?:at|in) ([\S]+)[^\n]*/g, function (m, name) {
         return '\n    in ' + name + ' (at **)';
       })
     );
@@ -92,7 +92,7 @@ describe('ReactIncrementalErrorHandling', () => {
       throw new Error('oops!');
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(
           <ErrorBoundary>
@@ -204,7 +204,7 @@ describe('ReactIncrementalErrorHandling', () => {
       throw new Error('oops!');
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(
           <ErrorBoundary>
@@ -398,7 +398,7 @@ describe('ReactIncrementalErrorHandling', () => {
       );
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Parent />, () =>
           Scheduler.unstable_yieldValue('commit'),
@@ -450,7 +450,7 @@ describe('ReactIncrementalErrorHandling', () => {
       );
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<App />);
       });
@@ -503,7 +503,7 @@ describe('ReactIncrementalErrorHandling', () => {
       state = {errorCount: 0};
       componentDidCatch(error) {
         Scheduler.unstable_yieldValue(`componentDidCatch: ${error.message}`);
-        this.setState(state => ({errorCount: state.errorCount + 1}));
+        this.setState((state) => ({errorCount: state.errorCount + 1}));
       }
       render() {
         if (this.state.errorCount > 0) {
@@ -587,7 +587,7 @@ describe('ReactIncrementalErrorHandling', () => {
       throw new Error('Hello');
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(
           <ErrorBoundary>
@@ -770,7 +770,7 @@ describe('ReactIncrementalErrorHandling', () => {
       throw new Error('Hello');
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(
           <RethrowErrorBoundary>
@@ -1379,9 +1379,7 @@ describe('ReactIncrementalErrorHandling', () => {
 
   it('recovers from uncaught reconciler errors', () => {
     const InvalidType = undefined;
-    expect(() =>
-      ReactNoop.render(<InvalidType />),
-    ).toErrorDev(
+    expect(() => ReactNoop.render(<InvalidType />)).toErrorDev(
       'Warning: React.createElement: type is invalid -- expected a string',
       {withoutStack: true},
     );
@@ -1750,7 +1748,7 @@ describe('ReactIncrementalErrorHandling', () => {
   });
 
   it('provides component stack even if overriding prepareStackTrace', () => {
-    Error.prepareStackTrace = function(error, callsites) {
+    Error.prepareStackTrace = function (error, callsites) {
       const stack = ['An error occurred:', error.message];
       for (let i = 0; i < callsites.length; i++) {
         const callsite = callsites[i];
@@ -1846,7 +1844,7 @@ describe('ReactIncrementalErrorHandling', () => {
     }
 
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           root.render(<Oops />);
         });

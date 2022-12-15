@@ -16,7 +16,7 @@ describe('ReactSuspenseList', () => {
     act = require('jest-react').act;
     Profiler = React.Profiler;
     Suspense = React.Suspense;
-    if (gate(flags => flags.enableSuspenseList)) {
+    if (gate((flags) => flags.enableSuspenseList)) {
       SuspenseList = React.SuspenseList;
     }
   });
@@ -28,15 +28,15 @@ describe('ReactSuspenseList', () => {
 
   function createAsyncText(text) {
     let resolved = false;
-    const Component = function() {
+    const Component = function () {
       if (!resolved) {
         Scheduler.unstable_yieldValue('Suspend! [' + text + ']');
         throw promise;
       }
       return <Text text={text} />;
     };
-    const promise = new Promise(resolve => {
-      Component.resolve = function() {
+    const promise = new Promise((resolve) => {
+      Component.resolve = function () {
         resolved = true;
         return resolve();
       };
@@ -164,7 +164,7 @@ describe('ReactSuspenseList', () => {
     function Foo({items}) {
       return (
         <SuspenseList revealOrder="forwards">
-          {items.map(name => (
+          {items.map((name) => (
             <Suspense key={name} fallback="Loading">
               {name}
             </Suspense>
@@ -1166,7 +1166,7 @@ describe('ReactSuspenseList', () => {
     const F = createAsyncText('F');
 
     function createSyncText(text) {
-      return function() {
+      return function () {
         return <Text text={text} />;
       };
     }
@@ -1362,7 +1362,7 @@ describe('ReactSuspenseList', () => {
     }
 
     // This render is only CPU bound. Nothing suspends.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo />);
       });
@@ -1546,7 +1546,7 @@ describe('ReactSuspenseList', () => {
     }
 
     // This render is only CPU bound. Nothing suspends.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo />);
       });
@@ -2549,7 +2549,7 @@ describe('ReactSuspenseList', () => {
 
     await act(async () => {
       // Add a few items at the end.
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           updateLowPri(true);
         });
@@ -2692,7 +2692,7 @@ describe('ReactSuspenseList', () => {
       );
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<App />);
       });
@@ -2765,7 +2765,7 @@ describe('ReactSuspenseList', () => {
       );
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<App />);
       });

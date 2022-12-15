@@ -98,7 +98,7 @@ const ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
 let ReactDebugCurrentFrame;
 let prevGetCurrentStackImpl = null;
 let getCurrentServerStackImpl = () => '';
-let describeStackFrame = element => '';
+let describeStackFrame = (element) => '';
 
 let validatePropertiesInDevelopment = (type, props) => {};
 let pushCurrentDebugStack = (stack: Array<Frame>) => {};
@@ -109,13 +109,13 @@ let hasWarnedAboutUsingContextAsConsumer = false;
 if (__DEV__) {
   ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
 
-  validatePropertiesInDevelopment = function(type, props) {
+  validatePropertiesInDevelopment = function (type, props) {
     validateARIAProperties(type, props);
     validateInputProperties(type, props);
     validateUnknownProperties(type, props, null);
   };
 
-  describeStackFrame = function(element): string {
+  describeStackFrame = function (element): string {
     return describeUnknownElementTypeFrameInDEV(
       element.type,
       element._source,
@@ -123,7 +123,7 @@ if (__DEV__) {
     );
   };
 
-  pushCurrentDebugStack = function(stack: Array<Frame>) {
+  pushCurrentDebugStack = function (stack: Array<Frame>) {
     currentDebugStacks.push(stack);
 
     if (currentDebugStacks.length === 1) {
@@ -134,7 +134,7 @@ if (__DEV__) {
     }
   };
 
-  pushElementToDebugStack = function(element: ReactElement) {
+  pushElementToDebugStack = function (element: ReactElement) {
     // For the innermost executing ReactDOMServer call,
     const stack = currentDebugStacks[currentDebugStacks.length - 1];
     // Take the innermost executing frame (e.g. <Foo>),
@@ -146,7 +146,7 @@ if (__DEV__) {
     // creating separate frames for them.
   };
 
-  popCurrentDebugStack = function() {
+  popCurrentDebugStack = function () {
     currentDebugStacks.pop();
 
     if (currentDebugStacks.length === 0) {
@@ -157,7 +157,7 @@ if (__DEV__) {
     }
   };
 
-  getCurrentServerStackImpl = function(): string {
+  getCurrentServerStackImpl = function (): string {
     if (currentDebugStacks.length === 0) {
       // Nothing is currently rendering.
       return '';
@@ -217,7 +217,7 @@ function validateDangerousTag(tag) {
 }
 
 const styleNameCache = {};
-const processStyleName = function(styleName) {
+const processStyleName = function (styleName) {
   if (styleNameCache.hasOwnProperty(styleName)) {
     return styleNameCache[styleName];
   }
@@ -324,7 +324,7 @@ function flattenOptionChildren(children: mixed): ?string {
   let content = '';
   // Flatten children and warn if they aren't strings or numbers;
   // invalid types are ignored.
-  React.Children.forEach((children: any), function(child) {
+  React.Children.forEach((children: any), function (child) {
     if (child == null) {
       return;
     }
@@ -422,20 +422,20 @@ function resolve(
     let queue = [];
     let replace = false;
     const updater = {
-      isMounted: function(publicInstance) {
+      isMounted: function (publicInstance) {
         return false;
       },
-      enqueueForceUpdate: function(publicInstance) {
+      enqueueForceUpdate: function (publicInstance) {
         if (queue === null) {
           warnNoop(publicInstance, 'forceUpdate');
           return null;
         }
       },
-      enqueueReplaceState: function(publicInstance, completeState) {
+      enqueueReplaceState: function (publicInstance, completeState) {
         replace = true;
         queue = [completeState];
       },
-      enqueueSetState: function(publicInstance, currentPartialState) {
+      enqueueSetState: function (publicInstance, currentPartialState) {
         if (queue === null) {
           warnNoop(publicInstance, 'setState');
           return null;
@@ -729,8 +729,9 @@ function resolve(
           for (const contextKey in childContext) {
             if (!(contextKey in childContextTypes)) {
               throw new Error(
-                `${getComponentNameFromType(Component) ||
-                  'Unknown'}.getChildContext(): key "${contextKey}" is not defined in childContextTypes.`,
+                `${
+                  getComponentNameFromType(Component) || 'Unknown'
+                }.getChildContext(): key "${contextKey}" is not defined in childContextTypes.`,
               );
             }
           }

@@ -387,7 +387,7 @@ describe('ReactDOMServer', () => {
 
       function Consumer(props) {
         return (
-          <Context.Consumer>{value => 'Result: ' + value}</Context.Consumer>
+          <Context.Consumer>{(value) => 'Result: ' + value}</Context.Consumer>
         );
       }
 
@@ -461,7 +461,7 @@ describe('ReactDOMServer', () => {
 
       function Consumer(props) {
         return (
-          <Context.Consumer>{value => 'Result: ' + value}</Context.Consumer>
+          <Context.Consumer>{(value) => 'Result: ' + value}</Context.Consumer>
         );
       }
 
@@ -567,7 +567,7 @@ describe('ReactDOMServer', () => {
     });
 
     it('aborts synchronously any suspended tasks and renders their fallbacks', () => {
-      const promise = new Promise(res => {});
+      const promise = new Promise((res) => {});
       function Suspender() {
         throw promise;
       }
@@ -608,7 +608,7 @@ describe('ReactDOMServer', () => {
         'renderToNodeStream is deprecated. Use renderToPipeableStream instead.',
         {withoutStack: true},
       );
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         response.once('error', () => {
           resolve();
         });
@@ -620,9 +620,8 @@ describe('ReactDOMServer', () => {
   describe('renderToStaticNodeStream', () => {
     it('should generate simple markup', () => {
       const SuccessfulElement = React.createElement(() => <img />);
-      const response = ReactDOMServer.renderToStaticNodeStream(
-        SuccessfulElement,
-      );
+      const response =
+        ReactDOMServer.renderToStaticNodeStream(SuccessfulElement);
       expect(response.read().toString()).toMatch(new RegExp('<img' + '/>'));
     });
 
@@ -631,7 +630,7 @@ describe('ReactDOMServer', () => {
         throw new Error('An Error');
       });
       const response = ReactDOMServer.renderToStaticNodeStream(FailingElement);
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         response.once('error', () => {
           resolve();
         });
@@ -641,7 +640,7 @@ describe('ReactDOMServer', () => {
 
     it('should refer users to new apis when using suspense', async () => {
       let resolve = null;
-      const promise = new Promise(res => {
+      const promise = new Promise((res) => {
         resolve = () => {
           resolved = true;
           res();
@@ -689,9 +688,7 @@ describe('ReactDOMServer', () => {
     }
 
     ReactDOMServer.renderToString(<Foo />);
-    expect(() =>
-      jest.runOnlyPendingTimers(),
-    ).toErrorDev(
+    expect(() => jest.runOnlyPendingTimers()).toErrorDev(
       'Warning: setState(...): Can only update a mounting component.' +
         ' This usually means you called setState() outside componentWillMount() on the server.' +
         ' This is a no-op.\n\nPlease check the code for the Foo component.',
@@ -719,9 +716,7 @@ describe('ReactDOMServer', () => {
     }
 
     ReactDOMServer.renderToString(<Baz />);
-    expect(() =>
-      jest.runOnlyPendingTimers(),
-    ).toErrorDev(
+    expect(() => jest.runOnlyPendingTimers()).toErrorDev(
       'Warning: forceUpdate(...): Can only update a mounting component. ' +
         'This usually means you called forceUpdate() outside componentWillMount() on the server. ' +
         'This is a no-op.\n\nPlease check the code for the Baz component.',

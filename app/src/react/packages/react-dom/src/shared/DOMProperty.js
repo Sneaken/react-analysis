@@ -259,7 +259,7 @@ if (enableCustomElementPropertySupport) {
   reservedProps.push('innerText', 'textContent');
 }
 
-reservedProps.forEach(name => {
+reservedProps.forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     RESERVED,
@@ -293,7 +293,7 @@ reservedProps.forEach(name => {
 // These are "enumerated" HTML attributes that accept "true" and "false".
 // In React, we let users pass `true` and `false` even though technically
 // these aren't boolean attributes (they are coerced to strings).
-['contentEditable', 'draggable', 'spellCheck', 'value'].forEach(name => {
+['contentEditable', 'draggable', 'spellCheck', 'value'].forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     BOOLEANISH_STRING,
@@ -314,7 +314,7 @@ reservedProps.forEach(name => {
   'externalResourcesRequired',
   'focusable',
   'preserveAlpha',
-].forEach(name => {
+].forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     BOOLEANISH_STRING,
@@ -354,7 +354,7 @@ reservedProps.forEach(name => {
   'seamless',
   // Microdata
   'itemScope',
-].forEach(name => {
+].forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     BOOLEAN,
@@ -379,7 +379,7 @@ reservedProps.forEach(name => {
   // NOTE: if you add a camelCased prop to this list,
   // you'll need to set attributeName to name.toLowerCase()
   // instead in the assignment below.
-].forEach(name => {
+].forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     BOOLEAN,
@@ -400,7 +400,7 @@ reservedProps.forEach(name => {
   // NOTE: if you add a camelCased prop to this list,
   // you'll need to set attributeName to name.toLowerCase()
   // instead in the assignment below.
-].forEach(name => {
+].forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     OVERLOADED_BOOLEAN,
@@ -422,7 +422,7 @@ reservedProps.forEach(name => {
   // NOTE: if you add a camelCased prop to this list,
   // you'll need to set attributeName to name.toLowerCase()
   // instead in the assignment below.
-].forEach(name => {
+].forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     POSITIVE_NUMERIC,
@@ -435,7 +435,7 @@ reservedProps.forEach(name => {
 });
 
 // These are HTML attributes that must be numbers.
-['rowSpan', 'start'].forEach(name => {
+['rowSpan', 'start'].forEach((name) => {
   properties[name] = new PropertyInfoRecord(
     name,
     NUMERIC,
@@ -448,7 +448,7 @@ reservedProps.forEach(name => {
 });
 
 const CAMELIZE = /[\-\:]([a-z])/g;
-const capitalize = token => token[1].toUpperCase();
+const capitalize = (token) => token[1].toUpperCase();
 
 // This is a list of all SVG attributes that need special casing, namespacing,
 // or boolean value assignment. Regular attributes that just accept strings
@@ -533,7 +533,7 @@ const capitalize = token => token[1].toUpperCase();
   // NOTE: if you add a camelCased prop to this list,
   // you'll need to set attributeName to name.toLowerCase()
   // instead in the assignment below.
-].forEach(attributeName => {
+].forEach((attributeName) => {
   const name = attributeName.replace(CAMELIZE, capitalize);
   properties[name] = new PropertyInfoRecord(
     name,
@@ -558,7 +558,7 @@ const capitalize = token => token[1].toUpperCase();
   // NOTE: if you add a camelCased prop to this list,
   // you'll need to set attributeName to name.toLowerCase()
   // instead in the assignment below.
-].forEach(attributeName => {
+].forEach((attributeName) => {
   const name = attributeName.replace(CAMELIZE, capitalize);
   properties[name] = new PropertyInfoRecord(
     name,
@@ -580,7 +580,7 @@ const capitalize = token => token[1].toUpperCase();
   // NOTE: if you add a camelCased prop to this list,
   // you'll need to set attributeName to name.toLowerCase()
   // instead in the assignment below.
-].forEach(attributeName => {
+].forEach((attributeName) => {
   const name = attributeName.replace(CAMELIZE, capitalize);
   properties[name] = new PropertyInfoRecord(
     name,
@@ -596,7 +596,7 @@ const capitalize = token => token[1].toUpperCase();
 // These attribute exists both in HTML and SVG.
 // The attribute name is case-sensitive in SVG so we can't just use
 // the React name like we do for attributes that exist only in HTML.
-['tabIndex', 'crossOrigin'].forEach(attributeName => {
+['tabIndex', 'crossOrigin'].forEach((attributeName) => {
   properties[attributeName] = new PropertyInfoRecord(
     attributeName,
     STRING,
@@ -621,7 +621,7 @@ properties[xlinkHref] = new PropertyInfoRecord(
   false, // removeEmptyString
 );
 
-['src', 'href', 'action', 'formAction'].forEach(attributeName => {
+['src', 'href', 'action', 'formAction'].forEach((attributeName) => {
   properties[attributeName] = new PropertyInfoRecord(
     attributeName,
     STRING,

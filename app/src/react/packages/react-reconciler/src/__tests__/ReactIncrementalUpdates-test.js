@@ -24,8 +24,8 @@ describe('ReactIncrementalUpdates', () => {
     ReactNoop = require('react-noop-renderer');
     Scheduler = require('scheduler');
     act = require('jest-react').act;
-    ContinuousEventPriority = require('react-reconciler/constants')
-      .ContinuousEventPriority;
+    ContinuousEventPriority =
+      require('react-reconciler/constants').ContinuousEventPriority;
   });
 
   function span(prop) {
@@ -139,13 +139,7 @@ describe('ReactIncrementalUpdates', () => {
       state = {};
       render() {
         instance = this;
-        return (
-          <span
-            prop={Object.keys(this.state)
-              .sort()
-              .join('')}
-          />
-        );
+        return <span prop={Object.keys(this.state).sort().join('')} />;
       }
     }
 
@@ -162,7 +156,7 @@ describe('ReactIncrementalUpdates', () => {
     }
 
     // Schedule some async updates
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         instance.setState(createUpdate('a'));
         instance.setState(createUpdate('b'));
@@ -179,7 +173,7 @@ describe('ReactIncrementalUpdates', () => {
     expect(ReactNoop.getChildren()).toEqual([span('')]);
 
     // Schedule some more updates at different priorities
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       instance.setState(createUpdate('d'));
       ReactNoop.flushSync(() => {
         instance.setState(createUpdate('e'));
@@ -238,13 +232,7 @@ describe('ReactIncrementalUpdates', () => {
       state = {};
       render() {
         instance = this;
-        return (
-          <span
-            prop={Object.keys(this.state)
-              .sort()
-              .join('')}
-          />
-        );
+        return <span prop={Object.keys(this.state).sort().join('')} />;
       }
     }
 
@@ -261,7 +249,7 @@ describe('ReactIncrementalUpdates', () => {
     }
 
     // Schedule some async updates
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         instance.setState(createUpdate('a'));
         instance.setState(createUpdate('b'));
@@ -278,7 +266,7 @@ describe('ReactIncrementalUpdates', () => {
     expect(ReactNoop.getChildren()).toEqual([span('')]);
 
     // Schedule some more updates at different priorities
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       instance.setState(createUpdate('d'));
 
       ReactNoop.flushSync(() => {
@@ -353,7 +341,7 @@ describe('ReactIncrementalUpdates', () => {
     instance.setState({b: 'b'});
     // No longer a public API, but we can test that it works internally by
     // reaching into the updater.
-    instance.updater.enqueueReplaceState(instance, previousState => ({
+    instance.updater.enqueueReplaceState(instance, (previousState) => ({
       previousState,
     }));
     expect(Scheduler).toFlushWithoutYielding();
@@ -415,7 +403,7 @@ describe('ReactIncrementalUpdates', () => {
 
     expect(instance.state).toEqual({a: 'a', b: 'b'});
 
-    if (gate(flags => flags.deferRenderPhaseUpdateToNextBatch)) {
+    if (gate((flags) => flags.deferRenderPhaseUpdateToNextBatch)) {
       expect(Scheduler).toHaveYielded([
         'componentWillReceiveProps',
         'render',
@@ -451,7 +439,7 @@ describe('ReactIncrementalUpdates', () => {
 
     expect(() =>
       expect(Scheduler).toFlushAndYield(
-        gate(flags =>
+        gate((flags) =>
           flags.deferRenderPhaseUpdateToNextBatch
             ? [
                 'setState updater',
@@ -484,7 +472,7 @@ describe('ReactIncrementalUpdates', () => {
       return {b: 'b'};
     });
     expect(Scheduler).toFlushAndYield(
-      gate(flags =>
+      gate((flags) =>
         flags.deferRenderPhaseUpdateToNextBatch
           ? // In the new reconciler, updates inside the render phase are
             // treated as if they came from an event, so the update gets shifted
@@ -555,14 +543,14 @@ describe('ReactIncrementalUpdates', () => {
       setCount = _setCount;
       Scheduler.unstable_yieldValue('Render: ' + count);
       useLayoutEffect(() => {
-        setCount(prevCount => prevCount + 1);
+        setCount((prevCount) => prevCount + 1);
         Scheduler.unstable_yieldValue('Commit: ' + count);
       }, []);
       return null;
     }
 
     act(() => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           ReactNoop.render(<App />);
         });
@@ -578,7 +566,7 @@ describe('ReactIncrementalUpdates', () => {
       ]);
 
       Scheduler.unstable_advanceTime(10000);
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           setCount(2);
         });
@@ -603,7 +591,7 @@ describe('ReactIncrementalUpdates', () => {
 
     Scheduler.unstable_advanceTime(10000);
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Text text="B" />);
       });
@@ -620,7 +608,7 @@ describe('ReactIncrementalUpdates', () => {
       return text;
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Text text="A" />);
       });
@@ -633,7 +621,7 @@ describe('ReactIncrementalUpdates', () => {
 
     Scheduler.unstable_advanceTime(10000);
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Text text="B" />);
       });
@@ -650,8 +638,8 @@ describe('ReactIncrementalUpdates', () => {
     let pushToLog;
     function App() {
       const [log, setLog] = useState('');
-      pushToLog = msg => {
-        setLog(prevLog => prevLog + msg);
+      pushToLog = (msg) => {
+        setLog((prevLog) => prevLog + msg);
       };
 
       useLayoutEffect(() => {
@@ -661,7 +649,7 @@ describe('ReactIncrementalUpdates', () => {
           ReactNoop.unstable_runWithPriority(ContinuousEventPriority, () =>
             pushToLog('C'),
           );
-          setLog(prevLog => prevLog + 'D');
+          setLog((prevLog) => prevLog + 'D');
         }
       }, [log]);
 
@@ -676,7 +664,7 @@ describe('ReactIncrementalUpdates', () => {
     expect(root).toMatchRenderedOutput(null);
 
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           pushToLog('A');
         });
@@ -710,8 +698,8 @@ describe('ReactIncrementalUpdates', () => {
     let pushToLog;
     class App extends React.Component {
       state = {log: ''};
-      pushToLog = msg => {
-        this.setState(prevState => ({log: prevState.log + msg}));
+      pushToLog = (msg) => {
+        this.setState((prevState) => ({log: prevState.log + msg}));
       };
       componentDidUpdate() {
         Scheduler.unstable_yieldValue('Committed: ' + this.state.log);
@@ -737,7 +725,7 @@ describe('ReactIncrementalUpdates', () => {
     expect(root).toMatchRenderedOutput(null);
 
     await act(async () => {
-      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      if (gate((flags) => flags.enableSyncDefaultUpdates)) {
         React.startTransition(() => {
           pushToLog('A');
         });
@@ -808,7 +796,7 @@ describe('ReactIncrementalUpdates', () => {
     // batch, change the prop back to its original value.
     await act(async () => {
       root.render(<App prop="A" />);
-      app.setState(state => ({count: state.count + 1}));
+      app.setState((state) => ({count: state.count + 1}));
     });
     // There were two total prop changes, plus an increment.
     expect(root).toMatchRenderedOutput('201');

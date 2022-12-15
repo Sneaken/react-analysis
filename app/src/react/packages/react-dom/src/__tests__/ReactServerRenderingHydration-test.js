@@ -354,7 +354,7 @@ describe('ReactDOMServerHydration', () => {
   it('should be able to use lazy components after hydrating', async () => {
     const Lazy = React.lazy(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           setTimeout(
             () =>
               resolve({
@@ -544,13 +544,13 @@ describe('ReactDOMServerHydration', () => {
       'outerText',
       'outerHTML',
     ];
-    readOnlyProperties.forEach(readOnlyProperty => {
+    readOnlyProperties.forEach((readOnlyProperty) => {
       const props = {};
       props[readOnlyProperty] = 'hello';
       const jsx = React.createElement('my-custom-element', props);
       const element = document.createElement('div');
       element.innerHTML = ReactDOMServer.renderToString(jsx);
-      if (gate(flags => flags.enableCustomElementPropertySupport)) {
+      if (gate((flags) => flags.enableCustomElementPropertySupport)) {
         expect(() => ReactDOM.hydrate(jsx, element)).toErrorDev(
           `Warning: Assignment to read-only property will result in a no-op: \`${readOnlyProperty}\``,
         );
@@ -575,18 +575,18 @@ describe('ReactDOMServerHydration', () => {
 
     // Install setters to activate `in` check
     Object.defineProperty(customElement, 'str', {
-      set: function(x) {
+      set: function (x) {
         this._str = x;
       },
-      get: function() {
+      get: function () {
         return this._str;
       },
     });
     Object.defineProperty(customElement, 'obj', {
-      set: function(x) {
+      set: function (x) {
         this._obj = x;
       },
-      get: function() {
+      get: function () {
         return this._obj;
       },
     });

@@ -339,8 +339,8 @@ export type FiberRoot = {
   ...
 };
 
-type BasicStateAction<S> = (S => S) | S;
-type Dispatch<A> = A => void;
+type BasicStateAction<S> = ((S) => S) | S;
+type Dispatch<A> = (A) => void;
 
 export type Dispatcher = {|
   getCacheSignal?: () => AbortSignal,

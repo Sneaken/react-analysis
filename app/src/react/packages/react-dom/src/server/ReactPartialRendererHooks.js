@@ -22,8 +22,8 @@ import {validateContextBounds} from './ReactPartialRendererContext';
 import {enableCache} from 'shared/ReactFeatureFlags';
 import is from 'shared/objectIs';
 
-type BasicStateAction<S> = (S => S) | S;
-type Dispatch<A> = A => void;
+type BasicStateAction<S> = ((S) => S) | S;
+type Dispatch<A> = (A) => void;
 
 type Update<A> = {|
   action: A,
@@ -269,7 +269,7 @@ export function useState<S>(
 export function useReducer<S, I, A>(
   reducer: (S, A) => S,
   initialArg: I,
-  init?: I => S,
+  init?: (I) => S,
 ): [S, Dispatch<A>] {
   if (__DEV__) {
     if (reducer !== basicStateReducer) {
@@ -503,7 +503,7 @@ function useDeferredValue<T>(value: T): T {
 
 function useTransition(): [boolean, (callback: () => void) => void] {
   resolveCurrentlyRenderingComponent();
-  const startTransition = callback => {
+  const startTransition = (callback) => {
     callback();
   };
   return [false, startTransition];

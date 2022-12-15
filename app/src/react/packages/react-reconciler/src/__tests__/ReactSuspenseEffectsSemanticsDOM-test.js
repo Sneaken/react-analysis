@@ -97,7 +97,7 @@ describe('ReactSuspenseEffectsSemanticsDOM', () => {
     function ChildA({label}) {
       return (
         <span
-          ref={node => {
+          ref={(node) => {
             if (node) {
               Scheduler.unstable_yieldValue('Ref mount: ' + label);
             } else {
@@ -112,7 +112,7 @@ describe('ReactSuspenseEffectsSemanticsDOM', () => {
     function ChildB({label}) {
       return (
         <span
-          ref={node => {
+          ref={(node) => {
             if (node) {
               Scheduler.unstable_yieldValue('Ref mount: ' + label);
             } else {
@@ -276,7 +276,7 @@ describe('ReactSuspenseEffectsSemanticsDOM', () => {
     function ChildA({label}) {
       return (
         <span
-          ref={node => {
+          ref={(node) => {
             if (node) {
               Scheduler.unstable_yieldValue('Ref mount: ' + label);
             } else {
@@ -291,7 +291,7 @@ describe('ReactSuspenseEffectsSemanticsDOM', () => {
     function ChildB({label}) {
       return (
         <span
-          ref={node => {
+          ref={(node) => {
             if (node) {
               Scheduler.unstable_yieldValue('Ref mount: ' + label);
             } else {

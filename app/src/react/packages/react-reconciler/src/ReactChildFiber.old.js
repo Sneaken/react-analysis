@@ -7,25 +7,24 @@
  * @flow
  */
 
-import type {ReactElement} from 'shared/ReactElementType'
-import type {ReactPortal} from 'shared/ReactTypes'
-import type {Fiber} from './ReactInternalTypes'
-import type {Lanes} from './ReactFiberLane.old'
+import type {ReactElement} from 'shared/ReactElementType';
+import type {ReactPortal} from 'shared/ReactTypes';
+import type {Fiber} from './ReactInternalTypes';
+import type {Lanes} from './ReactFiberLane.old';
 
-import getComponentNameFromFiber
-  from 'react-reconciler/src/getComponentNameFromFiber'
-import {ChildDeletion, Forked, Placement} from './ReactFiberFlags'
+import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
+import {ChildDeletion, Forked, Placement} from './ReactFiberFlags';
 import {
   getIteratorFn,
   REACT_ELEMENT_TYPE,
   REACT_FRAGMENT_TYPE,
   REACT_LAZY_TYPE,
   REACT_PORTAL_TYPE,
-} from 'shared/ReactSymbols'
-import {ClassComponent, Fragment, HostPortal, HostText} from './ReactWorkTags'
-import isArray from 'shared/isArray'
-import {warnAboutStringRefs} from 'shared/ReactFeatureFlags'
-import {checkPropStringCoercion} from 'shared/CheckStringCoercion'
+} from 'shared/ReactSymbols';
+import {ClassComponent, Fragment, HostPortal, HostText} from './ReactWorkTags';
+import isArray from 'shared/isArray';
+import {warnAboutStringRefs} from 'shared/ReactFeatureFlags';
+import {checkPropStringCoercion} from 'shared/CheckStringCoercion';
 
 import {
   createFiberFromElement,
@@ -34,12 +33,12 @@ import {
   createFiberFromText,
   createWorkInProgress,
   resetWorkInProgress,
-} from './ReactFiber.old'
-import {emptyRefsObject} from './ReactFiberClassComponent.old'
-import {isCompatibleFamilyForHotReloading} from './ReactFiberHotReloading.old'
-import {StrictLegacyMode} from './ReactTypeOfMode'
-import {getIsHydrating} from './ReactFiberHydrationContext.old'
-import {pushTreeFork} from './ReactFiberTreeContext.old'
+} from './ReactFiber.old';
+import {emptyRefsObject} from './ReactFiberClassComponent.old';
+import {isCompatibleFamilyForHotReloading} from './ReactFiberHotReloading.old';
+import {StrictLegacyMode} from './ReactTypeOfMode';
+import {getIsHydrating} from './ReactFiberHydrationContext.old';
+import {pushTreeFork} from './ReactFiberTreeContext.old';
 
 let didWarnAboutMaps;
 let didWarnAboutGenerators;
@@ -186,7 +185,7 @@ function coerceRef(
       ) {
         return current.ref;
       }
-      const ref = function(value) {
+      const ref = function (value) {
         let refs = resolvedInst.refs;
         if (refs === emptyRefsObject) {
           // This is a lazy pooled frozen object, so we need to initialize.

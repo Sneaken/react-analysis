@@ -67,7 +67,7 @@ describe('useRef', () => {
     let ping;
     function App() {
       ping = useDebouncedCallback(
-        value => {
+        (value) => {
           Scheduler.unstable_yieldValue('ping: ' + value);
         },
         100,

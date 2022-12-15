@@ -18,7 +18,7 @@
 // the package.json because DevTools uses it for feature detection. Consider
 // some other way of handling that.
 test('ReactVersion matches package.json', () => {
-  if (gate(flags => flags.build && flags.stable && !flags.www)) {
+  if (gate((flags) => flags.build && flags.stable && !flags.www)) {
     const React = require('react');
     const packageJSON = require('react/package.json');
     expect(React.version).toBe(packageJSON.version);

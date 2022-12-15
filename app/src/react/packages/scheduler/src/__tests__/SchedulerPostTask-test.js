@@ -69,7 +69,7 @@ describe('SchedulerPostTask', () => {
     };
 
     // Note: setTimeout is used to report errors and nothing else.
-    window.setTimeout = cb => {
+    window.setTimeout = (cb) => {
       try {
         cb();
       } catch (error) {
@@ -81,7 +81,7 @@ describe('SchedulerPostTask', () => {
     const scheduler = {};
     global.scheduler = scheduler;
 
-    scheduler.postTask = function(callback, {priority, signal}) {
+    scheduler.postTask = function (callback, {priority, signal}) {
       const id = idCounter++;
       log(
         `Post Task ${id} [${priority === undefined ? '<default>' : priority}]`,

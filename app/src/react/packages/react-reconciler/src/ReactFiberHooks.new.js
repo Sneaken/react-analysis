@@ -134,7 +134,7 @@ export type Update<S, A> = {|
 export type UpdateQueue<S, A> = {|
   pending: Update<S, A> | null,
   lanes: Lanes,
-  dispatch: (A => mixed) | null,
+  dispatch: ((A) => mixed) | null,
   lastRenderedReducer: ((S, A) => S) | null,
   lastRenderedState: S | null,
 |};
@@ -176,9 +176,9 @@ export type FunctionComponentUpdateQueue = {|
   stores: Array<StoreConsistencyCheck<any>> | null,
 |};
 
-type BasicStateAction<S> = (S => S) | S;
+type BasicStateAction<S> = ((S) => S) | S;
 
-type Dispatch<A> = A => void;
+type Dispatch<A> = (A) => void;
 
 // These are set right before calling the component.
 let renderLanes: Lanes = NoLanes;
@@ -730,7 +730,7 @@ function basicStateReducer<S>(state: S, action: BasicStateAction<S>): S {
 function mountReducer<S, I, A>(
   reducer: (S, A) => S,
   initialArg: I,
-  init?: I => S,
+  init?: (I) => S,
 ): [S, Dispatch<A>] {
   const hook = mountWorkInProgressHook();
   let initialState;
@@ -759,7 +759,7 @@ function mountReducer<S, I, A>(
 function updateReducer<S, I, A>(
   reducer: (S, A) => S,
   initialArg: I,
-  init?: I => S,
+  init?: (I) => S,
 ): [S, Dispatch<A>] {
   const hook = updateWorkInProgressHook();
   const queue = hook.queue;
@@ -913,7 +913,7 @@ function updateReducer<S, I, A>(
 function rerenderReducer<S, I, A>(
   reducer: (S, A) => S,
   initialArg: I,
-  init?: I => S,
+  init?: (I) => S,
 ): [S, Dispatch<A>] {
   const hook = updateWorkInProgressHook();
   const queue = hook.queue;
@@ -969,7 +969,7 @@ function rerenderReducer<S, I, A>(
 type MutableSourceMemoizedState<Source, Snapshot> = {|
   refs: {
     getSnapshot: MutableSourceGetSnapshotFn<Source, Snapshot>,
-    setSnapshot: Snapshot => void,
+    setSnapshot: (Snapshot) => void,
   },
   source: MutableSource<any>,
   subscribe: MutableSourceSubscribeFn<Source, Snapshot>,
@@ -1436,7 +1436,8 @@ function pushStoreConsistencyCheck<T>(
     getSnapshot,
     value: renderedSnapshot,
   };
-  let componentUpdateQueue: null | FunctionComponentUpdateQueue = (currentlyRenderingFiber.updateQueue: any);
+  let componentUpdateQueue: null | FunctionComponentUpdateQueue =
+    (currentlyRenderingFiber.updateQueue: any);
   if (componentUpdateQueue === null) {
     componentUpdateQueue = createFunctionComponentUpdateQueue();
     currentlyRenderingFiber.updateQueue = (componentUpdateQueue: any);
@@ -1519,13 +1520,8 @@ function mountState<S>(
     lastRenderedState: (initialState: any),
   };
   hook.queue = queue;
-  const dispatch: Dispatch<
-    BasicStateAction<S>,
-  > = (queue.dispatch = (dispatchSetState.bind(
-    null,
-    currentlyRenderingFiber,
-    queue,
-  ): any));
+  const dispatch: Dispatch<BasicStateAction<S>> = (queue.dispatch =
+    (dispatchSetState.bind(null, currentlyRenderingFiber, queue): any));
   return [hook.memoizedState, dispatch];
 }
 
@@ -1550,7 +1546,8 @@ function pushEffect(tag, create, destroy, deps) {
     // Circular
     next: (null: any),
   };
-  let componentUpdateQueue: null | FunctionComponentUpdateQueue = (currentlyRenderingFiber.updateQueue: any);
+  let componentUpdateQueue: null | FunctionComponentUpdateQueue =
+    (currentlyRenderingFiber.updateQueue: any);
   if (componentUpdateQueue === null) {
     componentUpdateQueue = createFunctionComponentUpdateQueue();
     currentlyRenderingFiber.updateQueue = (componentUpdateQueue: any);
@@ -2266,7 +2263,8 @@ function dispatchSetState<S, A>(
         let prevDispatcher;
         if (__DEV__) {
           prevDispatcher = ReactCurrentDispatcher.current;
-          ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+          ReactCurrentDispatcher.current =
+            InvalidNestedHooksDispatcherOnUpdateInDEV;
         }
         try {
           const currentState: S = (queue.lastRenderedState: any);
@@ -2322,7 +2320,8 @@ function enqueueRenderPhaseUpdate<S, A>(
   // This is a render phase update. Stash it in a lazily-created map of
   // queue -> linked list of updates. After this render pass, we'll restart
   // and apply the stashed updates on top of the work-in-progress hook.
-  didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
+  didScheduleRenderPhaseUpdateDuringThisPass =
+    didScheduleRenderPhaseUpdate = true;
   const pending = queue.pending;
   if (pending === null) {
     // This is the first update. Create a circular list.
@@ -2601,7 +2600,7 @@ if (__DEV__) {
     useReducer<S, I, A>(
       reducer: (S, A) => S,
       initialArg: I,
-      init?: I => S,
+      init?: (I) => S,
     ): [S, Dispatch<A>] {
       currentHookNameInDev = 'useReducer';
       mountHookTypesDev();
@@ -2675,11 +2674,12 @@ if (__DEV__) {
   if (enableCache) {
     (HooksDispatcherOnMountInDEV: Dispatcher).getCacheSignal = getCacheSignal;
     (HooksDispatcherOnMountInDEV: Dispatcher).getCacheForType = getCacheForType;
-    (HooksDispatcherOnMountInDEV: Dispatcher).useCacheRefresh = function useCacheRefresh() {
-      currentHookNameInDev = 'useCacheRefresh';
-      mountHookTypesDev();
-      return mountRefresh();
-    };
+    (HooksDispatcherOnMountInDEV: Dispatcher).useCacheRefresh =
+      function useCacheRefresh() {
+        currentHookNameInDev = 'useCacheRefresh';
+        mountHookTypesDev();
+        return mountRefresh();
+      };
   }
 
   HooksDispatcherOnMountWithHookTypesInDEV = {
@@ -2743,7 +2743,7 @@ if (__DEV__) {
     useReducer<S, I, A>(
       reducer: (S, A) => S,
       initialArg: I,
-      init?: I => S,
+      init?: (I) => S,
     ): [S, Dispatch<A>] {
       currentHookNameInDev = 'useReducer';
       updateHookTypesDev();
@@ -2815,13 +2815,16 @@ if (__DEV__) {
     unstable_isNewReconciler: enableNewReconciler,
   };
   if (enableCache) {
-    (HooksDispatcherOnMountWithHookTypesInDEV: Dispatcher).getCacheSignal = getCacheSignal;
-    (HooksDispatcherOnMountWithHookTypesInDEV: Dispatcher).getCacheForType = getCacheForType;
-    (HooksDispatcherOnMountWithHookTypesInDEV: Dispatcher).useCacheRefresh = function useCacheRefresh() {
-      currentHookNameInDev = 'useCacheRefresh';
-      updateHookTypesDev();
-      return mountRefresh();
-    };
+    (HooksDispatcherOnMountWithHookTypesInDEV: Dispatcher).getCacheSignal =
+      getCacheSignal;
+    (HooksDispatcherOnMountWithHookTypesInDEV: Dispatcher).getCacheForType =
+      getCacheForType;
+    (HooksDispatcherOnMountWithHookTypesInDEV: Dispatcher).useCacheRefresh =
+      function useCacheRefresh() {
+        currentHookNameInDev = 'useCacheRefresh';
+        updateHookTypesDev();
+        return mountRefresh();
+      };
   }
 
   HooksDispatcherOnUpdateInDEV = {
@@ -2875,7 +2878,8 @@ if (__DEV__) {
       currentHookNameInDev = 'useMemo';
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return updateMemo(create, deps);
       } finally {
@@ -2885,12 +2889,13 @@ if (__DEV__) {
     useReducer<S, I, A>(
       reducer: (S, A) => S,
       initialArg: I,
-      init?: I => S,
+      init?: (I) => S,
     ): [S, Dispatch<A>] {
       currentHookNameInDev = 'useReducer';
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return updateReducer(reducer, initialArg, init);
       } finally {
@@ -2908,7 +2913,8 @@ if (__DEV__) {
       currentHookNameInDev = 'useState';
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return updateState(initialState);
       } finally {
@@ -2958,12 +2964,14 @@ if (__DEV__) {
   };
   if (enableCache) {
     (HooksDispatcherOnUpdateInDEV: Dispatcher).getCacheSignal = getCacheSignal;
-    (HooksDispatcherOnUpdateInDEV: Dispatcher).getCacheForType = getCacheForType;
-    (HooksDispatcherOnUpdateInDEV: Dispatcher).useCacheRefresh = function useCacheRefresh() {
-      currentHookNameInDev = 'useCacheRefresh';
-      updateHookTypesDev();
-      return updateRefresh();
-    };
+    (HooksDispatcherOnUpdateInDEV: Dispatcher).getCacheForType =
+      getCacheForType;
+    (HooksDispatcherOnUpdateInDEV: Dispatcher).useCacheRefresh =
+      function useCacheRefresh() {
+        currentHookNameInDev = 'useCacheRefresh';
+        updateHookTypesDev();
+        return updateRefresh();
+      };
   }
 
   HooksDispatcherOnRerenderInDEV = {
@@ -3018,7 +3026,8 @@ if (__DEV__) {
       currentHookNameInDev = 'useMemo';
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnRerenderInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnRerenderInDEV;
       try {
         return updateMemo(create, deps);
       } finally {
@@ -3028,12 +3037,13 @@ if (__DEV__) {
     useReducer<S, I, A>(
       reducer: (S, A) => S,
       initialArg: I,
-      init?: I => S,
+      init?: (I) => S,
     ): [S, Dispatch<A>] {
       currentHookNameInDev = 'useReducer';
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnRerenderInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnRerenderInDEV;
       try {
         return rerenderReducer(reducer, initialArg, init);
       } finally {
@@ -3051,7 +3061,8 @@ if (__DEV__) {
       currentHookNameInDev = 'useState';
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnRerenderInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnRerenderInDEV;
       try {
         return rerenderState(initialState);
       } finally {
@@ -3100,13 +3111,16 @@ if (__DEV__) {
     unstable_isNewReconciler: enableNewReconciler,
   };
   if (enableCache) {
-    (HooksDispatcherOnRerenderInDEV: Dispatcher).getCacheSignal = getCacheSignal;
-    (HooksDispatcherOnRerenderInDEV: Dispatcher).getCacheForType = getCacheForType;
-    (HooksDispatcherOnRerenderInDEV: Dispatcher).useCacheRefresh = function useCacheRefresh() {
-      currentHookNameInDev = 'useCacheRefresh';
-      updateHookTypesDev();
-      return updateRefresh();
-    };
+    (HooksDispatcherOnRerenderInDEV: Dispatcher).getCacheSignal =
+      getCacheSignal;
+    (HooksDispatcherOnRerenderInDEV: Dispatcher).getCacheForType =
+      getCacheForType;
+    (HooksDispatcherOnRerenderInDEV: Dispatcher).useCacheRefresh =
+      function useCacheRefresh() {
+        currentHookNameInDev = 'useCacheRefresh';
+        updateHookTypesDev();
+        return updateRefresh();
+      };
   }
 
   InvalidNestedHooksDispatcherOnMountInDEV = {
@@ -3178,7 +3192,7 @@ if (__DEV__) {
     useReducer<S, I, A>(
       reducer: (S, A) => S,
       initialArg: I,
-      init?: I => S,
+      init?: (I) => S,
     ): [S, Dispatch<A>] {
       currentHookNameInDev = 'useReducer';
       warnInvalidHookAccess();
@@ -3259,13 +3273,16 @@ if (__DEV__) {
     unstable_isNewReconciler: enableNewReconciler,
   };
   if (enableCache) {
-    (InvalidNestedHooksDispatcherOnMountInDEV: Dispatcher).getCacheSignal = getCacheSignal;
-    (InvalidNestedHooksDispatcherOnMountInDEV: Dispatcher).getCacheForType = getCacheForType;
-    (InvalidNestedHooksDispatcherOnMountInDEV: Dispatcher).useCacheRefresh = function useCacheRefresh() {
-      currentHookNameInDev = 'useCacheRefresh';
-      mountHookTypesDev();
-      return mountRefresh();
-    };
+    (InvalidNestedHooksDispatcherOnMountInDEV: Dispatcher).getCacheSignal =
+      getCacheSignal;
+    (InvalidNestedHooksDispatcherOnMountInDEV: Dispatcher).getCacheForType =
+      getCacheForType;
+    (InvalidNestedHooksDispatcherOnMountInDEV: Dispatcher).useCacheRefresh =
+      function useCacheRefresh() {
+        currentHookNameInDev = 'useCacheRefresh';
+        mountHookTypesDev();
+        return mountRefresh();
+      };
   }
 
   InvalidNestedHooksDispatcherOnUpdateInDEV = {
@@ -3327,7 +3344,8 @@ if (__DEV__) {
       warnInvalidHookAccess();
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return updateMemo(create, deps);
       } finally {
@@ -3337,13 +3355,14 @@ if (__DEV__) {
     useReducer<S, I, A>(
       reducer: (S, A) => S,
       initialArg: I,
-      init?: I => S,
+      init?: (I) => S,
     ): [S, Dispatch<A>] {
       currentHookNameInDev = 'useReducer';
       warnInvalidHookAccess();
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return updateReducer(reducer, initialArg, init);
       } finally {
@@ -3363,7 +3382,8 @@ if (__DEV__) {
       warnInvalidHookAccess();
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return updateState(initialState);
       } finally {
@@ -3418,13 +3438,16 @@ if (__DEV__) {
     unstable_isNewReconciler: enableNewReconciler,
   };
   if (enableCache) {
-    (InvalidNestedHooksDispatcherOnUpdateInDEV: Dispatcher).getCacheSignal = getCacheSignal;
-    (InvalidNestedHooksDispatcherOnUpdateInDEV: Dispatcher).getCacheForType = getCacheForType;
-    (InvalidNestedHooksDispatcherOnUpdateInDEV: Dispatcher).useCacheRefresh = function useCacheRefresh() {
-      currentHookNameInDev = 'useCacheRefresh';
-      updateHookTypesDev();
-      return updateRefresh();
-    };
+    (InvalidNestedHooksDispatcherOnUpdateInDEV: Dispatcher).getCacheSignal =
+      getCacheSignal;
+    (InvalidNestedHooksDispatcherOnUpdateInDEV: Dispatcher).getCacheForType =
+      getCacheForType;
+    (InvalidNestedHooksDispatcherOnUpdateInDEV: Dispatcher).useCacheRefresh =
+      function useCacheRefresh() {
+        currentHookNameInDev = 'useCacheRefresh';
+        updateHookTypesDev();
+        return updateRefresh();
+      };
   }
 
   InvalidNestedHooksDispatcherOnRerenderInDEV = {
@@ -3487,7 +3510,8 @@ if (__DEV__) {
       warnInvalidHookAccess();
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return updateMemo(create, deps);
       } finally {
@@ -3497,13 +3521,14 @@ if (__DEV__) {
     useReducer<S, I, A>(
       reducer: (S, A) => S,
       initialArg: I,
-      init?: I => S,
+      init?: (I) => S,
     ): [S, Dispatch<A>] {
       currentHookNameInDev = 'useReducer';
       warnInvalidHookAccess();
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return rerenderReducer(reducer, initialArg, init);
       } finally {
@@ -3523,7 +3548,8 @@ if (__DEV__) {
       warnInvalidHookAccess();
       updateHookTypesDev();
       const prevDispatcher = ReactCurrentDispatcher.current;
-      ReactCurrentDispatcher.current = InvalidNestedHooksDispatcherOnUpdateInDEV;
+      ReactCurrentDispatcher.current =
+        InvalidNestedHooksDispatcherOnUpdateInDEV;
       try {
         return rerenderState(initialState);
       } finally {
@@ -3578,12 +3604,15 @@ if (__DEV__) {
     unstable_isNewReconciler: enableNewReconciler,
   };
   if (enableCache) {
-    (InvalidNestedHooksDispatcherOnRerenderInDEV: Dispatcher).getCacheSignal = getCacheSignal;
-    (InvalidNestedHooksDispatcherOnRerenderInDEV: Dispatcher).getCacheForType = getCacheForType;
-    (InvalidNestedHooksDispatcherOnRerenderInDEV: Dispatcher).useCacheRefresh = function useCacheRefresh() {
-      currentHookNameInDev = 'useCacheRefresh';
-      updateHookTypesDev();
-      return updateRefresh();
-    };
+    (InvalidNestedHooksDispatcherOnRerenderInDEV: Dispatcher).getCacheSignal =
+      getCacheSignal;
+    (InvalidNestedHooksDispatcherOnRerenderInDEV: Dispatcher).getCacheForType =
+      getCacheForType;
+    (InvalidNestedHooksDispatcherOnRerenderInDEV: Dispatcher).useCacheRefresh =
+      function useCacheRefresh() {
+        currentHookNameInDev = 'useCacheRefresh';
+        updateHookTypesDev();
+        return updateRefresh();
+      };
   }
 }

@@ -112,13 +112,13 @@ describe('ReactCache', () => {
         resolve = res;
         reject = rej;
       }).then(
-        value => {
+        (value) => {
           if (newRecord.status === 'pending') {
             newRecord.status = 'resolved';
             newRecord.value = value;
           }
         },
-        error => {
+        (error) => {
           if (newRecord.status === 'pending') {
             newRecord.status = 'rejected';
             newRecord.value = error;

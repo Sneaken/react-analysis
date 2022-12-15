@@ -24,7 +24,7 @@ beforeEach(() => {
   act = require('jest-react').act;
 
   Suspense = React.Suspense;
-  if (gate(flags => flags.enableSuspenseList)) {
+  if (gate((flags) => flags.enableSuspenseList)) {
     SuspenseList = React.SuspenseList;
   }
 
@@ -61,7 +61,7 @@ function createTextCache() {
         const thenable = record.value;
         record.status = 'resolved';
         record.value = text;
-        thenable.pings.forEach(t => t());
+        thenable.pings.forEach((t) => t());
       }
     },
     reject(text, error) {
@@ -76,7 +76,7 @@ function createTextCache() {
         const thenable = record.value;
         record.status = 'rejected';
         record.value = error;
-        thenable.pings.forEach(t => t());
+        thenable.pings.forEach((t) => t());
       }
     },
   };
@@ -198,7 +198,7 @@ test('regression (#20932): return pointer is correct before entering deleted tre
   });
   expect(Scheduler).toHaveYielded([0, 'Tail']);
   await act(async () => {
-    setAsyncText(x => x + 1);
+    setAsyncText((x) => x + 1);
   });
   expect(Scheduler).toHaveYielded([
     'Suspend! [1]',

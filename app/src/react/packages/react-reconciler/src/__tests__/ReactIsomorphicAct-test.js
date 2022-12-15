@@ -18,8 +18,8 @@ describe('isomorphic act()', () => {
   beforeEach(() => {
     React = require('react');
     ReactNoop = require('react-noop-renderer');
-    DiscreteEventPriority = require('react-reconciler/constants')
-      .DiscreteEventPriority;
+    DiscreteEventPriority =
+      require('react-reconciler/constants').DiscreteEventPriority;
     act = React.unstable_act;
   });
 

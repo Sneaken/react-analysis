@@ -20,7 +20,7 @@ jest.useRealTimers();
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 function sleep(period) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve(true);
     }, period);
@@ -40,7 +40,7 @@ describe('ReactTestUtils.act()', () => {
       }
     };
 
-    const unmountConcurrent = _dom => {
+    const unmountConcurrent = (_dom) => {
       if (__DEV__) {
         act(() => {
           if (concurrentRoot !== null) {
@@ -56,7 +56,7 @@ describe('ReactTestUtils.act()', () => {
       }
     };
 
-    const rerenderConcurrent = el => {
+    const rerenderConcurrent = (el) => {
       act(() => concurrentRoot.render(el));
     };
 
@@ -152,7 +152,7 @@ function runActTests(label, render, unmount, rerender) {
             Scheduler.unstable_yieldValue(ctr);
           });
           return (
-            <button id="button" onClick={() => setCtr(x => x + 1)}>
+            <button id="button" onClick={() => setCtr((x) => x + 1)}>
               {ctr}
             </button>
           );
@@ -187,7 +187,7 @@ function runActTests(label, render, unmount, rerender) {
           const [ctr, setCtr] = React.useState(0);
           React.useEffect(() => {
             if (ctr < 5) {
-              setCtr(x => x + 1);
+              setCtr((x) => x + 1);
             }
           });
           return ctr;
@@ -363,7 +363,7 @@ function runActTests(label, render, unmount, rerender) {
             const [state, setState] = React.useState(0);
             async function ticker() {
               await null;
-              setState(x => x + 1);
+              setState((x) => x + 1);
             }
             React.useEffect(() => {
               ticker();
@@ -560,7 +560,7 @@ function runActTests(label, render, unmount, rerender) {
           const [state, setState] = React.useState(0);
           async function ticker() {
             await null;
-            setState(x => x + 1);
+            setState((x) => x + 1);
           }
           React.useEffect(() => {
             Scheduler.unstable_yieldValue(state);
@@ -706,7 +706,7 @@ function runActTests(label, render, unmount, rerender) {
 
           let resolved = false;
           let resolve;
-          const promise = new Promise(_resolve => {
+          const promise = new Promise((_resolve) => {
             resolve = _resolve;
           });
 

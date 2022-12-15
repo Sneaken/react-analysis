@@ -65,7 +65,7 @@ describe('ReactIncremental', () => {
       return [<Bar key="a" isBar={true} />, <Bar key="b" isBar={true} />];
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo />, () =>
           Scheduler.unstable_yieldValue('callback'),
@@ -162,7 +162,7 @@ describe('ReactIncremental', () => {
     ReactNoop.render(<Foo text="foo" />);
     expect(Scheduler).toFlushAndYield(['Foo', 'Bar', 'Bar']);
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo text="bar" />);
       });
@@ -175,7 +175,7 @@ describe('ReactIncremental', () => {
     // This will abort the previous work and restart
     ReactNoop.flushSync(() => ReactNoop.render(null));
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Foo text="baz" />);
       });
@@ -215,7 +215,7 @@ describe('ReactIncremental', () => {
     ReactNoop.render(<Foo />);
     expect(Scheduler).toFlushWithoutYielding();
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         inst.setState(
           () => {
@@ -240,7 +240,7 @@ describe('ReactIncremental', () => {
 
     // This will abort the previous work and restart
     ReactNoop.flushSync(() => ReactNoop.render(<Foo />));
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         inst.setState(
           () => {
@@ -1878,7 +1878,7 @@ describe('ReactIncremental', () => {
       'ShowLocale {"locale":"de"}',
       'ShowBoth {"locale":"de"}',
     ]);
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(
           <Intl locale="sv">
@@ -2028,7 +2028,7 @@ describe('ReactIncremental', () => {
       }
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(
           <Intl locale="fr">
@@ -2506,7 +2506,7 @@ describe('ReactIncremental', () => {
       });
       render = () => this.props.children;
       updateCount = () =>
-        this.setState(state => ({
+        this.setState((state) => ({
           count: state.count + 1,
         }));
     }
@@ -2555,7 +2555,7 @@ describe('ReactIncremental', () => {
       });
       render = () => this.props.children;
       updateCount = () =>
-        this.setState(state => ({
+        this.setState((state) => ({
           count: state.count + 1,
         }));
     }
@@ -2610,7 +2610,7 @@ describe('ReactIncremental', () => {
       });
       render = () => this.props.children;
       updateCount = () =>
-        this.setState(state => ({
+        this.setState((state) => ({
           count: state.count + 1,
         }));
     }
@@ -2675,7 +2675,7 @@ describe('ReactIncremental', () => {
       });
       render = () => this.props.children;
       updateCount = () =>
-        this.setState(state => ({
+        this.setState((state) => ({
           count: state.count + 1,
         }));
     }
@@ -2699,7 +2699,7 @@ describe('ReactIncremental', () => {
       getChildContext = () => ({
         name: this.state.name,
       });
-      updateName = name => {
+      updateName = (name) => {
         this.setState({name});
       };
       render = () => this.props.children;
@@ -2746,7 +2746,7 @@ describe('ReactIncremental', () => {
       return null;
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Parent step={1} />);
       });
@@ -2772,7 +2772,7 @@ describe('ReactIncremental', () => {
       return null;
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Parent step={1} />);
       });
@@ -2799,7 +2799,7 @@ describe('ReactIncremental', () => {
       return null;
     }
 
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         ReactNoop.render(<Parent step={1} />);
       });
@@ -2854,7 +2854,7 @@ describe('ReactIncremental', () => {
     jest.resetModules();
     let receivedNonExtensibleObjects;
     // eslint-disable-next-line no-extend-native
-    Map.prototype.set = function(key) {
+    Map.prototype.set = function (key) {
       if (typeof key === 'object' && key !== null) {
         if (!Object.isExtensible(key)) {
           receivedNonExtensibleObjects = true;
@@ -2882,7 +2882,7 @@ describe('ReactIncremental', () => {
     // doesn't cause a failure.
     jest.resetModules();
     // eslint-disable-next-line no-extend-native
-    Map.prototype.set = function(key, value) {
+    Map.prototype.set = function (key, value) {
       if (typeof key === 'object' && key !== null) {
         // A polyfill could do something like this.
         // It would throw if an object is not extensible.

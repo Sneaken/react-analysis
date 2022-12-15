@@ -21,7 +21,7 @@ describe('ReactLazyContextPropagation', () => {
     useState = React.useState;
     useContext = React.useContext;
     Suspense = React.Suspense;
-    if (gate(flags => flags.enableSuspenseList)) {
+    if (gate((flags) => flags.enableSuspenseList)) {
       SuspenseList = React.SuspenseList;
     }
 
@@ -63,7 +63,7 @@ describe('ReactLazyContextPropagation', () => {
           const thenable = record.value;
           record.status = 'resolved';
           record.value = text;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
       reject(text, error) {
@@ -78,7 +78,7 @@ describe('ReactLazyContextPropagation', () => {
           const thenable = record.value;
           record.status = 'rejected';
           record.value = error;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
     };

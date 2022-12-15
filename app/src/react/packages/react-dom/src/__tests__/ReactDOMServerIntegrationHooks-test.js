@@ -55,7 +55,7 @@ function initModules() {
   forwardRef = React.forwardRef;
 
   yieldedValues = [];
-  yieldValue = value => {
+  yieldValue = (value) => {
     yieldedValues.push(value);
   };
   clearYields = () => {
@@ -72,12 +72,8 @@ function initModules() {
   };
 }
 
-const {
-  resetModules,
-  itRenders,
-  itThrowsWhenRendering,
-  serverRender,
-} = ReactDOMServerIntegrationUtils(initModules);
+const {resetModules, itRenders, itThrowsWhenRendering, serverRender} =
+  ReactDOMServerIntegrationUtils(initModules);
 
 describe('ReactDOMServerHooks', () => {
   beforeEach(() => {
@@ -90,7 +86,7 @@ describe('ReactDOMServerHooks', () => {
   }
 
   describe('useState', () => {
-    itRenders('basic render', async render => {
+    itRenders('basic render', async (render) => {
       function Counter(props) {
         const [count] = useState(0);
         return <span>Count: {count}</span>;
@@ -100,7 +96,7 @@ describe('ReactDOMServerHooks', () => {
       expect(domNode.textContent).toEqual('Count: 0');
     });
 
-    itRenders('lazy state initialization', async render => {
+    itRenders('lazy state initialization', async (render) => {
       function Counter(props) {
         const [count] = useState(() => {
           return 0;
@@ -115,7 +111,7 @@ describe('ReactDOMServerHooks', () => {
     it('does not trigger a re-renders when updater is invoked outside current render function', async () => {
       function UpdateCount({setCount, count, children}) {
         if (count < 3) {
-          setCount(c => c + 1);
+          setCount((c) => c + 1);
         }
         return <span>{children}</span>;
       }
@@ -136,7 +132,7 @@ describe('ReactDOMServerHooks', () => {
 
     itThrowsWhenRendering(
       'if used inside a class component',
-      async render => {
+      async (render) => {
         class Counter extends React.Component {
           render() {
             const [count] = useState(0);
@@ -154,13 +150,13 @@ describe('ReactDOMServerHooks', () => {
         'See https://reactjs.org/link/invalid-hook-call for tips about how to debug and fix this problem.',
     );
 
-    itRenders('multiple times when an updater is called', async render => {
+    itRenders('multiple times when an updater is called', async (render) => {
       function Counter() {
         const [count, setCount] = useState(0);
         if (count < 12) {
-          setCount(c => c + 1);
-          setCount(c => c + 1);
-          setCount(c => c + 1);
+          setCount((c) => c + 1);
+          setCount((c) => c + 1);
+          setCount((c) => c + 1);
         }
         return <Text text={'Count: ' + count} />;
       }
@@ -169,7 +165,7 @@ describe('ReactDOMServerHooks', () => {
       expect(domNode.textContent).toEqual('Count: 12');
     });
 
-    itRenders('until there are no more new updates', async render => {
+    itRenders('until there are no more new updates', async (render) => {
       function Counter() {
         const [count, setCount] = useState(0);
         if (count < 3) {
@@ -184,7 +180,7 @@ describe('ReactDOMServerHooks', () => {
 
     itThrowsWhenRendering(
       'after too many iterations',
-      async render => {
+      async (render) => {
         function Counter() {
           const [count, setCount] = useState(0);
           setCount(count + 1);
@@ -198,7 +194,7 @@ describe('ReactDOMServerHooks', () => {
   });
 
   describe('useReducer', () => {
-    itRenders('with initial state', async render => {
+    itRenders('with initial state', async (render) => {
       function reducer(state, action) {
         return action === 'increment' ? state + 1 : state;
       }
@@ -215,12 +211,12 @@ describe('ReactDOMServerHooks', () => {
       expect(domNode.textContent).toEqual('0');
     });
 
-    itRenders('lazy initialization', async render => {
+    itRenders('lazy initialization', async (render) => {
       function reducer(state, action) {
         return action === 'increment' ? state + 1 : state;
       }
       function Counter() {
-        const [count] = useReducer(reducer, 0, c => c + 1);
+        const [count] = useReducer(reducer, 0, (c) => c + 1);
         yieldValue('Render: ' + count);
         return <Text text={count} />;
       }
@@ -234,7 +230,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'multiple times when updates happen during the render phase',
-      async render => {
+      async (render) => {
         function reducer(state, action) {
           return action === 'increment' ? state + 1 : state;
         }
@@ -263,7 +259,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'using reducer passed at time of render, not time of dispatch',
-      async render => {
+      async (render) => {
         // This test is a bit contrived but it demonstrates a subtle edge case.
 
         // Reducer A increments by 1. Reducer B increments by 10.
@@ -318,7 +314,7 @@ describe('ReactDOMServerHooks', () => {
   });
 
   describe('useMemo', () => {
-    itRenders('basic render', async render => {
+    itRenders('basic render', async (render) => {
       function CapitalizedText(props) {
         const text = props.text;
         const capitalizedText = useMemo(() => {
@@ -334,7 +330,7 @@ describe('ReactDOMServerHooks', () => {
       expect(domNode.textContent).toEqual('HELLO');
     });
 
-    itRenders('if no inputs are provided', async render => {
+    itRenders('if no inputs are provided', async (render) => {
       function LazyCompute(props) {
         const computed = useMemo(props.compute);
         return <Text text={computed} />;
@@ -353,7 +349,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'multiple times when updates happen during the render phase',
-      async render => {
+      async (render) => {
         function CapitalizedText(props) {
           const [text, setText] = useState(props.text);
           const capitalizedText = useMemo(() => {
@@ -380,7 +376,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'should only invoke the memoized function when the inputs change',
-      async render => {
+      async (render) => {
         function CapitalizedText(props) {
           const [text, setText] = useState(props.text);
           const [count, setCount] = useState(0);
@@ -417,7 +413,7 @@ describe('ReactDOMServerHooks', () => {
       },
     );
 
-    itRenders('with a warning for useState inside useMemo', async render => {
+    itRenders('with a warning for useState inside useMemo', async (render) => {
       function App() {
         useMemo(() => {
           useState();
@@ -432,7 +428,7 @@ describe('ReactDOMServerHooks', () => {
 
     itThrowsWhenRendering(
       'with a warning for useRef inside useReducer',
-      async render => {
+      async (render) => {
         function App() {
           const [value, dispatch] = useReducer((state, action) => {
             useRef(0);
@@ -450,7 +446,7 @@ describe('ReactDOMServerHooks', () => {
       'Rendered more hooks than during the previous render',
     );
 
-    itRenders('with a warning for useRef inside useState', async render => {
+    itRenders('with a warning for useRef inside useState', async (render) => {
       function App() {
         const [value] = useState(() => {
           useRef(0);
@@ -465,7 +461,7 @@ describe('ReactDOMServerHooks', () => {
   });
 
   describe('useRef', () => {
-    itRenders('basic render', async render => {
+    itRenders('basic render', async (render) => {
       function Counter(props) {
         const ref = useRef();
         return <span ref={ref}>Hi</span>;
@@ -477,7 +473,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'multiple times when updates happen during the render phase',
-      async render => {
+      async (render) => {
         function Counter(props) {
           const [count, setCount] = useState(0);
           const ref = useRef();
@@ -500,7 +496,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'always return the same reference through multiple renders',
-      async render => {
+      async (render) => {
         let firstRef = null;
         function Counter(props) {
           const [count, setCount] = useState(0);
@@ -531,7 +527,7 @@ describe('ReactDOMServerHooks', () => {
 
   describe('useEffect', () => {
     const yields = [];
-    itRenders('should ignore effects on the server', async render => {
+    itRenders('should ignore effects on the server', async (render) => {
       function Counter(props) {
         useEffect(() => {
           yieldValue('invoked on client');
@@ -557,7 +553,7 @@ describe('ReactDOMServerHooks', () => {
   });
 
   describe('useCallback', () => {
-    itRenders('should not invoke the passed callbacks', async render => {
+    itRenders('should not invoke the passed callbacks', async (render) => {
       function Counter(props) {
         useCallback(() => {
           yieldValue('should not be invoked');
@@ -570,9 +566,9 @@ describe('ReactDOMServerHooks', () => {
       expect(domNode.textContent).toEqual('Count: 0');
     });
 
-    itRenders('should support render time callbacks', async render => {
+    itRenders('should support render time callbacks', async (render) => {
       function Counter(props) {
-        const renderCount = useCallback(increment => {
+        const renderCount = useCallback((increment) => {
           return 'Count: ' + (props.count + increment);
         });
         return <Text text={renderCount(3)} />;
@@ -585,7 +581,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'should only change the returned reference when the inputs change',
-      async render => {
+      async (render) => {
         function CapitalizedText(props) {
           const [text, setText] = useState(props.text);
           const [count, setCount] = useState(0);
@@ -666,7 +662,7 @@ describe('ReactDOMServerHooks', () => {
   describe('useContext', () => {
     itThrowsWhenRendering(
       'if used inside a class component',
-      async render => {
+      async (render) => {
         const Context = React.createContext({}, () => {});
         class Counter extends React.Component {
           render() {
@@ -688,7 +684,7 @@ describe('ReactDOMServerHooks', () => {
 
   itRenders(
     'can use the same context multiple times in the same function',
-    async render => {
+    async (render) => {
       const Context = React.createContext({foo: 0, bar: 0, baz: 0});
 
       function Provider(props) {
@@ -745,7 +741,7 @@ describe('ReactDOMServerHooks', () => {
   );
 
   describe('useDebugValue', () => {
-    itRenders('is a noop', async render => {
+    itRenders('is a noop', async (render) => {
       function Counter(props) {
         const debugValue = useDebugValue(123);
         return <Text text={typeof debugValue} />;
@@ -766,7 +762,7 @@ describe('ReactDOMServerHooks', () => {
 
     itRenders(
       'can read the same context multiple times in the same function',
-      async render => {
+      async (render) => {
         const Context = React.createContext(
           {foo: 0, bar: 0, baz: 0},
           (a, b) => {
@@ -840,28 +836,33 @@ describe('ReactDOMServerHooks', () => {
       },
     );
 
-    itRenders('with a warning inside useMemo and useReducer', async render => {
-      const Context = React.createContext(42);
+    itRenders(
+      'with a warning inside useMemo and useReducer',
+      async (render) => {
+        const Context = React.createContext(42);
 
-      function ReadInMemo(props) {
-        const count = React.useMemo(() => readContext(Context), []);
-        return <Text text={count} />;
-      }
-
-      function ReadInReducer(props) {
-        const [count, dispatch] = React.useReducer(() => readContext(Context));
-        if (count !== 42) {
-          dispatch();
+        function ReadInMemo(props) {
+          const count = React.useMemo(() => readContext(Context), []);
+          return <Text text={count} />;
         }
-        return <Text text={count} />;
-      }
 
-      const domNode1 = await render(<ReadInMemo />, 1);
-      expect(domNode1.textContent).toEqual('42');
+        function ReadInReducer(props) {
+          const [count, dispatch] = React.useReducer(() =>
+            readContext(Context),
+          );
+          if (count !== 42) {
+            dispatch();
+          }
+          return <Text text={count} />;
+        }
 
-      const domNode2 = await render(<ReadInReducer />, 1);
-      expect(domNode2.textContent).toEqual('42');
-    });
+        const domNode1 = await render(<ReadInMemo />, 1);
+        expect(domNode1.textContent).toEqual('42');
+
+        const domNode2 = await render(<ReadInReducer />, 1);
+        expect(domNode2.textContent).toEqual('42');
+      },
+    );
   });
 
   it('renders successfully after a component using hooks throws an error', () => {

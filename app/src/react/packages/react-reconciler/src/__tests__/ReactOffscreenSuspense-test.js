@@ -36,7 +36,7 @@ describe('ReactOffscreen', () => {
       const thenable = record.value;
       record.status = 'resolved';
       record.value = text;
-      thenable.pings.forEach(t => t());
+      thenable.pings.forEach((t) => t());
     }
   }
 

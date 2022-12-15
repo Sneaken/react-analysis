@@ -18,7 +18,7 @@ let act;
 describe('ReactES6Class', () => {
   let container;
   let root;
-  const freeze = function(expectation) {
+  const freeze = function (expectation) {
     Object.freeze(expectation);
     return expectation;
   };
@@ -293,7 +293,7 @@ describe('ReactES6Class', () => {
   });
 
   it('should warn with non-object in the initial state property', () => {
-    [['an array'], 'a string', 1234].forEach(function(state) {
+    [['an array'], 'a string', 1234].forEach(function (state) {
       class Foo extends React.Component {
         constructor() {
           super();
@@ -541,9 +541,7 @@ describe('ReactES6Class', () => {
       'replaceState(...) is deprecated in plain JavaScript React classes',
       {withoutStack: true},
     );
-    expect(() =>
-      expect(() => ref.current.isMounted()).toThrow(),
-    ).toWarnDev(
+    expect(() => expect(() => ref.current.isMounted()).toThrow()).toWarnDev(
       'isMounted(...) is deprecated in plain JavaScript React classes',
       {withoutStack: true},
     );

@@ -15,7 +15,7 @@ describe('ReactDOMSelect', () => {
   let ReactDOMServer;
   let ReactTestUtils;
 
-  const noop = function() {};
+  const noop = function () {};
 
   beforeEach(() => {
     jest.resetModules();
@@ -269,7 +269,7 @@ describe('ReactDOMSelect', () => {
   it('should allow setting `value` with `objectToString`', () => {
     const objectToString = {
       animal: 'giraffe',
-      toString: function() {
+      toString: function () {
         return this.animal;
       },
     };
@@ -591,7 +591,7 @@ describe('ReactDOMSelect', () => {
 
     function App({value}) {
       return (
-        <select value={value} ref={n => (node = n)} onChange={noop}>
+        <select value={value} ref={(n) => (node = n)} onChange={noop}>
           <option key="monkey" value="monkey">
             A monkey {value === 'monkey' ? 'is chosen' : null}!
           </option>
@@ -792,7 +792,7 @@ describe('ReactDOMSelect', () => {
         ReactDOM.render(
           <select
             onChange={this._handleChange.bind(this)}
-            ref={n => (selectNode = n)}
+            ref={(n) => (selectNode = n)}
             value={this.state.value}>
             <option value="monkey">A monkey!</option>
             <option value="giraffe">A giraffe!</option>
@@ -803,7 +803,7 @@ describe('ReactDOMSelect', () => {
       }
 
       render() {
-        return <div ref={n => (this._nestingContainer = n)} />;
+        return <div ref={(n) => (this._nestingContainer = n)} />;
       }
     }
 

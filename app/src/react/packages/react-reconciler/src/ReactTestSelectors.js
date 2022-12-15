@@ -499,7 +499,7 @@ const commitHooks: Array<Function> = [];
 
 export function onCommitRoot(): void {
   if (supportsTestSelectors) {
-    commitHooks.forEach(commitHook => commitHook());
+    commitHooks.forEach((commitHook) => commitHook());
   }
 }
 
@@ -531,13 +531,13 @@ export function observeVisibleRects(
   const commitHook = () => {
     const nextInstanceRoots = findAllNodes(hostRoot, selectors);
 
-    instanceRoots.forEach(target => {
+    instanceRoots.forEach((target) => {
       if (nextInstanceRoots.indexOf(target) < 0) {
         unobserve(target);
       }
     });
 
-    nextInstanceRoots.forEach(target => {
+    nextInstanceRoots.forEach((target) => {
       if (instanceRoots.indexOf(target) < 0) {
         observe(target);
       }

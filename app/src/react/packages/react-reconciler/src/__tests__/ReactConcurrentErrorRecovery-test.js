@@ -53,7 +53,7 @@ describe('ReactConcurrentErrorRecovery', () => {
           const thenable = record.value;
           record.status = 'resolved';
           record.value = text;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
       reject(text, error) {
@@ -68,7 +68,7 @@ describe('ReactConcurrentErrorRecovery', () => {
           const thenable = record.value;
           record.status = 'rejected';
           record.value = error;
-          thenable.pings.forEach(t => t());
+          thenable.pings.forEach((t) => t());
         }
       },
     };
@@ -221,7 +221,9 @@ describe('ReactConcurrentErrorRecovery', () => {
 
     // Because we're still suspended on A, we can't show an error boundary. We
     // should wait for A to resolve.
-    if (gate(flags => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)) {
+    if (
+      gate((flags) => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)
+    ) {
       expect(Scheduler).toHaveYielded([
         'Suspend! [A2]',
         'Loading...',
@@ -247,7 +249,9 @@ describe('ReactConcurrentErrorRecovery', () => {
     await act(async () => {
       resolveText('A2');
     });
-    if (gate(flags => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)) {
+    if (
+      gate((flags) => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)
+    ) {
       expect(Scheduler).toHaveYielded([
         'A2',
         'Error! [B2]',
@@ -342,7 +346,9 @@ describe('ReactConcurrentErrorRecovery', () => {
 
     // Because we're still suspended on B, we can't show an error boundary. We
     // should wait for B to resolve.
-    if (gate(flags => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)) {
+    if (
+      gate((flags) => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)
+    ) {
       expect(Scheduler).toHaveYielded([
         'Error! [A2]',
         // This extra log happens when we replay the error
@@ -368,7 +374,9 @@ describe('ReactConcurrentErrorRecovery', () => {
     await act(async () => {
       resolveText('B2');
     });
-    if (gate(flags => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)) {
+    if (
+      gate((flags) => flags.replayFailedUnitOfWorkWithInvokeGuardedCallback)
+    ) {
       expect(Scheduler).toHaveYielded([
         'Error! [A2]',
         // This extra log happens when we replay the error

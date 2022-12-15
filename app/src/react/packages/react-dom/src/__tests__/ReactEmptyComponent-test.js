@@ -45,7 +45,7 @@ describe('ReactEmptyComponent', () => {
     };
   });
 
-  describe.each([null, undefined])('when %s', nullORUndefined => {
+  describe.each([null, undefined])('when %s', (nullORUndefined) => {
     it('should not throw when rendering', () => {
       class Component extends React.Component {
         render() {
@@ -53,7 +53,7 @@ describe('ReactEmptyComponent', () => {
         }
       }
 
-      expect(function() {
+      expect(function () {
         ReactTestUtils.renderIntoDocument(<Component />);
       }).not.toThrowError();
     });
@@ -158,10 +158,10 @@ describe('ReactEmptyComponent', () => {
         />
       );
 
-      expect(function() {
+      expect(function () {
         ReactTestUtils.renderIntoDocument(instance1);
       }).not.toThrow();
-      expect(function() {
+      expect(function () {
         ReactTestUtils.renderIntoDocument(instance2);
       }).not.toThrow();
 
@@ -201,10 +201,10 @@ describe('ReactEmptyComponent', () => {
           <TogglingComponent firstComponent={Child} secondComponent={'div'} />
         );
 
-        expect(function() {
+        expect(function () {
           ReactTestUtils.renderIntoDocument(instance1);
         }).not.toThrow();
-        expect(function() {
+        expect(function () {
           ReactTestUtils.renderIntoDocument(instance2);
         }).not.toThrow();
 
@@ -308,7 +308,7 @@ describe('ReactEmptyComponent', () => {
         }
       }
 
-      expect(function() {
+      expect(function () {
         ReactTestUtils.renderIntoDocument(<Parent />);
       }).not.toThrow();
     });

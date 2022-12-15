@@ -35,7 +35,7 @@ describe('useMutableSourceHydration', () => {
       React.useMutableSource || React.unstable_useMutableSource;
   });
 
-  const defaultGetSnapshot = source => source.value;
+  const defaultGetSnapshot = (source) => source.value;
   const defaultSubscribe = (source, callback) => source.subscribe(callback);
 
   function createComplexSource(initialValueA, initialValueB) {
@@ -75,7 +75,7 @@ describe('useMutableSourceHydration', () => {
       set valueA(newValue) {
         revision++;
         valueA = newValue;
-        callbacksA.forEach(callback => callback());
+        callbacksA.forEach((callback) => callback());
       },
       get valueA() {
         return valueA;
@@ -84,7 +84,7 @@ describe('useMutableSourceHydration', () => {
       set valueB(newValue) {
         revision++;
         valueB = newValue;
-        callbacksB.forEach(callback => callback());
+        callbacksB.forEach((callback) => callback());
       },
       get valueB() {
         return valueB;
@@ -118,7 +118,7 @@ describe('useMutableSourceHydration', () => {
       set value(newValue) {
         revision++;
         value = newValue;
-        callbacks.forEach(callback => callback());
+        callbacks.forEach((callback) => callback());
       },
       get value() {
         return value;
@@ -138,7 +138,7 @@ describe('useMutableSourceHydration', () => {
   // @gate enableUseMutableSource
   it('should render and hydrate', () => {
     const source = createSource('one');
-    const mutableSource = createMutableSource(source, param => param.version);
+    const mutableSource = createMutableSource(source, (param) => param.version);
 
     function TestComponent() {
       return (
@@ -172,7 +172,7 @@ describe('useMutableSourceHydration', () => {
   // @gate enableClientRenderFallbackOnTextMismatch
   it('should detect a tear before hydrating a component', () => {
     const source = createSource('one');
-    const mutableSource = createMutableSource(source, param => param.version);
+    const mutableSource = createMutableSource(source, (param) => param.version);
 
     function TestComponent() {
       return (
@@ -223,7 +223,7 @@ describe('useMutableSourceHydration', () => {
   // @gate enableUseMutableSource
   it('should detect a tear between hydrating components', () => {
     const source = createSource('one');
-    const mutableSource = createMutableSource(source, param => param.version);
+    const mutableSource = createMutableSource(source, (param) => param.version);
 
     function TestComponent() {
       return (
@@ -254,7 +254,7 @@ describe('useMutableSourceHydration', () => {
 
     expect(() => {
       act(() => {
-        if (gate(flags => flags.enableSyncDefaultUpdates)) {
+        if (gate((flags) => flags.enableSyncDefaultUpdates)) {
           React.startTransition(() => {
             ReactDOMClient.hydrateRoot(container, <TestComponent />, {
               mutableSources: [mutableSource],
@@ -299,12 +299,12 @@ describe('useMutableSourceHydration', () => {
   // @gate enableUseMutableSource
   it('should detect a tear between hydrating components reading from different parts of a source', () => {
     const source = createComplexSource('a:one', 'b:one');
-    const mutableSource = createMutableSource(source, param => param.version);
+    const mutableSource = createMutableSource(source, (param) => param.version);
 
     // Subscribe to part of the store.
-    const getSnapshotA = s => s.valueA;
+    const getSnapshotA = (s) => s.valueA;
     const subscribeA = (s, callback) => s.subscribeA(callback);
-    const getSnapshotB = s => s.valueB;
+    const getSnapshotB = (s) => s.valueB;
     const subscribeB = (s, callback) => s.subscribeB(callback);
 
     const container = document.createElement('div');
@@ -347,7 +347,7 @@ describe('useMutableSourceHydration', () => {
             />
           </>
         );
-        if (gate(flags => flags.enableSyncDefaultUpdates)) {
+        if (gate((flags) => flags.enableSyncDefaultUpdates)) {
           React.startTransition(() => {
             ReactDOMClient.hydrateRoot(container, fragment, {
               mutableSources: [mutableSource],

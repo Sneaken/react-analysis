@@ -31,7 +31,7 @@ const AbortControllerLocal = enableCache
 
         this.abort = () => {
           signal.aborted = true;
-          listeners.forEach(listener => listener());
+          listeners.forEach((listener) => listener());
         };
       }: AbortController)
   : (null: any);

@@ -27,9 +27,8 @@ import {HostRoot} from './ReactWorkTags';
 // render. When this render exits, either because it finishes or because it is
 // interrupted, the interleaved updates will be transferred onto the main part
 // of the queue.
-let concurrentQueues: Array<
-  HookQueue<any, any> | ClassQueue<any>,
-> | null = null;
+let concurrentQueues: Array<HookQueue<any, any> | ClassQueue<any>> | null =
+  null;
 
 export function pushConcurrentUpdateQueue(
   queue: HookQueue<any, any> | ClassQueue<any>,
@@ -137,7 +136,8 @@ export function enqueueConcurrentRenderForLane(fiber: Fiber, lane: Lane) {
 
 // Calling this function outside this module should only be done for backwards
 // compatibility and should always be accompanied by a warning.
-export const unsafe_markUpdateLaneFromFiberToRoot = markUpdateLaneFromFiberToRoot;
+export const unsafe_markUpdateLaneFromFiberToRoot =
+  markUpdateLaneFromFiberToRoot;
 
 function markUpdateLaneFromFiberToRoot(
   sourceFiber: Fiber,

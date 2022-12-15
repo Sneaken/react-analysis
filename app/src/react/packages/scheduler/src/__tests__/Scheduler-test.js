@@ -80,7 +80,7 @@ describe('SchedulerBrowser', () => {
       // TODO
       return id;
     };
-    global.clearTimeout = id => {
+    global.clearTimeout = (id) => {
       // TODO
     };
 
@@ -340,7 +340,7 @@ describe('SchedulerBrowser', () => {
       // Even though there's no input, eventually Scheduler will yield
       // regardless in case there's a pending main thread task we don't know
       // about, like a network event.
-      gate(flags =>
+      gate((flags) =>
         flags.enableIsInputPending
           ? 'Yield at 300ms'
           : // When isInputPending is disabled, we always yield quickly
@@ -394,7 +394,7 @@ describe('SchedulerBrowser', () => {
         // Even though there's no input, eventually Scheduler will yield
         // regardless in case there's a pending main thread task we don't know
         // about, like a network event.
-        gate(flags =>
+        gate((flags) =>
           flags.enableIsInputPending
             ? 'Yield at 300ms'
             : // When isInputPending is disabled, we always yield quickly
@@ -419,7 +419,7 @@ describe('SchedulerBrowser', () => {
         'Task with continuous input',
         // This time we yielded quickly to unblock the continuous event. But not
         // as quickly as for a discrete event.
-        gate(flags =>
+        gate((flags) =>
           flags.enableIsInputPending
             ? 'Yield at 50ms'
             : // When isInputPending is disabled, we always yield quickly
@@ -449,7 +449,7 @@ describe('SchedulerBrowser', () => {
     runtime.assertLog([
       'Message Event',
       'Task with no paint',
-      gate(flags =>
+      gate((flags) =>
         flags.enableIsInputPending
           ? 'Yield at 300ms'
           : // When isInputPending is disabled, we always yield quickly

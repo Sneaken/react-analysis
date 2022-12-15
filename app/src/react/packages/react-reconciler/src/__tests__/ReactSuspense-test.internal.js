@@ -41,14 +41,14 @@ describe('ReactSuspense', () => {
                       );
                       status = 'rejected';
                       value = new Error('Failed to load: ' + text);
-                      listeners.forEach(listener => listener.reject(value));
+                      listeners.forEach((listener) => listener.reject(value));
                     } else {
                       Scheduler.unstable_yieldValue(
                         `Promise resolved [${text}]`,
                       );
                       status = 'resolved';
                       value = text;
-                      listeners.forEach(listener => listener.resolve(value));
+                      listeners.forEach((listener) => listener.resolve(value));
                     }
                   }, ms);
                 } else {
@@ -124,7 +124,7 @@ describe('ReactSuspense', () => {
 
     // Navigate the shell to now render the child content.
     // This should suspend.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         root.update(<Foo renderBar={true} />);
       });
@@ -214,7 +214,7 @@ describe('ReactSuspense', () => {
 
     function resolveThenable() {
       didResolve = true;
-      listeners.forEach(l => l());
+      listeners.forEach((l) => l());
     }
 
     function Async() {
@@ -239,7 +239,7 @@ describe('ReactSuspense', () => {
     expect(root).toMatchRenderedOutput('Initial');
 
     // The update will suspend.
-    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+    if (gate((flags) => flags.enableSyncDefaultUpdates)) {
       React.startTransition(() => {
         root.update(
           <>
@@ -1386,7 +1386,7 @@ describe('ReactSuspense', () => {
       }
 
       async function fetchComponent() {
-        return new Promise(r => {
+        return new Promise((r) => {
           // simulating a delayed import() call
           setTimeout(r, 1000, {default: Hello});
         });
@@ -1642,7 +1642,7 @@ describe('ReactSuspense', () => {
       function Child() {
         return (
           <ValueContext.Consumer>
-            {value => {
+            {(value) => {
               Scheduler.unstable_yieldValue(
                 `Received context value [${value}]`,
               );

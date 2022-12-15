@@ -58,7 +58,7 @@ function lazyInitializer<T>(payload: Payload<T>): T {
     // happens if the ctor or any wrappers processing the ctor throws. This might
     // end up fixing it if the resolution was a concurrency bug.
     thenable.then(
-      moduleObject => {
+      (moduleObject) => {
         if (payload._status === Pending || payload._status === Uninitialized) {
           // Transition to the next state.
           const resolved: ResolvedPayload<T> = (payload: any);
@@ -66,7 +66,7 @@ function lazyInitializer<T>(payload: Payload<T>): T {
           resolved._result = moduleObject;
         }
       },
-      error => {
+      (error) => {
         if (payload._status === Pending || payload._status === Uninitialized) {
           // Transition to the next state.
           const rejected: RejectedPayload = (payload: any);

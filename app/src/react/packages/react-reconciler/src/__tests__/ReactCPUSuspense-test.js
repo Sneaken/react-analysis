@@ -23,7 +23,7 @@ describe('ReactSuspenseWithNoopRenderer', () => {
 
     textCache = new Map();
 
-    readText = text => {
+    readText = (text) => {
       const record = textCache.get(text);
       if (record !== undefined) {
         switch (record.status) {
@@ -36,7 +36,7 @@ describe('ReactSuspenseWithNoopRenderer', () => {
         }
       } else {
         let ping;
-        const promise = new Promise(resolve => (ping = resolve));
+        const promise = new Promise((resolve) => (ping = resolve));
         const newRecord = {
           status: 'pending',
           ping: ping,
@@ -47,7 +47,7 @@ describe('ReactSuspenseWithNoopRenderer', () => {
       }
     };
 
-    resolveText = text => {
+    resolveText = (text) => {
       const record = textCache.get(text);
       if (record !== undefined) {
         if (record.status === 'pending') {
