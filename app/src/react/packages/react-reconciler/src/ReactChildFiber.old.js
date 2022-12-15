@@ -107,8 +107,7 @@ function coerceRef(
       // TODO: Clean this up once we turn on the string ref warning for
       // everyone, because the strict mode case will no longer be relevant
       if (
-        (returnFiber.mode & StrictLegacyMode || warnAboutStringRefs) &&
-        // We warn in ReactElement.js if owner and self are equal for string refs
+        (returnFiber.mode & StrictLegacyMode || warnAboutStringRefs) && // We warn in ReactElement.js if owner and self are equal for string refs
         // because these cannot be automatically converted to an arrow function
         // using a codemod. Therefore, we don't have to warn about string refs again.
         !(
@@ -336,6 +335,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     lastPlacedIndex: number,
     newIndex: number,
   ): number {
+    // 标记节点是否移动(flags)
     newFiber.index = newIndex;
     if (!shouldTrackSideEffects) {
       // During hydration, the useId algorithm needs to know which fibers are
@@ -407,12 +407,10 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
     if (current !== null) {
       if (
-        current.elementType === elementType ||
-        // Keep this check inline so it only runs on the false path:
+        current.elementType === elementType || // Keep this check inline so it only runs on the false path:
         (__DEV__
           ? isCompatibleFamilyForHotReloading(current, element)
-          : false) ||
-        // Lazy types should reconcile their resolved type.
+          : false) || // Lazy types should reconcile their resolved type.
         // We need to do this after the Hot Reloading check above,
         // because hot reloading has different semantics than prod because
         // it doesn't resuspend. So we can't let the call below suspend.
@@ -767,6 +765,16 @@ function ChildReconciler(shouldTrackSideEffects) {
     // If you change this code, also update reconcileChildrenIterator() which
     // uses the same algorithm.
 
+    // const _debug = true;
+    const _debug = false;
+    const _debugFlag = returnFiber.type === 'ul';
+    const _console =
+      _debug && _debugFlag
+        ? console
+        : {
+            log() {},
+          };
+
     if (__DEV__) {
       // First, validate keys.
       let knownKeys = null;
@@ -780,10 +788,12 @@ function ChildReconciler(shouldTrackSideEffects) {
     let previousNewFiber: Fiber | null = null;
 
     let oldFiber = currentFirstChild;
+    // 最后一个可复用的节点在 oldFiber 中的位置索引
     let lastPlacedIndex = 0;
     let newIdx = 0;
     let nextOldFiber = null;
     // old fiber 还存在并且新节点还没遍历完
+    _console.log('开始第一轮更新');
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       if (oldFiber.index > newIdx) {
         // 节点变少了
@@ -819,7 +829,10 @@ function ChildReconciler(shouldTrackSideEffects) {
           deleteChild(returnFiber, oldFiber);
         }
       }
+      // 最后一个可以复用的 old fiber 的 index
+      _console.log('开始 lastPlacedIndex =>', lastPlacedIndex);
       lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
+      _console.log('结束 lastPlacedIndex =>', lastPlacedIndex);
       if (previousNewFiber === null) {
         // TODO: Move out of the loop. This only happens for the first run.
         resultingFirstChild = newFiber;
@@ -873,9 +886,9 @@ function ChildReconciler(shouldTrackSideEffects) {
       return resultingFirstChild;
     }
 
+    _console.log('开始第二轮更新');
     // break 跳过来的, 一般都是 key 发生了变化
-
-    // 根据 key（优先） 或者 index 来缓存节点
+    // 根据 key（优先） 或者 index 来缓存节点（剩余节点）
     // Add all children to a key map for quick lookups.
     const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
 
@@ -890,6 +903,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         newChildren[newIdx],
         lanes,
       );
+      _console.log('节点是否复用', !!newFiber.alternate);
       if (newFiber !== null) {
         if (shouldTrackSideEffects) {
           if (newFiber.alternate !== null) {
@@ -903,7 +917,10 @@ function ChildReconciler(shouldTrackSideEffects) {
             );
           }
         }
+        // 考虑性能，我们要尽量减少将节点从后面移动到前面的操作，这里所有的移动都是向右的。
+        _console.log('开始 lastPlacedIndex =>', lastPlacedIndex);
         lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
+        _console.log('结束 lastPlacedIndex =>', lastPlacedIndex);
         if (previousNewFiber === null) {
           resultingFirstChild = newFiber;
         } else {
@@ -949,8 +966,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // We don't support rendering Generators because it's a mutation.
       // See https://github.com/facebook/react/issues/12995
       if (
-        typeof Symbol === 'function' &&
-        // $FlowFixMe Flow doesn't know about toStringTag
+        typeof Symbol === 'function' && // $FlowFixMe Flow doesn't know about toStringTag
         newChildrenIterable[Symbol.toStringTag] === 'Generator'
       ) {
         if (!didWarnAboutGenerators) {
@@ -1180,12 +1196,10 @@ function ChildReconciler(shouldTrackSideEffects) {
           }
         } else {
           if (
-            child.elementType === elementType ||
-            // Keep this check inline so it only runs on the false path:
+            child.elementType === elementType || // Keep this check inline so it only runs on the false path:
             (__DEV__
               ? isCompatibleFamilyForHotReloading(child, element)
-              : false) ||
-            // Lazy types should reconcile their resolved type.
+              : false) || // Lazy types should reconcile their resolved type.
             // We need to do this after the Hot Reloading check above,
             // because hot reloading has different semantics than prod because
             // it doesn't resuspend. So we can't let the call below suspend.
