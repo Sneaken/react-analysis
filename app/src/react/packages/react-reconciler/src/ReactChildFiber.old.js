@@ -267,6 +267,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // Noop.
       return;
     }
+    // 这个属性用来标记哪些节点是需要删除的
     const deletions = returnFiber.deletions;
     if (deletions === null) {
       returnFiber.deletions = [childToDelete];
@@ -1185,7 +1186,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         const elementType = element.type;
         if (elementType === REACT_FRAGMENT_TYPE) {
           if (child.tag === Fragment) {
-            //删除兄弟节点
+            // 删除兄弟节点
             deleteRemainingChildren(returnFiber, child.sibling);
             const existing = useFiber(child, element.props.children);
             existing.return = returnFiber;
@@ -1197,7 +1198,7 @@ function ChildReconciler(shouldTrackSideEffects) {
           }
         } else {
           if (
-            child.elementType === elementType || // Keep this check inline so it only runs on the false path:
+            child.elementType === elementType || // Keep this check inline, so it only runs on the false path:
             (__DEV__
               ? isCompatibleFamilyForHotReloading(child, element)
               : false) || // Lazy types should reconcile their resolved type.
@@ -1209,7 +1210,9 @@ function ChildReconciler(shouldTrackSideEffects) {
               elementType.$$typeof === REACT_LAZY_TYPE &&
               resolveLazy(elementType) === child.type)
           ) {
+            // 既然是单节点 就不会有兄弟节点，所以把兄弟节点标记为删除
             deleteRemainingChildren(returnFiber, child.sibling);
+            // 节点复用
             const existing = useFiber(child, element.props);
             existing.ref = coerceRef(returnFiber, child, element);
             existing.return = returnFiber;
@@ -1220,13 +1223,13 @@ function ChildReconciler(shouldTrackSideEffects) {
             return existing;
           }
         }
-        // 代码执行到这里代表：key相同但是type不同
-        // 将该fiber及其兄弟fiber标记为删除
+        // 代码执行到这里代表：key 相同但是 type 不同
+        // 将该 fiber 及其兄弟 fiber 标记为删除
         // Didn't match.
         deleteRemainingChildren(returnFiber, child);
         break;
       } else {
-        // key不同，将该fiber标记为删除
+        // key 不同，将该 fiber 标记为删除
         deleteChild(returnFiber, child);
       }
       child = child.sibling;
