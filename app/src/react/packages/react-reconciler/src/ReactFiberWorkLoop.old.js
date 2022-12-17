@@ -9,56 +9,121 @@
 
 import type {Wakeable} from 'shared/ReactTypes';
 import type {Fiber, FiberRoot} from './ReactInternalTypes';
-import type {Lanes, Lane} from './ReactFiberLane.old';
+import type {Lane, Lanes} from './ReactFiberLane.old';
+import {
+  addFiberToLanesMap,
+  addTransitionToLanesMap,
+  claimNextRetryLane,
+  claimNextTransitionLane,
+  getHighestPriorityLane,
+  getLanesToRetrySynchronouslyOnError,
+  getMostRecentEventTime,
+  getNextLanes,
+  getTransitionsForLanes,
+  includesBlockingLane,
+  includesExpiredLane,
+  includesNonIdleWork,
+  includesOnlyRetries,
+  includesOnlyTransitions,
+  includesSomeLane,
+  isSubsetOfLanes,
+  markRootEntangled,
+  markRootFinished,
+  markRootPinged,
+  markRootSuspended as markRootSuspended_dontCallThisOneDirectly,
+  markRootUpdated,
+  markStarvedLanesAsExpired,
+  mergeLanes,
+  movePendingFibersToMemoized,
+  NoLane,
+  NoLanes,
+  NoTimestamp,
+  pickArbitraryLane,
+  removeLanes,
+  SyncLane,
+} from './ReactFiberLane.old';
 import type {SuspenseState} from './ReactFiberSuspenseComponent.old';
 import type {StackCursor} from './ReactFiberStack.old';
+import {
+  createCursor,
+  pop as popFromStack,
+  push as pushToStack,
+} from './ReactFiberStack.old';
 import type {Flags} from './ReactFiberFlags';
+import {
+  BeforeMutationMask,
+  ForceClientRender,
+  HostEffectMask,
+  Incomplete,
+  LayoutMask,
+  MountLayoutDev,
+  MountPassiveDev,
+  MutationMask,
+  NoFlags,
+  PassiveMask,
+  StoreConsistency,
+} from './ReactFiberFlags';
 import type {FunctionComponentUpdateQueue} from './ReactFiberHooks.old';
+import {
+  ContextOnlyDispatcher,
+  getIsUpdatingOpaqueValueInRenderPhaseInDEV,
+  resetHooksAfterThrow,
+} from './ReactFiberHooks.old';
 import type {EventPriority} from './ReactEventPriorities.old';
+import {
+  ContinuousEventPriority,
+  DefaultEventPriority,
+  DiscreteEventPriority,
+  getCurrentUpdatePriority,
+  IdleEventPriority,
+  lanesToEventPriority,
+  lowerEventPriority,
+  setCurrentUpdatePriority,
+} from './ReactEventPriorities.old';
 import type {
   PendingTransitionCallbacks,
-  TransitionObject,
   Transition,
+  TransitionObject,
 } from './ReactFiberTracingMarkerComponent.old';
+import {processTransitionCallbacks} from './ReactFiberTracingMarkerComponent.old';
 
 import {
-  warnAboutDeprecatedLifecycles,
-  replayFailedUnitOfWorkWithInvokeGuardedCallback,
+  deferRenderPhaseUpdateToNextBatch,
+  disableSchedulerTimeoutInWorkLoop,
+  enableCache,
   enableCreateEventHandleAPI,
-  enableProfilerTimer,
+  enableDebugTracing,
   enableProfilerCommitHooks,
   enableProfilerNestedUpdatePhase,
   enableProfilerNestedUpdateScheduledHook,
-  deferRenderPhaseUpdateToNextBatch,
-  enableDebugTracing,
+  enableProfilerTimer,
   enableSchedulingProfiler,
-  disableSchedulerTimeoutInWorkLoop,
   enableStrictEffects,
-  skipUnmountedBoundaries,
-  enableUpdaterTracking,
-  enableCache,
   enableTransitionTracing,
+  enableUpdaterTracking,
+  replayFailedUnitOfWorkWithInvokeGuardedCallback,
+  skipUnmountedBoundaries,
+  warnAboutDeprecatedLifecycles,
 } from 'shared/ReactFeatureFlags';
 import ReactSharedInternals from 'shared/ReactSharedInternals';
 import is from 'shared/objectIs';
 
 import {
-  // Aliased because `act` will override and push to an internal queue
-  scheduleCallback as Scheduler_scheduleCallback,
   cancelCallback as Scheduler_cancelCallback,
-  shouldYield,
-  requestPaint,
-  now,
-  ImmediatePriority as ImmediateSchedulerPriority,
-  UserBlockingPriority as UserBlockingSchedulerPriority,
-  NormalPriority as NormalSchedulerPriority,
   IdlePriority as IdleSchedulerPriority,
+  ImmediatePriority as ImmediateSchedulerPriority,
+  NormalPriority as NormalSchedulerPriority,
+  now,
+  requestPaint,
+  scheduleCallback as Scheduler_scheduleCallback,
+  shouldYield,
+  UserBlockingPriority as UserBlockingSchedulerPriority,
 } from './Scheduler';
 import {
   flushSyncCallbacks,
   flushSyncCallbacksOnlyInLegacyMode,
-  scheduleSyncCallback,
   scheduleLegacySyncCallback,
+  scheduleSyncCallback,
 } from './ReactFiberSyncTaskQueue.old';
 import {
   logCommitStarted,
@@ -72,100 +137,45 @@ import {
 } from './DebugTracing';
 
 import {
-  resetAfterCommit,
-  scheduleTimeout,
-  cancelTimeout,
-  noTimeout,
   afterActiveInstanceBlur,
-  getCurrentEventPriority,
-  supportsMicrotasks,
+  cancelTimeout,
   errorHydratingContainer,
+  getCurrentEventPriority,
+  noTimeout,
+  resetAfterCommit,
   scheduleMicrotask,
+  scheduleTimeout,
+  supportsMicrotasks,
 } from './ReactFiberHostConfig';
 
 import {
-  createWorkInProgress,
   assignFiberPropertiesInDEV,
+  createWorkInProgress,
 } from './ReactFiber.old';
 import {isRootDehydrated} from './ReactFiberShellHydration';
 import {didSuspendOrErrorWhileHydratingDEV} from './ReactFiberHydrationContext.old';
-import {NoMode, ProfileMode, ConcurrentMode} from './ReactTypeOfMode';
+import {ConcurrentMode, NoMode, ProfileMode} from './ReactTypeOfMode';
 import {
+  ClassComponent,
+  ForwardRef,
+  FunctionComponent,
   HostRoot,
   IndeterminateComponent,
-  ClassComponent,
+  MemoComponent,
+  Profiler,
+  SimpleMemoComponent,
   SuspenseComponent,
   SuspenseListComponent,
-  FunctionComponent,
-  ForwardRef,
-  MemoComponent,
-  SimpleMemoComponent,
-  Profiler,
 } from './ReactWorkTags';
 import {LegacyRoot} from './ReactRootTags';
-import {
-  NoFlags,
-  Incomplete,
-  StoreConsistency,
-  HostEffectMask,
-  ForceClientRender,
-  BeforeMutationMask,
-  MutationMask,
-  LayoutMask,
-  PassiveMask,
-  MountPassiveDev,
-  MountLayoutDev,
-} from './ReactFiberFlags';
-import {
-  NoLanes,
-  NoLane,
-  SyncLane,
-  NoTimestamp,
-  claimNextTransitionLane,
-  claimNextRetryLane,
-  includesSomeLane,
-  isSubsetOfLanes,
-  mergeLanes,
-  removeLanes,
-  pickArbitraryLane,
-  includesNonIdleWork,
-  includesOnlyRetries,
-  includesOnlyTransitions,
-  includesBlockingLane,
-  includesExpiredLane,
-  getNextLanes,
-  markStarvedLanesAsExpired,
-  getLanesToRetrySynchronouslyOnError,
-  getMostRecentEventTime,
-  markRootUpdated,
-  markRootSuspended as markRootSuspended_dontCallThisOneDirectly,
-  markRootPinged,
-  markRootEntangled,
-  markRootFinished,
-  getHighestPriorityLane,
-  addFiberToLanesMap,
-  movePendingFibersToMemoized,
-  addTransitionToLanesMap,
-  getTransitionsForLanes,
-} from './ReactFiberLane.old';
-import {
-  DiscreteEventPriority,
-  ContinuousEventPriority,
-  DefaultEventPriority,
-  IdleEventPriority,
-  getCurrentUpdatePriority,
-  setCurrentUpdatePriority,
-  lowerEventPriority,
-  lanesToEventPriority,
-} from './ReactEventPriorities.old';
-import {requestCurrentTransition, NoTransition} from './ReactFiberTransition';
+import {NoTransition, requestCurrentTransition} from './ReactFiberTransition';
 import {beginWork as originalBeginWork} from './ReactFiberBeginWork.old';
 import {completeWork} from './ReactFiberCompleteWork.old';
-import {unwindWork, unwindInterruptedWork} from './ReactFiberUnwindWork.old';
+import {unwindInterruptedWork, unwindWork} from './ReactFiberUnwindWork.old';
 import {
-  throwException,
-  createRootErrorUpdate,
   createClassErrorUpdate,
+  createRootErrorUpdate,
+  throwException,
 } from './ReactFiberThrow.old';
 import {
   commitBeforeMutationEffects,
@@ -175,27 +185,17 @@ import {
   commitPassiveMountEffects,
   commitPassiveUnmountEffects,
   invokeLayoutEffectMountInDEV,
-  invokePassiveEffectMountInDEV,
   invokeLayoutEffectUnmountInDEV,
+  invokePassiveEffectMountInDEV,
   invokePassiveEffectUnmountInDEV,
   reportUncaughtErrorInDEV,
 } from './ReactFiberCommitWork.old';
 import {enqueueUpdate} from './ReactFiberClassUpdateQueue.old';
 import {resetContextDependencies} from './ReactFiberNewContext.old';
 import {
-  resetHooksAfterThrow,
-  ContextOnlyDispatcher,
-  getIsUpdatingOpaqueValueInRenderPhaseInDEV,
-} from './ReactFiberHooks.old';
-import {
-  createCapturedValueAtFiber,
   type CapturedValue,
+  createCapturedValueAtFiber,
 } from './ReactCapturedValue';
-import {
-  push as pushToStack,
-  pop as popFromStack,
-  createCursor,
-} from './ReactFiberStack.old';
 import {
   enqueueConcurrentRenderForLane,
   finishQueueingConcurrentUpdates,
@@ -214,40 +214,39 @@ import {
 import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
 import ReactStrictModeWarnings from './ReactStrictModeWarnings.old';
 import {
-  isRendering as ReactCurrentDebugFiberIsRenderingInDEV,
   current as ReactCurrentFiberCurrent,
+  isRendering as ReactCurrentDebugFiberIsRenderingInDEV,
   resetCurrentFiber as resetCurrentDebugFiberInDEV,
   setCurrentFiber as setCurrentDebugFiberInDEV,
 } from './ReactCurrentFiber';
 import {
-  invokeGuardedCallback,
-  hasCaughtError,
   clearCaughtError,
+  hasCaughtError,
+  invokeGuardedCallback,
 } from 'shared/ReactErrorUtils';
 import {
   isDevToolsPresent,
   markCommitStarted,
   markCommitStopped,
+  markComponentErrored,
   markComponentRenderStopped,
   markComponentSuspended,
-  markComponentErrored,
   markLayoutEffectsStarted,
   markLayoutEffectsStopped,
   markPassiveEffectsStarted,
   markPassiveEffectsStopped,
   markRenderStarted,
-  markRenderYielded,
   markRenderStopped,
+  markRenderYielded,
   onCommitRoot as onCommitRootDevTools,
   onPostCommitRoot as onPostCommitRootDevTools,
 } from './ReactFiberDevToolsHook.old';
 import {onCommitRoot as onCommitRootTestSelector} from './ReactTestSelectors';
 import {releaseCache} from './ReactFiberCacheComponent.old';
 import {
-  isLegacyActEnvironment,
   isConcurrentActEnvironment,
+  isLegacyActEnvironment,
 } from './ReactFiberAct.old';
-import {processTransitionCallbacks} from './ReactFiberTracingMarkerComponent.old';
 
 const ceil = Math.ceil;
 
@@ -333,6 +332,7 @@ let workInProgressRootRenderTargetTime: number = Infinity;
 const RENDER_TIMEOUT_MS = 500;
 
 let workInProgressTransitions: Array<Transition> | null = null;
+
 export function getWorkInProgressTransitions() {
   return workInProgressTransitions;
 }
@@ -1355,8 +1355,10 @@ export function discreteUpdates<A, B, C, D, R>(
 // Overload the definition to the two valid signatures.
 // Warning, this opts-out of checking the function body.
 declare function flushSync<R>(fn: () => R): R;
+
 // eslint-disable-next-line no-redeclare
 declare function flushSync(): void;
+
 // eslint-disable-next-line no-redeclare
 export function flushSync(fn) {
   // In legacy mode, we flush pending passive effects at the beginning of the
@@ -2552,6 +2554,7 @@ function prepareToThrowUncaughtError(error: mixed) {
     firstUncaughtError = error;
   }
 }
+
 export const onUncaughtError = prepareToThrowUncaughtError;
 
 function captureCommitPhaseErrorOnRoot(
@@ -2873,6 +2876,7 @@ function invokeEffectsInDev(
 }
 
 let didWarnStateUpdateForNotYetMountedComponent: Set<string> | null = null;
+
 export function warnAboutUpdateOnNotYetMountedFiberInDEV(fiber: Fiber) {
   if (__DEV__) {
     if ((executionContext & RenderContext) !== NoContext) {
@@ -3076,6 +3080,7 @@ export function restorePendingUpdaters(root: FiberRoot, lanes: Lanes): void {
 }
 
 const fakeActCallbackNode = {};
+
 function scheduleCallback(priorityLevel, callback) {
   if (__DEV__) {
     // If we're currently inside an `act` scope, bypass Scheduler and push to
