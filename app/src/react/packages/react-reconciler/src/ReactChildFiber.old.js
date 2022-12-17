@@ -813,7 +813,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         newChildren[newIdx],
         lanes,
       );
-      _console.log('节点是否复用', !!newFiber.alternate);
+      _console.log('节点是否复用', !!newFiber?.alternate);
       if (newFiber === null) {
         // TODO: This breaks on empty slots like null children. That's
         // unfortunate because it triggers the slow path all the time. We need
@@ -905,7 +905,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         newChildren[newIdx],
         lanes,
       );
-      _console.log('节点是否复用', !!newFiber.alternate);
+      _console.log('节点是否复用', !!newFiber?.alternate);
       if (newFiber !== null) {
         if (shouldTrackSideEffects) {
           if (newFiber.alternate !== null) {
