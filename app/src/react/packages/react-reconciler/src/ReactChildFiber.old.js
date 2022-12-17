@@ -797,7 +797,6 @@ function ChildReconciler(shouldTrackSideEffects) {
     _console.log('开始第一轮更新');
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       if (oldFiber.index > newIdx) {
-        // 节点变少了
         nextOldFiber = oldFiber;
         oldFiber = null;
       } else {
@@ -1186,7 +1185,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         const elementType = element.type;
         if (elementType === REACT_FRAGMENT_TYPE) {
           if (child.tag === Fragment) {
-            // 删除兄弟节点
+            // 标记删除兄弟节点
             deleteRemainingChildren(returnFiber, child.sibling);
             const existing = useFiber(child, element.props.children);
             existing.return = returnFiber;
