@@ -1176,6 +1176,8 @@ function ChildReconciler(shouldTrackSideEffects) {
     element: ReactElement,
     lanes: Lanes,
   ): Fiber {
+    // 单节点 diff: 更新后同一层级只存在一个 JSX 对象
+
     const key = element.key;
     let child = currentFirstChild;
     while (child !== null) {
@@ -1224,11 +1226,15 @@ function ChildReconciler(shouldTrackSideEffects) {
         }
         // 代码执行到这里代表：key 相同但是 type 不同
         // 将该 fiber 及其兄弟 fiber 标记为删除
+        // 为什么要删除兄弟节点？
+        // 因为已经找到能够复用的节点，所以才需要标记删除可能存在的兄弟节点
         // Didn't match.
         deleteRemainingChildren(returnFiber, child);
         break;
       } else {
         // key 不同，将该 fiber 标记为删除
+        // 为什么不标记删除兄弟节点？
+        // 因为可能在后续的兄弟节点中，找到了这个能够复用节点
         deleteChild(returnFiber, child);
       }
       child = child.sibling;
