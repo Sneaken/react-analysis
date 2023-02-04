@@ -1227,7 +1227,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         // 代码执行到这里代表：key 相同但是 type 不同
         // 将该 fiber 及其兄弟 fiber 标记为删除
         // 为什么要删除兄弟节点？
-        // 因为已经找到能够复用的节点，所以才需要标记删除可能存在的兄弟节点
+        // 因为已经没有节点能够复用，所以要删除所有旧节点
         // Didn't match.
         deleteRemainingChildren(returnFiber, child);
         break;
