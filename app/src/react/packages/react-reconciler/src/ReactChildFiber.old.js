@@ -346,16 +346,20 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
     const current = newFiber.alternate;
     if (current !== null) {
+      // 存在复用
       const oldIndex = current.index;
       if (oldIndex < lastPlacedIndex) {
+        // 节点移动
         // This is a move.
         newFiber.flags |= Placement;
         return lastPlacedIndex;
       } else {
+        // 节点在原索引位置未移动
         // This item can stay in place.
         return oldIndex;
       }
     } else {
+      // 新节点插入
       // This is an insertion.
       newFiber.flags |= Placement;
       return lastPlacedIndex;
@@ -747,6 +751,8 @@ function ChildReconciler(shouldTrackSideEffects) {
     newChildren: Array<*>,
     lanes: Lanes,
   ): Fiber | null {
+    // 多节点 diff: 更新后的 JSX 对象 的 children 是一个数组
+
     // This algorithm can't optimize by searching from both ends since we
     // don't have backpointers on fibers. I'm trying to see how far we can get
     // with that model. If it ends up not being worth the tradeoffs, we can
@@ -766,16 +772,6 @@ function ChildReconciler(shouldTrackSideEffects) {
     // If you change this code, also update reconcileChildrenIterator() which
     // uses the same algorithm.
 
-    // const _debug = true;
-    const _debug = false;
-    const _debugFlag = returnFiber.type === 'ul' || returnFiber.type === 'li';
-    const _console =
-      _debug && _debugFlag
-        ? console
-        : {
-            log() {},
-          };
-
     if (__DEV__) {
       // First, validate keys.
       let knownKeys = null;
@@ -788,13 +784,17 @@ function ChildReconciler(shouldTrackSideEffects) {
     let resultingFirstChild: Fiber | null = null;
     let previousNewFiber: Fiber | null = null;
 
+    // 参与比较的 current fiberNode
     let oldFiber = currentFirstChild;
     // 最后一个可复用的节点在 oldFiber 中的位置索引
+    // 用来判断 oldFiber 是否移动
     let lastPlacedIndex = 0;
+    // JSX 对象的索引
     let newIdx = 0;
+    // 下一个 oldFiber
     let nextOldFiber = null;
+    // 开始第一轮遍历
     // old fiber 还存在并且新节点还没遍历完
-    _console.log('开始第一轮更新');
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       if (oldFiber.index > newIdx) {
         nextOldFiber = oldFiber;
@@ -812,7 +812,6 @@ function ChildReconciler(shouldTrackSideEffects) {
         newChildren[newIdx],
         lanes,
       );
-      _console.log('节点是否复用', !!newFiber?.alternate);
       if (newFiber === null) {
         // TODO: This breaks on empty slots like null children. That's
         // unfortunate because it triggers the slow path all the time. We need
@@ -821,19 +820,19 @@ function ChildReconciler(shouldTrackSideEffects) {
         if (oldFiber === null) {
           oldFiber = nextOldFiber;
         }
+        // key 不同导致不可复用，立即跳出遍历
         break;
       }
       if (shouldTrackSideEffects) {
         if (oldFiber && newFiber.alternate === null) {
           // We matched the slot, but we didn't reuse the existing fiber, so we
           // need to delete the existing child.
+          // key 相同 type 不同，导致不可复用，会将 oldFiber 标记为删除，继续遍历
           deleteChild(returnFiber, oldFiber);
         }
       }
       // 最后一个可以复用的 old fiber 的 index
-      _console.log('开始 lastPlacedIndex =>', lastPlacedIndex);
       lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
-      _console.log('结束 lastPlacedIndex =>', lastPlacedIndex);
       if (previousNewFiber === null) {
         // TODO: Move out of the loop. This only happens for the first run.
         resultingFirstChild = newFiber;
@@ -850,8 +849,8 @@ function ChildReconciler(shouldTrackSideEffects) {
 
     if (newIdx === newChildren.length) {
       // 新节点遍历完了
-      // old fiber !== null, 说明节点变少
-      // old fiber === null, 说明 节点数量没变
+      // 如果 oldFiber 存在， 意味着有旧节点被删除。
+      // 所以需要遍历其余 oldFiber, 依次标记为删除。
       // We've reached the end of the new children. We can delete the rest.
       deleteRemainingChildren(returnFiber, oldFiber);
       if (getIsHydrating()) {
@@ -862,8 +861,8 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (oldFiber === null) {
-      // 新节点没遍历完，但是 old fiber 遍历完了
-      // 说明 节点数量变多了
+      // 新节点没遍历完，但是 oldFiber 遍历完了
+      // 意味着有新节点被插入，需要遍历其余 newChildren 依次生成 fiberNode。
       // If we don't have any more existing children we can choose a fast path
       // since the rest will all be insertions.
       for (; newIdx < newChildren.length; newIdx++) {
@@ -887,9 +886,12 @@ function ChildReconciler(shouldTrackSideEffects) {
       return resultingFirstChild;
     }
 
-    _console.log('开始第二轮更新');
+    // 开始第二轮遍历
     // break 跳过来的, 一般都是 key 发生了变化
     // 根据 key（优先） 或者 index 来缓存节点（剩余节点）
+    // 为了快速找到 "key 对应的 oldFiber"
+    // 将未处理的 oldFiber 存入以 key 为 key, oldFiber 为 value 的 map (Map<string|number, Fiber>)
+    // 重点是未处理的 oldFiber
     // Add all children to a key map for quick lookups.
     const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
 
@@ -904,11 +906,10 @@ function ChildReconciler(shouldTrackSideEffects) {
         newChildren[newIdx],
         lanes,
       );
-      _console.log('节点是否复用', !!newFiber?.alternate);
       if (newFiber !== null) {
         if (shouldTrackSideEffects) {
           if (newFiber.alternate !== null) {
-            // 如果某个节点被重用，那么就需要被从删除候选中移除
+            // 如果某个节点被重用，那么就需要从候选中移除
             // The new fiber is a work in progress, but if there exists a
             // current, that means that we reused the fiber. We need to delete
             // it from the child list so that we don't add it to the deletion
@@ -919,9 +920,8 @@ function ChildReconciler(shouldTrackSideEffects) {
           }
         }
         // 考虑性能，我们要尽量减少将节点从后面移动到前面的操作，这里所有的移动都是向右的。
-        _console.log('开始 lastPlacedIndex =>', lastPlacedIndex);
+        // 处于性能考虑，开发时尽量避免将节点从后面移动到前面的操作
         lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
-        _console.log('结束 lastPlacedIndex =>', lastPlacedIndex);
         if (previousNewFiber === null) {
           resultingFirstChild = newFiber;
         } else {
