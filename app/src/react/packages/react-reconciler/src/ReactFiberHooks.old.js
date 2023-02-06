@@ -14,57 +14,39 @@ import type {
   ReactContext,
   StartTransitionOptions,
 } from 'shared/ReactTypes';
-import type {Fiber, Dispatcher, HookType} from './ReactInternalTypes';
-import type {Lanes, Lane} from './ReactFiberLane.old';
-import type {HookFlags} from './ReactHookEffectTags';
-import type {FiberRoot} from './ReactInternalTypes';
-import type {Cache} from './ReactFiberCacheComponent.old';
-import type {Flags} from './ReactFiberFlags';
-
-import ReactSharedInternals from 'shared/ReactSharedInternals';
+import type {
+  Dispatcher,
+  Fiber,
+  FiberRoot,
+  HookType,
+} from './ReactInternalTypes';
+import type {Lane, Lanes} from './ReactFiberLane.old';
 import {
-  enableDebugTracing,
-  enableSchedulingProfiler,
-  enableNewReconciler,
-  enableCache,
-  enableUseRefAccessWarning,
-  enableStrictEffects,
-  enableLazyContextPropagation,
-  enableSuspenseLayoutEffectSemantics,
-  enableUseMutableSource,
-  enableTransitionTracing,
-} from 'shared/ReactFeatureFlags';
-
-import {
-  NoMode,
-  ConcurrentMode,
-  DebugTracingMode,
-  StrictEffectsMode,
-} from './ReactTypeOfMode';
-import {
-  NoLane,
-  SyncLane,
-  NoLanes,
-  isSubsetOfLanes,
+  claimNextTransitionLane,
   includesBlockingLane,
   includesOnlyNonUrgentLanes,
-  claimNextTransitionLane,
-  mergeLanes,
-  removeLanes,
   intersectLanes,
+  isSubsetOfLanes,
   isTransitionLane,
   markRootEntangled,
   markRootMutableRead,
+  mergeLanes,
+  NoLane,
+  NoLanes,
   NoTimestamp,
+  removeLanes,
+  SyncLane,
 } from './ReactFiberLane.old';
+import type {HookFlags} from './ReactHookEffectTags';
 import {
-  ContinuousEventPriority,
-  getCurrentUpdatePriority,
-  setCurrentUpdatePriority,
-  higherEventPriority,
-} from './ReactEventPriorities.old';
-import {readContext, checkIfContextChanged} from './ReactFiberNewContext.old';
-import {HostRoot, CacheComponent} from './ReactWorkTags';
+  HasEffect as HookHasEffect,
+  Insertion as HookInsertion,
+  Layout as HookLayout,
+  Passive as HookPassive,
+} from './ReactHookEffectTags';
+import type {Cache} from './ReactFiberCacheComponent.old';
+import {CacheContext, createCache} from './ReactFiberCacheComponent.old';
+import type {Flags} from './ReactFiberFlags';
 import {
   LayoutStatic as LayoutStaticEffect,
   MountLayoutDev as MountLayoutDevEffect,
@@ -72,29 +54,52 @@ import {
   Passive as PassiveEffect,
   PassiveStatic as PassiveStaticEffect,
   StaticMask as StaticMaskEffect,
-  Update as UpdateEffect,
   StoreConsistency,
+  Update as UpdateEffect,
 } from './ReactFiberFlags';
+
+import ReactSharedInternals from 'shared/ReactSharedInternals';
 import {
-  HasEffect as HookHasEffect,
-  Layout as HookLayout,
-  Passive as HookPassive,
-  Insertion as HookInsertion,
-} from './ReactHookEffectTags';
+  enableCache,
+  enableDebugTracing,
+  enableLazyContextPropagation,
+  enableNewReconciler,
+  enableSchedulingProfiler,
+  enableStrictEffects,
+  enableSuspenseLayoutEffectSemantics,
+  enableTransitionTracing,
+  enableUseMutableSource,
+  enableUseRefAccessWarning,
+} from 'shared/ReactFeatureFlags';
+
+import {
+  ConcurrentMode,
+  DebugTracingMode,
+  NoMode,
+  StrictEffectsMode,
+} from './ReactTypeOfMode';
+import {
+  ContinuousEventPriority,
+  getCurrentUpdatePriority,
+  higherEventPriority,
+  setCurrentUpdatePriority,
+} from './ReactEventPriorities.old';
+import {checkIfContextChanged, readContext} from './ReactFiberNewContext.old';
+import {CacheComponent, HostRoot} from './ReactWorkTags';
 import {
   getWorkInProgressRoot,
-  scheduleUpdateOnFiber,
-  requestUpdateLane,
-  requestEventTime,
   markSkippedUpdateLanes,
+  requestEventTime,
+  requestUpdateLane,
+  scheduleUpdateOnFiber,
 } from './ReactFiberWorkLoop.old';
 
 import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
 import is from 'shared/objectIs';
 import isArray from 'shared/isArray';
 import {
-  markWorkInProgressReceivedUpdate,
   checkIfWorkInProgressReceivedUpdate,
+  markWorkInProgressReceivedUpdate,
 } from './ReactFiberBeginWork.old';
 import {getIsHydrating} from './ReactFiberHydrationContext.old';
 import {
@@ -105,7 +110,6 @@ import {
 } from './ReactMutableSource.old';
 import {logStateUpdateScheduled} from './DebugTracing';
 import {markStateUpdateScheduled} from './ReactFiberDevToolsHook.old';
-import {createCache, CacheContext} from './ReactFiberCacheComponent.old';
 import {
   createUpdate as createLegacyQueueUpdate,
   enqueueUpdate as enqueueLegacyQueueUpdate,
@@ -153,10 +157,15 @@ export type Hook = {|
 |};
 
 export type Effect = {|
+  // 用于区分 effect 类型
   tag: HookFlags,
+  // effect 回调函数
   create: () => (() => void) | void,
+  // effect 销毁函数
   destroy: (() => void) | void,
+  // 依赖项
   deps: Array<mixed> | null,
+  // 与当前 FC 的 其他 effect 形成环状链表
   next: Effect,
 |};
 
