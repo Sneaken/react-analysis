@@ -98,6 +98,7 @@ function useState(initialState) {
   let baseState = hook.memoizedState;
   if (hook.queue.pending) {
     // 获取 update 环状单向链表中第一个 update
+    // hook.queue.pending 指向最后一个 update， next 就是第一个
     let firstUpdate = hook.queue.pending.next;
 
     do {
@@ -124,6 +125,7 @@ function App() {
 
   return {
     click() {
+      setValue((value) => value + 1);
       setValue((value) => value + 1);
     },
   };
