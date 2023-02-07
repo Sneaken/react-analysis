@@ -16,18 +16,31 @@ export const NoFlags = /*                      */ 0b00000000000000000000000000;
 export const PerformedWork = /*                */ 0b00000000000000000000000001;
 
 // You can change the rest (and add more).
+// 当前 fiberNode 或者子孙 fiberNode 存在"需要插入或移动的 HostComponent 或者 HostText"
 export const Placement = /*                    */ 0b00000000000000000000000010;
+// ClassComponent 存在更新，且定义了 componentDidMount 或者 componentDidUpdate 方法
+// HostComponent(原生 Element 类型， 如 DIV, SPAN)发生属性变化
+// HostText(文本元素类型) 发生内容变化
+// FC 定义了 useLayoutEffect
 export const Update = /*                       */ 0b00000000000000000000000100;
 export const Deletion = /*                     */ 0b00000000000000000000001000;
+// 有 "需要被删除的子 HostComponent 或者 子 HostText"
 export const ChildDeletion = /*                */ 0b00000000000000000000010000;
+// 清空 HostComponent 的文本内容
 export const ContentReset = /*                 */ 0b00000000000000000000100000;
+// 当 ClassComponent 中的 this.setState 执行时， 或者 ReactDOM.render 执行时传递了回调函数参数
 export const Callback = /*                     */ 0b00000000000000000001000000;
 export const DidCapture = /*                   */ 0b00000000000000000010000000;
 export const ForceClientRender = /*            */ 0b00000000000000000100000000;
+// HostComponent ref 属性的创建与更新
 export const Ref = /*                          */ 0b00000000000000001000000000;
+// ClassComponent 存在更新，且定义了 getSnapshotBeforeUpdate 方法
 export const Snapshot = /*                     */ 0b00000000000000010000000000;
+// FC 定义了 useEffect 且需要触发回调函数
 export const Passive = /*                      */ 0b00000000000000100000000000;
+// hydrate 相关
 export const Hydrating = /*                    */ 0b00000000000001000000000000;
+// 控制 SuspenseComponent 的子树与 fallback 切换时子树的显隐
 export const Visibility = /*                   */ 0b00000000000010000000000000;
 export const StoreConsistency = /*             */ 0b00000000000100000000000000;
 
