@@ -257,10 +257,16 @@ function resolveLazy(lazyType) {
   return init(payload);
 }
 
-// This wrapper function exists because I expect to clone the code in each path
-// to be able to optimize each path individually by branching early. This needs
-// a compiler or we can do it manually. Helpers that don't need this branching
-// live outside of this function.
+/**
+ * This wrapper function exists because I expect to clone the code in each path
+ * to be able to optimize each path individually by branching early. This needs
+ * a compiler or we can do it manually. Helpers that don't need this branching
+ * live outside of this function.
+ * @param {boolean} shouldTrackSideEffects 是否标记副作用
+ *                                  mount 的时候不需要标记，update 的时候需要标记
+ * @return {(function(Fiber, (Fiber|null), *, Lanes): (Fiber|null))|*}
+ * @constructor
+ */
 function ChildReconciler(shouldTrackSideEffects) {
   function deleteChild(returnFiber: Fiber, childToDelete: Fiber): void {
     if (!shouldTrackSideEffects) {

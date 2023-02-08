@@ -259,9 +259,13 @@ const {
 
 type ExecutionContext = number;
 
+// 未处于 React 上下文
 export const NoContext = /*             */ 0b000;
+// 处于 batchedUpdates 上下文
 const BatchedContext = /*               */ 0b001;
+// 处于 render 阶段
 const RenderContext = /*                */ 0b010;
+// 处于 commit 阶段
 const CommitContext = /*                */ 0b100;
 
 type RootExitStatus = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -1225,6 +1229,7 @@ function performSyncWorkOnRoot(root) {
     syncNestedUpdateFlag();
   }
 
+  // 判断当前上下文 是否在  render 阶段 或者是 commit 阶段
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     throw new Error('Should not already be working.');
   }
@@ -1832,6 +1837,11 @@ function workLoopConcurrent() {
   }
 }
 
+/**
+ * 创建下一个 fiberNode 并赋值给 wip, 并将 wip 与已创建的 fiberNode 连接起来构成 FiberTree。
+ * wip === null 代表 "FiberTree 的构建工程结束"
+ * @param {Fiber} unitOfWork
+ */
 function performUnitOfWork(unitOfWork: Fiber): void {
   // The current, flushed, state of this fiber is the alternate. Ideally
   // nothing should rely on this, but relying on it here means that we don't

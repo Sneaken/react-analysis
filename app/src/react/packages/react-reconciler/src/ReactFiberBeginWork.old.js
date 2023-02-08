@@ -8,37 +8,89 @@
  */
 
 import type {
-  ReactProviderType,
+  MutableSource,
   ReactContext,
   ReactNodeList,
+  ReactProviderType,
 } from 'shared/ReactTypes';
 import type {LazyComponent as LazyComponentType} from 'react/src/ReactLazy';
 import type {Fiber, FiberRoot} from './ReactInternalTypes';
 import type {TypeOfMode} from './ReactTypeOfMode';
-import type {Lanes, Lane} from './ReactFiberLane.old';
-import type {MutableSource} from 'shared/ReactTypes';
+import {
+  ConcurrentMode,
+  NoMode,
+  ProfileMode,
+  StrictLegacyMode,
+} from './ReactTypeOfMode';
+import type {Lane, Lanes} from './ReactFiberLane.old';
+import {
+  DefaultHydrationLane,
+  getBumpedLaneForHydration,
+  includesSomeLane,
+  laneToLanes,
+  mergeLanes,
+  NoLane,
+  NoLanes,
+  NoTimestamp,
+  OffscreenLane,
+  pickArbitraryLane,
+  removeLanes,
+  SomeRetryLane,
+  SyncLane,
+} from './ReactFiberLane.old';
 import type {
-  SuspenseState,
   SuspenseListRenderState,
   SuspenseListTailMode,
+  SuspenseState,
 } from './ReactFiberSuspenseComponent.old';
+import {findFirstSuspended} from './ReactFiberSuspenseComponent.old';
 import type {SuspenseContext} from './ReactFiberSuspenseContext.old';
+import {
+  addSubtreeSuspenseContext,
+  ForceSuspenseFallback,
+  hasSuspenseContext,
+  InvisibleParentSuspenseContext,
+  pushSuspenseContext,
+  setDefaultShallowSuspenseContext,
+  setShallowSuspenseContext,
+  suspenseStackCursor,
+} from './ReactFiberSuspenseContext.old';
 import type {
   OffscreenProps,
-  OffscreenState,
   OffscreenQueue,
+  OffscreenState,
 } from './ReactFiberOffscreenComponent';
 import type {
   Cache,
   CacheComponentState,
   SpawnedCachePool,
 } from './ReactFiberCacheComponent.old';
+import {CacheContext, pushCacheProvider} from './ReactFiberCacheComponent.old';
 import type {UpdateQueue} from './ReactFiberClassUpdateQueue.old';
+import {
+  cloneUpdateQueue,
+  enqueueCapturedUpdate,
+  initializeUpdateQueue,
+  processUpdateQueue,
+} from './ReactFiberClassUpdateQueue.old';
 import type {RootState} from './ReactFiberRoot.old';
 import {
-  enableSuspenseAvoidThisFallback,
+  debugRenderPhaseSideEffectsForStrictMode,
+  disableLegacyContext,
+  disableModulePatternComponents,
+  enableCache,
   enableCPUSuspense,
+  enableLazyContextPropagation,
+  enableLegacyHidden,
+  enableProfilerCommitHooks,
+  enableProfilerTimer,
+  enableSchedulingProfiler,
+  enableScopeAPI,
+  enableSuspenseAvoidThisFallback,
+  enableSuspenseLayoutEffectSemantics,
+  enableTransitionTracing,
   enableUseMutableSource,
+  warnAboutDefaultPropsOnFunctionComponents,
 } from 'shared/ReactFeatureFlags';
 
 import checkPropTypes from 'shared/checkPropTypes';
@@ -48,167 +100,114 @@ import {
   setIsStrictModeForDevtools,
 } from './ReactFiberDevToolsHook.old';
 import {
-  IndeterminateComponent,
-  FunctionComponent,
+  CacheComponent,
   ClassComponent,
-  HostRoot,
-  HostComponent,
-  HostText,
-  HostPortal,
+  ContextConsumer,
+  ContextProvider,
   ForwardRef,
   Fragment,
+  FunctionComponent,
+  HostComponent,
+  HostPortal,
+  HostRoot,
+  HostText,
+  IncompleteClassComponent,
+  IndeterminateComponent,
+  LazyComponent,
+  LegacyHiddenComponent,
+  MemoComponent,
   Mode,
-  ContextProvider,
-  ContextConsumer,
+  OffscreenComponent,
   Profiler,
+  ScopeComponent,
+  SimpleMemoComponent,
   SuspenseComponent,
   SuspenseListComponent,
-  MemoComponent,
-  SimpleMemoComponent,
-  LazyComponent,
-  IncompleteClassComponent,
-  ScopeComponent,
-  OffscreenComponent,
-  LegacyHiddenComponent,
-  CacheComponent,
   TracingMarkerComponent,
 } from './ReactWorkTags';
 import {
+  ChildDeletion,
+  ContentReset,
+  DidCapture,
+  ForceClientRender,
+  ForceUpdateForLegacySuspense,
+  Hydrating,
   NoFlags,
   PerformedWork,
   Placement,
-  Hydrating,
-  ContentReset,
-  DidCapture,
-  Update,
   Ref,
   RefStatic,
-  ChildDeletion,
-  ForceUpdateForLegacySuspense,
-  StaticMask,
   ShouldCapture,
-  ForceClientRender,
+  StaticMask,
+  Update,
 } from './ReactFiberFlags';
 import ReactSharedInternals from 'shared/ReactSharedInternals';
-import {
-  debugRenderPhaseSideEffectsForStrictMode,
-  disableLegacyContext,
-  disableModulePatternComponents,
-  enableProfilerCommitHooks,
-  enableProfilerTimer,
-  warnAboutDefaultPropsOnFunctionComponents,
-  enableScopeAPI,
-  enableCache,
-  enableLazyContextPropagation,
-  enableSuspenseLayoutEffectSemantics,
-  enableSchedulingProfiler,
-  enableTransitionTracing,
-  enableLegacyHidden,
-} from 'shared/ReactFeatureFlags';
 import isArray from 'shared/isArray';
 import shallowEqual from 'shared/shallowEqual';
 import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
 import getComponentNameFromType from 'shared/getComponentNameFromType';
 import ReactStrictModeWarnings from './ReactStrictModeWarnings.old';
-import {REACT_LAZY_TYPE, getIteratorFn} from 'shared/ReactSymbols';
+import {getIteratorFn, REACT_LAZY_TYPE} from 'shared/ReactSymbols';
 import {
   getCurrentFiberOwnerNameInDevOrNull,
   setIsRendering,
 } from './ReactCurrentFiber';
 import {
-  resolveFunctionForHotReloading,
-  resolveForwardRefForHotReloading,
   resolveClassForHotReloading,
+  resolveForwardRefForHotReloading,
+  resolveFunctionForHotReloading,
 } from './ReactFiberHotReloading.old';
 
 import {
+  cloneChildFibers,
   mountChildFibers,
   reconcileChildFibers,
-  cloneChildFibers,
 } from './ReactChildFiber.old';
-import {
-  processUpdateQueue,
-  cloneUpdateQueue,
-  initializeUpdateQueue,
-  enqueueCapturedUpdate,
-} from './ReactFiberClassUpdateQueue.old';
-import {
-  NoLane,
-  NoLanes,
-  SyncLane,
-  OffscreenLane,
-  DefaultHydrationLane,
-  SomeRetryLane,
-  NoTimestamp,
-  includesSomeLane,
-  laneToLanes,
-  removeLanes,
-  mergeLanes,
-  getBumpedLaneForHydration,
-  pickArbitraryLane,
-} from './ReactFiberLane.old';
-import {
-  ConcurrentMode,
-  NoMode,
-  ProfileMode,
-  StrictLegacyMode,
-} from './ReactTypeOfMode';
-import {
-  shouldSetTextContent,
-  isSuspenseInstancePending,
-  isSuspenseInstanceFallback,
-  getSuspenseInstanceFallbackErrorDetails,
-  registerSuspenseInstanceRetry,
-  supportsHydration,
-  isPrimaryRenderer,
-} from './ReactFiberHostConfig';
 import type {SuspenseInstance} from './ReactFiberHostConfig';
+import {
+  getSuspenseInstanceFallbackErrorDetails,
+  isPrimaryRenderer,
+  isSuspenseInstanceFallback,
+  isSuspenseInstancePending,
+  registerSuspenseInstanceRetry,
+  shouldSetTextContent,
+  supportsHydration,
+} from './ReactFiberHostConfig';
 import {shouldError, shouldSuspend} from './ReactFiberReconciler';
-import {pushHostContext, pushHostContainer} from './ReactFiberHostContext.old';
+import {pushHostContainer, pushHostContext} from './ReactFiberHostContext.old';
 import {
-  suspenseStackCursor,
-  pushSuspenseContext,
-  InvisibleParentSuspenseContext,
-  ForceSuspenseFallback,
-  hasSuspenseContext,
-  setDefaultShallowSuspenseContext,
-  addSubtreeSuspenseContext,
-  setShallowSuspenseContext,
-} from './ReactFiberSuspenseContext.old';
-import {findFirstSuspended} from './ReactFiberSuspenseComponent.old';
-import {
-  pushProvider,
-  propagateContextChange,
-  lazilyPropagateParentContextChanges,
-  propagateParentContextChangesToDeferredTree,
   checkIfContextChanged,
-  readContext,
+  lazilyPropagateParentContextChanges,
   prepareToReadContext,
+  propagateContextChange,
+  propagateParentContextChangesToDeferredTree,
+  pushProvider,
+  readContext,
   scheduleContextWorkOnParentPath,
 } from './ReactFiberNewContext.old';
 import {
-  renderWithHooks,
-  checkDidRenderIdHook,
   bailoutHooks,
+  checkDidRenderIdHook,
+  renderWithHooks,
 } from './ReactFiberHooks.old';
 import {stopProfilerTimerIfRunning} from './ReactProfilerTimer.old';
 import {
   getMaskedContext,
   getUnmaskedContext,
   hasContextChanged as hasLegacyContextChanged,
-  pushContextProvider as pushLegacyContextProvider,
-  isContextProvider as isLegacyContextProvider,
-  pushTopLevelContextObject,
   invalidateContextProvider,
+  isContextProvider as isLegacyContextProvider,
+  pushContextProvider as pushLegacyContextProvider,
+  pushTopLevelContextObject,
 } from './ReactFiberContext.old';
 import {
-  getIsHydrating,
   enterHydrationState,
+  getIsHydrating,
+  queueHydrationError,
   reenterHydrationStateFromDehydratedSuspenseInstance,
   resetHydrationState,
   tryToClaimNextHydratableInstance,
   warnIfHydrating,
-  queueHydrationError,
 } from './ReactFiberHydrationContext.old';
 import {
   adoptClassInstance,
@@ -219,44 +218,43 @@ import {
 } from './ReactFiberClassComponent.old';
 import {resolveDefaultProps} from './ReactFiberLazyComponent.old';
 import {
-  resolveLazyComponentTag,
-  createFiberFromTypeAndProps,
   createFiberFromFragment,
   createFiberFromOffscreen,
+  createFiberFromTypeAndProps,
   createWorkInProgress,
   isSimpleFunctionComponent,
+  resolveLazyComponentTag,
 } from './ReactFiber.old';
 import {
+  getWorkInProgressRoot,
+  markSkippedUpdateLanes,
+  pushRenderLanes,
+  renderDidSuspendDelayIfPossible,
   retryDehydratedSuspenseBoundary,
   scheduleUpdateOnFiber,
-  renderDidSuspendDelayIfPossible,
-  markSkippedUpdateLanes,
-  getWorkInProgressRoot,
-  pushRenderLanes,
 } from './ReactFiberWorkLoop.old';
 import {enqueueConcurrentRenderForLane} from './ReactFiberConcurrentUpdates.old';
 import {setWorkInProgressVersion} from './ReactMutableSource.old';
-import {pushCacheProvider, CacheContext} from './ReactFiberCacheComponent.old';
 import {
+  type CapturedValue,
   createCapturedValue,
   createCapturedValueAtFiber,
-  type CapturedValue,
 } from './ReactCapturedValue';
 import {createClassErrorUpdate} from './ReactFiberThrow.old';
 import is from 'shared/objectIs';
 import {
   getForksAtLevel,
   isForkedChild,
-  pushTreeId,
   pushMaterializedTreeId,
+  pushTreeId,
 } from './ReactFiberTreeContext.old';
 import {
-  requestCacheFromPool,
-  pushRootTransition,
-  getSuspendedCache,
-  pushTransition,
   getOffscreenDeferredCache,
+  getSuspendedCache,
   getSuspendedTransitions,
+  pushRootTransition,
+  pushTransition,
+  requestCacheFromPool,
 } from './ReactFiberTransition.old';
 
 const ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
@@ -285,6 +283,13 @@ if (__DEV__) {
   didWarnAboutDefaultPropsOnFunctionComponent = {};
 }
 
+/**
+ * Reconciler 模块的核心部分
+ * @param {Fiber|null} current
+ * @param {Fiber} workInProgress
+ * @param {any} nextChildren
+ * @param {Lanes} renderLanes
+ */
 export function reconcileChildren(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -3699,7 +3704,9 @@ function beginWork(
     }
   }
 
+  // 判断是 update 还是 mount
   if (current !== null) {
+    // update 时 判断是否可以复用
     const oldProps = current.memoizedProps;
     const newProps = workInProgress.pendingProps;
 
@@ -3771,8 +3778,10 @@ function beginWork(
   // move this assignment out of the common path and into each branch.
   workInProgress.lanes = NoLanes;
 
+  // 根据 tag 不同，进入不同的处理逻辑
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
+      // FC mount 进入的分支
       return mountIndeterminateComponent(
         current,
         workInProgress,
@@ -3781,6 +3790,7 @@ function beginWork(
       );
     }
     case LazyComponent: {
+      // lazyComponent mount 的时候进入的分支
       const elementType = workInProgress.elementType;
       return mountLazyComponent(
         current,
@@ -3790,8 +3800,10 @@ function beginWork(
       );
     }
     case FunctionComponent: {
+      // FC update 的时候进入的分支
       const Component = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;
+      // 合并组件的默认值 defaultProps
       const resolvedProps =
         workInProgress.elementType === Component
           ? unresolvedProps
