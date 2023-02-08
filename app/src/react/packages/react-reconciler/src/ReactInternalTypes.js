@@ -9,22 +9,25 @@
 
 import type {Source} from 'shared/ReactElementType';
 import type {
-  RefObject,
-  ReactContext,
-  MutableSourceSubscribeFn,
-  MutableSourceGetSnapshotFn,
-  MutableSourceVersion,
   MutableSource,
+  MutableSourceGetSnapshotFn,
+  MutableSourceSubscribeFn,
+  MutableSourceVersion,
+  ReactContext,
+  RefObject,
   StartTransitionOptions,
   Wakeable,
 } from 'shared/ReactTypes';
-import type {SuspenseInstance} from './ReactFiberHostConfig';
+import type {
+  NoTimeout,
+  SuspenseInstance,
+  TimeoutHandle,
+} from './ReactFiberHostConfig';
 import type {WorkTag} from './ReactWorkTags';
 import type {TypeOfMode} from './ReactTypeOfMode';
 import type {Flags} from './ReactFiberFlags';
-import type {Lane, Lanes, LaneMap} from './ReactFiberLane.old';
+import type {Lane, LaneMap, Lanes} from './ReactFiberLane.old';
 import type {RootTag} from './ReactRootTags';
-import type {TimeoutHandle, NoTimeout} from './ReactFiberHostConfig';
 import type {Cache} from './ReactFiberCacheComponent.old';
 import type {Transition} from './ReactFiberTracingMarkerComponent.new';
 import type {ConcurrentUpdate} from './ReactFiberConcurrentUpdates.new';
@@ -76,19 +79,23 @@ export type Fiber = {|
   // minimize the number of objects created during the initial render.
 
   // Tag identifying the type of fiber.
+  // 标记不同的组件类型
   tag: WorkTag,
 
   // Unique identifier of this child.
+  // ReactElement 里面的 key
   key: null | string,
 
   // The value of element.type which is used to preserve the identity during
   // reconciliation of this child.
+  // ReactElement.type
   elementType: any,
 
   // The resolved function/class/ associated with this fiber.
   type: any,
 
   // The local state associated with this fiber.
+  // 跟当前Fiber相关本地状态（比如浏览器环境就是DOM节点）
   stateNode: any,
 
   // Conceptual aliases
@@ -101,31 +108,41 @@ export type Fiber = {|
   // This is effectively the parent, but there can be multiple parents (two)
   // so this is only the parent of the thing we're currently processing.
   // It is conceptually the same as the return address of a stack frame.
+  // 该 fiber 的 父节点
   return: Fiber | null,
 
   // Singly Linked List Tree Structure.
+  // 该 fiber 的 第一个子节点
   child: Fiber | null,
+  // 该 fiber 右边的兄弟节点
   sibling: Fiber | null,
+  // 是 父节点的第几个子节点
   index: number,
 
   // The ref last used to attach this node.
   // I'll avoid adding an owner field for prod and model that as functions.
+  // ref 属性
   ref:
     | null
     | (((handle: mixed) => void) & {_stringRef: ?string, ...})
     | RefObject,
 
   // Input is the data coming into process this fiber. Arguments. Props.
+  // 新的变动带来的新的props(待更新的props)
   pendingProps: any, // This type will be more specific once we overload the tag.
+  // 上一次渲染完成之后的 props
   memoizedProps: any, // The props used to create the output.
 
   // A queue of state updates and callbacks.
+  // 该 Fiber 对应的组件产生的 Update 会存放在这个队列里面
   updateQueue: mixed,
 
   // The state used to create the output
+  // 上一次渲染完成之后的 state
   memoizedState: any,
 
   // Dependencies (contexts, events) for this fiber, if it has any
+  // context 相关的内容
   dependencies: Dependencies | null,
 
   // Bitfield that describes properties about the fiber and its subtree. E.g.
@@ -139,6 +156,7 @@ export type Fiber = {|
   // Effect
   flags: Flags,
   subtreeFlags: Flags,
+  // 需要删除的 fiber 节点
   deletions: Array<Fiber> | null,
 
   // Singly linked list fast path to the next fiber with side-effects.
@@ -147,7 +165,9 @@ export type Fiber = {|
   // The first and last fiber with side-effect within this subtree. This allows
   // us to reuse a slice of the linked list when we reuse the work done within
   // this fiber.
+  // 子树中第一个 side effect
   firstEffect: Fiber | null,
+  // 子树中最后一个 side effect
   lastEffect: Fiber | null,
 
   lanes: Lanes,
@@ -156,7 +176,10 @@ export type Fiber = {|
   // This is a pooled version of a Fiber. Every fiber that gets updated will
   // eventually have a pair. There are cases when we can clean up pairs to save
   // memory if we need to.
+  // work in progress fiber
   alternate: Fiber | null,
+
+  // 后面都是一些调试相关的属性
 
   // Time spent rendering this Fiber and its descendants for the current update.
   // This tells us how well the tree makes use of sCU for memoization.
