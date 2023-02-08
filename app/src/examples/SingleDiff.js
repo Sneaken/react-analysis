@@ -12,7 +12,10 @@ const SingleDiff = () => {
         {count}
       </button>
       <>
-        <p>{count}</p>
+        <p key="key">1</p>
+        <p key={count}>2</p>
+        <p key="key">3</p>
+        <p key={count}>4</p>
       </>
     </div>
   );
