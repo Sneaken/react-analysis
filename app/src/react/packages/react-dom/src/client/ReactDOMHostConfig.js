@@ -17,25 +17,24 @@ import type {
 import type {ReactScopeInstance} from 'shared/ReactTypes';
 
 import {
-  precacheFiberNode,
-  updateFiberProps,
   getClosestInstanceFromNode,
   getFiberFromScopeInstance,
   getInstanceFromNode as getInstanceFromNodeDOMTree,
   isContainerMarkedAsRoot,
+  precacheFiberNode,
+  updateFiberProps,
 } from './ReactDOMComponentTree';
-export {detachDeletedInstance} from './ReactDOMComponentTree';
 import {hasRole} from './DOMAccessibilityRoles';
 import {
+  checkForUnmatchedText,
   createElement,
   createTextNode,
-  setInitialProperties,
-  diffProperties,
-  updateProperties,
   diffHydratedProperties,
   diffHydratedText,
+  diffProperties,
+  setInitialProperties,
   trapClickOnNonInteractiveElement,
-  checkForUnmatchedText,
+  updateProperties,
   warnForDeletedHydratableElement,
   warnForDeletedHydratableText,
   warnForInsertedHydratedElement,
@@ -43,19 +42,19 @@ import {
 } from './ReactDOMComponent';
 import {getSelectionInformation, restoreSelection} from './ReactInputSelection';
 import setTextContent from './setTextContent';
-import {validateDOMNesting, updatedAncestorInfo} from './validateDOMNesting';
+import {updatedAncestorInfo, validateDOMNesting} from './validateDOMNesting';
 import {
+  getEventPriority,
   isEnabled as ReactBrowserEventEmitterIsEnabled,
   setEnabled as ReactBrowserEventEmitterSetEnabled,
-  getEventPriority,
 } from '../events/ReactDOMEventListener';
 import {getChildNamespace} from '../shared/DOMNamespaces';
 import {
+  COMMENT_NODE,
+  DOCUMENT_FRAGMENT_NODE,
+  DOCUMENT_NODE,
   ELEMENT_NODE,
   TEXT_NODE,
-  COMMENT_NODE,
-  DOCUMENT_NODE,
-  DOCUMENT_FRAGMENT_NODE,
 } from '../shared/HTMLNodeType';
 import dangerousStyleValue from '../shared/dangerousStyleValue';
 
@@ -72,6 +71,8 @@ import {DefaultEventPriority} from 'react-reconciler/src/ReactEventPriorities';
 
 // TODO: Remove this deep import when we delete the legacy root API
 import {ConcurrentMode, NoMode} from 'react-reconciler/src/ReactTypeOfMode';
+
+export {detachDeletedInstance} from './ReactDOMComponentTree';
 
 export type Type = string;
 export type Props = {
@@ -240,6 +241,16 @@ export function resetAfterCommit(containerInfo: Container): void {
   selectionInformation = null;
 }
 
+/**
+ * 创建 DOM 元素
+ * 在 DOM 元素上存放 fiber 信息 以及 props 信息
+ * @param {string} type
+ * @param {Props} props
+ * @param {Container} rootContainerInstance
+ * @param {HostContext} hostContext
+ * @param {Object} internalInstanceHandle
+ * @return {Instance}
+ */
 export function createInstance(
   type: string,
   props: Props,
@@ -267,13 +278,16 @@ export function createInstance(
   } else {
     parentNamespace = ((hostContext: any): HostContextProd);
   }
+  // 创建 DOM Element
   const domElement: Instance = createElement(
     type,
     props,
     rootContainerInstance,
     parentNamespace,
   );
+  // 将 fiber 信息也存放的 DOM 元素上
   precacheFiberNode(internalInstanceHandle, domElement);
+  // 将 fiber 的 props 存放在 DOM 元素上
   updateFiberProps(domElement, props);
   return domElement;
 }
@@ -285,6 +299,15 @@ export function appendInitialChild(
   parentInstance.appendChild(child);
 }
 
+/**
+ * 完成 DOM 属性的初始化
+ * @param {Instance} domElement
+ * @param {string} type
+ * @param {Props} props
+ * @param {Container} rootContainerInstance
+ * @param {HostContext} hostContext
+ * @return {boolean}
+ */
 export function finalizeInitialChildren(
   domElement: Instance,
   type: string,

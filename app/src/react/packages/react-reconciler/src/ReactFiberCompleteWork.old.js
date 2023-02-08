@@ -7,32 +7,73 @@
  * @flow
  */
 
-import type {Fiber} from './ReactInternalTypes';
+import type {Fiber, FiberRoot} from './ReactInternalTypes';
 import type {RootState} from './ReactFiberRoot.old';
-import type {Lanes, Lane} from './ReactFiberLane.old';
+import type {Lane, Lanes} from './ReactFiberLane.old';
+import {
+  includesSomeLane,
+  mergeLanes,
+  NoLanes,
+  OffscreenLane,
+  SomeRetryLane,
+} from './ReactFiberLane.old';
 import type {
-  ReactScopeInstance,
   ReactContext,
+  ReactScopeInstance,
   Wakeable,
 } from 'shared/ReactTypes';
-import type {FiberRoot} from './ReactInternalTypes';
 import type {
-  Instance,
-  Type,
-  Props,
-  Container,
   ChildSet,
+  Container,
+  Instance,
+  Props,
+  Type,
+} from './ReactFiberHostConfig';
+import {
+  appendChildToContainerChildSet,
+  appendInitialChild,
+  cloneHiddenInstance,
+  cloneHiddenTextInstance,
+  cloneInstance,
+  createContainerChildSet,
+  createInstance,
+  createTextInstance,
+  finalizeContainerChildren,
+  finalizeInitialChildren,
+  preparePortalMount,
+  prepareScopeUpdate,
+  prepareUpdate,
+  supportsMutation,
+  supportsPersistence,
 } from './ReactFiberHostConfig';
 import type {
-  SuspenseState,
   SuspenseListRenderState,
+  SuspenseState,
 } from './ReactFiberSuspenseComponent.old';
+import {findFirstSuspended} from './ReactFiberSuspenseComponent.old';
 import type {SuspenseContext} from './ReactFiberSuspenseContext.old';
+import {
+  ForceSuspenseFallback,
+  hasSuspenseContext,
+  InvisibleParentSuspenseContext,
+  popSuspenseContext,
+  pushSuspenseContext,
+  setDefaultShallowSuspenseContext,
+  setShallowSuspenseContext,
+  suspenseStackCursor,
+} from './ReactFiberSuspenseContext.old';
 import type {OffscreenState} from './ReactFiberOffscreenComponent';
 import type {Cache} from './ReactFiberCacheComponent.old';
+import {popCacheProvider} from './ReactFiberCacheComponent.old';
 import {
-  enableSuspenseAvoidThisFallback,
+  enableCache,
   enableLegacyHidden,
+  enableProfilerTimer,
+  enableScopeAPI,
+  enableSuspenseAvoidThisFallback,
+  enableSuspenseCallback,
+  enableSuspenseLayoutEffectSemantics,
+  enableTransitionTracing,
 } from 'shared/ReactFeatureFlags';
 
 import {resetWorkInProgressVersions as resetMutableSourceWorkInProgressVersions} from './ReactMutableSource.old';
@@ -40,84 +81,55 @@ import {resetWorkInProgressVersions as resetMutableSourceWorkInProgressVersions}
 import {now} from './Scheduler';
 
 import {
-  IndeterminateComponent,
-  FunctionComponent,
+  CacheComponent,
   ClassComponent,
-  HostRoot,
-  HostComponent,
-  HostText,
-  HostPortal,
-  ContextProvider,
   ContextConsumer,
+  ContextProvider,
   ForwardRef,
   Fragment,
+  FunctionComponent,
+  HostComponent,
+  HostPortal,
+  HostRoot,
+  HostText,
+  IncompleteClassComponent,
+  IndeterminateComponent,
+  LazyComponent,
+  LegacyHiddenComponent,
+  MemoComponent,
   Mode,
+  OffscreenComponent,
   Profiler,
+  ScopeComponent,
+  SimpleMemoComponent,
   SuspenseComponent,
   SuspenseListComponent,
-  MemoComponent,
-  SimpleMemoComponent,
-  LazyComponent,
-  IncompleteClassComponent,
-  ScopeComponent,
-  OffscreenComponent,
-  LegacyHiddenComponent,
-  CacheComponent,
   TracingMarkerComponent,
 } from './ReactWorkTags';
-import {NoMode, ConcurrentMode, ProfileMode} from './ReactTypeOfMode';
+import {ConcurrentMode, NoMode, ProfileMode} from './ReactTypeOfMode';
 import {
+  ChildDeletion,
+  DidCapture,
+  ForceClientRender,
+  Incomplete,
+  MutationMask,
+  NoFlags,
+  Passive,
+  Placement,
   Ref,
   RefStatic,
-  Placement,
+  ShouldCapture,
+  Snapshot,
+  StaticMask,
   Update,
   Visibility,
-  NoFlags,
-  DidCapture,
-  Snapshot,
-  ChildDeletion,
-  StaticMask,
-  MutationMask,
-  Passive,
-  Incomplete,
-  ShouldCapture,
-  ForceClientRender,
 } from './ReactFiberFlags';
-
 import {
-  createInstance,
-  createTextInstance,
-  appendInitialChild,
-  finalizeInitialChildren,
-  prepareUpdate,
-  supportsMutation,
-  supportsPersistence,
-  cloneInstance,
-  cloneHiddenInstance,
-  cloneHiddenTextInstance,
-  createContainerChildSet,
-  appendChildToContainerChildSet,
-  finalizeContainerChildren,
-  preparePortalMount,
-  prepareScopeUpdate,
-} from './ReactFiberHostConfig';
-import {
-  getRootHostContainer,
-  popHostContext,
   getHostContext,
+  getRootHostContainer,
   popHostContainer,
+  popHostContext,
 } from './ReactFiberHostContext.old';
-import {
-  suspenseStackCursor,
-  InvisibleParentSuspenseContext,
-  hasSuspenseContext,
-  popSuspenseContext,
-  pushSuspenseContext,
-  setShallowSuspenseContext,
-  ForceSuspenseFallback,
-  setDefaultShallowSuspenseContext,
-} from './ReactFiberSuspenseContext.old';
-import {findFirstSuspended} from './ReactFiberSuspenseComponent.old';
 import {
   isContextProvider as isLegacyContextProvider,
   popContext as popLegacyContext,
@@ -125,44 +137,28 @@ import {
 } from './ReactFiberContext.old';
 import {popProvider} from './ReactFiberNewContext.old';
 import {
-  prepareToHydrateHostInstance,
-  prepareToHydrateHostTextInstance,
-  prepareToHydrateHostSuspenseInstance,
-  warnIfUnhydratedTailNodes,
-  popHydrationState,
-  resetHydrationState,
   getIsHydrating,
   hasUnhydratedTailNodes,
+  popHydrationState,
+  prepareToHydrateHostInstance,
+  prepareToHydrateHostSuspenseInstance,
+  prepareToHydrateHostTextInstance,
+  resetHydrationState,
   upgradeHydrationErrorsToRecoverable,
+  warnIfUnhydratedTailNodes,
 } from './ReactFiberHydrationContext.old';
 import {
-  enableSuspenseCallback,
-  enableScopeAPI,
-  enableProfilerTimer,
-  enableCache,
-  enableSuspenseLayoutEffectSemantics,
-  enableTransitionTracing,
-} from 'shared/ReactFeatureFlags';
-import {
+  getRenderTargetTime,
+  getWorkInProgressTransitions,
+  popRenderLanes,
   renderDidSuspend,
   renderDidSuspendDelayIfPossible,
   renderHasNotSuspendedYet,
-  popRenderLanes,
-  getRenderTargetTime,
   subtreeRenderLanes,
-  getWorkInProgressTransitions,
 } from './ReactFiberWorkLoop.old';
-import {
-  OffscreenLane,
-  SomeRetryLane,
-  NoLanes,
-  includesSomeLane,
-  mergeLanes,
-} from './ReactFiberLane.old';
 import {resetChildFibers} from './ReactChildFiber.old';
 import {createScopeInstance} from './ReactFiberScope.old';
 import {transferActualDuration} from './ReactProfilerTimer.old';
-import {popCacheProvider} from './ReactFiberCacheComponent.old';
 import {popTreeContext} from './ReactFiberTreeContext.old';
 import {popRootTransition, popTransition} from './ReactFiberTransition.old';
 
@@ -211,6 +207,17 @@ let updateHostText;
 if (supportsMutation) {
   // Mutation mode
 
+  /**
+   * 将下一层 DOM 元素插入 "createInstance 方法创建的 DOM 元素"中
+   * 1. 从当前 fiberNode 向下遍历，将遍历到的第一层 DOM 元素类型通过 appendChild 方法插入到 parent 末尾
+   * 2. 对兄弟 fiberNode 执行 步骤1；
+   * 3. 如果没有兄弟节点，则对父 fiberNode 的兄弟执行步骤1；
+   * 4. 当遍历流程回到最初执行的步骤1所在层或者 parent 所在层时终止
+   * @param {Instance} parent
+   * @param {Fiber} workInProgress
+   * @param {boolean} needsVisibilityToggle
+   * @param {boolean} isHidden
+   */
   appendAllChildren = function (
     parent: Instance,
     workInProgress: Fiber,
@@ -219,28 +226,37 @@ if (supportsMutation) {
   ) {
     // We only have the top Fiber that was created but we need recurse down its
     // children to find all the terminal nodes.
+    // 为什么遍历那么复杂？
+    // 因为 fiberNode 的层级与 DOM 元素的层级可能不是一一对应的。
     let node = workInProgress.child;
     while (node !== null) {
+      // 步骤1：向下遍历，对第一层 DOM 元素执行 appendChild
       if (node.tag === HostComponent || node.tag === HostText) {
+        // 对 HostComponent, HostText 执行 appendChild
         appendInitialChild(parent, node.stateNode);
       } else if (node.tag === HostPortal) {
         // If we have a portal child, then we don't want to traverse
         // down its children. Instead, we'll get insertions from each child in
         // the portal directly.
       } else if (node.child !== null) {
+        // 继续向下遍历，直到找到第一层 DOM 元素类型
         node.child.return = node;
         node = node.child;
         continue;
       }
+      // 终止情况1：遍历到 parent 对应的 FiberNode
       if (node === workInProgress) {
         return;
       }
+      // 如果没有兄弟节点，则向父 fiberNode 遍历
       while (node.sibling === null) {
+        // 终止情况2：回到最初执行步骤1所在层
         if (node.return === null || node.return === workInProgress) {
           return;
         }
         node = node.return;
       }
+      // 对兄弟 fiberNode 执行步骤1
       node.sibling.return = node.return;
       node = node.sibling;
     }
@@ -252,6 +268,14 @@ if (supportsMutation) {
   ) {
     // Noop
   };
+  /**
+   *
+   * @param {Fiber} current
+   * @param {Fiber} workInProgress
+   * @param {Type} type
+   * @param {Props} newProps
+   * @param {Container} rootContainerInstance
+   */
   updateHostComponent = function (
     current: Fiber,
     workInProgress: Fiber,
@@ -290,6 +314,7 @@ if (supportsMutation) {
     // If the update payload indicates that there is a change or if there
     // is a new ref we mark this as an update. All the work is done in commitWork.
     if (updatePayload) {
+      // 如果有待更新的内容，就标记更新
       markUpdate(workInProgress);
     }
   };
@@ -648,6 +673,11 @@ function cutOffTailIfNeeded(
   }
 }
 
+/**
+ *
+ * @param {Fiber} completedWork
+ * @return {boolean}
+ */
 function bubbleProperties(completedWork: Fiber) {
   const didBailout =
     completedWork.alternate !== null &&
@@ -671,7 +701,9 @@ function bubbleProperties(completedWork: Fiber) {
           mergeLanes(child.lanes, child.childLanes),
         );
 
+        // 收集子 fiberNode 的 子孙 fiberNode 中标记的 flags
         subtreeFlags |= child.subtreeFlags;
+        // 收集子 fiberNode 标记的 flags
         subtreeFlags |= child.flags;
 
         // When a fiber is cloned, its actualDuration is reset to 0. This value will
@@ -697,7 +729,9 @@ function bubbleProperties(completedWork: Fiber) {
           mergeLanes(child.lanes, child.childLanes),
         );
 
+        // 收集子 fiberNode 的 子孙 fiberNode 中标记的 flags
         subtreeFlags |= child.subtreeFlags;
+        // 收集子 fiberNode 标记的 flags
         subtreeFlags |= child.flags;
 
         // Update the return pointer so the tree is consistent. This is a code
@@ -708,7 +742,7 @@ function bubbleProperties(completedWork: Fiber) {
         child = child.sibling;
       }
     }
-
+    // 附加在当前 fiberNode 的 subtreeFlags 上
     completedWork.subtreeFlags |= subtreeFlags;
   } else {
     // Bubble up the earliest expiration time.
@@ -972,6 +1006,7 @@ function completeWork(
       const rootContainerInstance = getRootHostContainer();
       const type = workInProgress.type;
       if (current !== null && workInProgress.stateNode != null) {
+        // update
         updateHostComponent(
           current,
           workInProgress,
@@ -981,9 +1016,11 @@ function completeWork(
         );
 
         if (current.ref !== workInProgress.ref) {
+          // ref 如果变化了 标记 Ref
           markRef(workInProgress);
         }
       } else {
+        // mount
         if (!newProps) {
           if (workInProgress.stateNode === null) {
             throw new Error(
@@ -1004,8 +1041,8 @@ function completeWork(
         // bottom->up. Top->down is faster in IE11.
         const wasHydrated = popHydrationState(workInProgress);
         if (wasHydrated) {
-          // TODO: Move this and createInstance step into the beginPhase
-          // to consolidate.
+          // SSR
+          // TODO: Move this and createInstance step into the beginPhase to consolidate.
           if (
             prepareToHydrateHostInstance(
               workInProgress,
@@ -1018,6 +1055,7 @@ function completeWork(
             markUpdate(workInProgress);
           }
         } else {
+          // 创建 DOM
           const instance = createInstance(
             type,
             newProps,
@@ -1026,6 +1064,7 @@ function completeWork(
             workInProgress,
           );
 
+          // 添加子 DOM
           appendAllChildren(instance, workInProgress, false, false);
 
           workInProgress.stateNode = instance;
@@ -1033,6 +1072,7 @@ function completeWork(
           // Certain renderers require commit-time effects for initial mount.
           // (eg DOM renderer supports auto-focus for certain elements).
           // Make sure such renderers get scheduled for later work.
+          // 设置 DOM 属性
           if (
             finalizeInitialChildren(
               instance,
@@ -1048,9 +1088,11 @@ function completeWork(
 
         if (workInProgress.ref !== null) {
           // If there is a ref on a host node we need to schedule a callback
+          // 标记存在 ref
           markRef(workInProgress);
         }
       }
+      // flags 冒泡
       bubbleProperties(workInProgress);
       return null;
     }

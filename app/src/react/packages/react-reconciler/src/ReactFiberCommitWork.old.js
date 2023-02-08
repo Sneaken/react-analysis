@@ -8,163 +8,162 @@
  */
 
 import type {
-  Instance,
-  TextInstance,
-  SuspenseInstance,
-  Container,
   ChildSet,
+  Container,
+  Instance,
+  SuspenseInstance,
+  TextInstance,
   UpdatePayload,
 } from './ReactFiberHostConfig';
-import type {Fiber} from './ReactInternalTypes';
-import type {FiberRoot} from './ReactInternalTypes';
+import {
+  appendChild,
+  appendChildToContainer,
+  beforeActiveInstanceBlur,
+  clearContainer,
+  clearSuspenseBoundary,
+  clearSuspenseBoundaryFromContainer,
+  commitHydratedContainer,
+  commitHydratedSuspenseInstance,
+  commitMount,
+  commitTextUpdate,
+  commitUpdate,
+  createContainerChildSet,
+  detachDeletedInstance,
+  getPublicInstance,
+  hideInstance,
+  hideTextInstance,
+  insertBefore,
+  insertInContainerBefore,
+  prepareForCommit,
+  prepareScopeUpdate,
+  removeChild,
+  removeChildFromContainer,
+  replaceContainerChildren,
+  resetTextContent,
+  supportsHydration,
+  supportsMutation,
+  supportsPersistence,
+  unhideInstance,
+  unhideTextInstance,
+} from './ReactFiberHostConfig';
+import type {Fiber, FiberRoot} from './ReactInternalTypes';
 import type {Lanes} from './ReactFiberLane.old';
+import {clearTransitionsForLanes} from './ReactFiberLane.old';
 import type {SuspenseState} from './ReactFiberSuspenseComponent.old';
 import type {UpdateQueue} from './ReactFiberClassUpdateQueue.old';
+import {commitUpdateQueue} from './ReactFiberClassUpdateQueue.old';
 import type {FunctionComponentUpdateQueue} from './ReactFiberHooks.old';
 import type {Wakeable} from 'shared/ReactTypes';
 import type {
-  OffscreenState,
   OffscreenInstance,
+  OffscreenState,
 } from './ReactFiberOffscreenComponent';
 import type {HookFlags} from './ReactHookEffectTags';
+import {
+  HasEffect as HookHasEffect,
+  Insertion as HookInsertion,
+  Layout as HookLayout,
+  NoFlags as NoHookEffect,
+  Passive as HookPassive,
+} from './ReactHookEffectTags';
 import type {Cache} from './ReactFiberCacheComponent.old';
+import {releaseCache, retainCache} from './ReactFiberCacheComponent.old';
 import type {RootState} from './ReactFiberRoot.old';
 import type {Transition} from './ReactFiberTracingMarkerComponent.old';
 
 import {
+  deletedTreeCleanUpLevel,
+  enableCache,
   enableCreateEventHandleAPI,
-  enableProfilerTimer,
   enableProfilerCommitHooks,
   enableProfilerNestedUpdatePhase,
+  enableProfilerTimer,
   enableSchedulingProfiler,
-  enableSuspenseCallback,
   enableScopeAPI,
   enableStrictEffects,
-  deletedTreeCleanUpLevel,
+  enableSuspenseCallback,
   enableSuspenseLayoutEffectSemantics,
-  enableUpdaterTracking,
-  enableCache,
   enableTransitionTracing,
+  enableUpdaterTracking,
 } from 'shared/ReactFeatureFlags';
 import {
-  FunctionComponent,
-  ForwardRef,
-  ClassComponent,
-  HostRoot,
-  HostComponent,
-  HostText,
-  HostPortal,
-  Profiler,
-  SuspenseComponent,
-  DehydratedFragment,
-  IncompleteClassComponent,
-  MemoComponent,
-  SimpleMemoComponent,
-  SuspenseListComponent,
-  ScopeComponent,
-  OffscreenComponent,
-  LegacyHiddenComponent,
   CacheComponent,
+  ClassComponent,
+  DehydratedFragment,
+  ForwardRef,
+  FunctionComponent,
+  HostComponent,
+  HostPortal,
+  HostRoot,
+  HostText,
+  IncompleteClassComponent,
+  LegacyHiddenComponent,
+  MemoComponent,
+  OffscreenComponent,
+  Profiler,
+  ScopeComponent,
+  SimpleMemoComponent,
+  SuspenseComponent,
+  SuspenseListComponent,
   TracingMarkerComponent,
 } from './ReactWorkTags';
-import {detachDeletedInstance} from './ReactFiberHostConfig';
 import {
-  NoFlags,
-  ContentReset,
-  Placement,
+  BeforeMutationMask,
   ChildDeletion,
+  ContentReset,
+  Hydrating,
+  LayoutMask,
+  MutationMask,
+  NoFlags,
+  Passive,
+  PassiveMask,
+  Placement,
+  Ref,
   Snapshot,
   Update,
-  Ref,
-  Hydrating,
-  Passive,
-  BeforeMutationMask,
-  MutationMask,
-  LayoutMask,
-  PassiveMask,
   Visibility,
 } from './ReactFiberFlags';
 import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
 import {
+  getCurrentFiber as getCurrentDebugFiberInDEV,
   resetCurrentFiber as resetCurrentDebugFiberInDEV,
   setCurrentFiber as setCurrentDebugFiberInDEV,
-  getCurrentFiber as getCurrentDebugFiberInDEV,
 } from './ReactCurrentFiber';
 import {resolveDefaultProps} from './ReactFiberLazyComponent.old';
 import {
-  isCurrentUpdateNested,
   getCommitTime,
+  isCurrentUpdateNested,
   recordLayoutEffectDuration,
-  startLayoutEffectTimer,
   recordPassiveEffectDuration,
+  startLayoutEffectTimer,
   startPassiveEffectTimer,
 } from './ReactProfilerTimer.old';
 import {ConcurrentMode, NoMode, ProfileMode} from './ReactTypeOfMode';
-import {commitUpdateQueue} from './ReactFiberClassUpdateQueue.old';
 import {
-  getPublicInstance,
-  supportsMutation,
-  supportsPersistence,
-  supportsHydration,
-  commitMount,
-  commitUpdate,
-  resetTextContent,
-  commitTextUpdate,
-  appendChild,
-  appendChildToContainer,
-  insertBefore,
-  insertInContainerBefore,
-  removeChild,
-  removeChildFromContainer,
-  clearSuspenseBoundary,
-  clearSuspenseBoundaryFromContainer,
-  replaceContainerChildren,
-  createContainerChildSet,
-  hideInstance,
-  hideTextInstance,
-  unhideInstance,
-  unhideTextInstance,
-  commitHydratedContainer,
-  commitHydratedSuspenseInstance,
-  clearContainer,
-  prepareScopeUpdate,
-  prepareForCommit,
-  beforeActiveInstanceBlur,
-} from './ReactFiberHostConfig';
-import {
-  captureCommitPhaseError,
-  resolveRetryWakeable,
-  markCommitTimeOfFallback,
-  enqueuePendingPassiveProfilerEffect,
-  restorePendingUpdaters,
-  addTransitionStartCallbackToPendingTransition,
   addTransitionCompleteCallbackToPendingTransition,
+  addTransitionStartCallbackToPendingTransition,
+  captureCommitPhaseError,
+  enqueuePendingPassiveProfilerEffect,
+  markCommitTimeOfFallback,
+  resolveRetryWakeable,
+  restorePendingUpdaters,
   setIsRunningInsertionEffect,
 } from './ReactFiberWorkLoop.old';
-import {
-  NoFlags as NoHookEffect,
-  HasEffect as HookHasEffect,
-  Layout as HookLayout,
-  Insertion as HookInsertion,
-  Passive as HookPassive,
-} from './ReactHookEffectTags';
 import {didWarnAboutReassigningProps} from './ReactFiberBeginWork.old';
 import {doesFiberContain} from './ReactFiberTreeReflection';
-import {invokeGuardedCallback, clearCaughtError} from 'shared/ReactErrorUtils';
+import {clearCaughtError, invokeGuardedCallback} from 'shared/ReactErrorUtils';
 import {
   isDevToolsPresent,
-  markComponentPassiveEffectMountStarted,
-  markComponentPassiveEffectMountStopped,
-  markComponentPassiveEffectUnmountStarted,
-  markComponentPassiveEffectUnmountStopped,
   markComponentLayoutEffectMountStarted,
   markComponentLayoutEffectMountStopped,
   markComponentLayoutEffectUnmountStarted,
   markComponentLayoutEffectUnmountStopped,
+  markComponentPassiveEffectMountStarted,
+  markComponentPassiveEffectMountStopped,
+  markComponentPassiveEffectUnmountStarted,
+  markComponentPassiveEffectUnmountStopped,
   onCommitUnmount,
 } from './ReactFiberDevToolsHook.old';
-import {releaseCache, retainCache} from './ReactFiberCacheComponent.old';
-import {clearTransitionsForLanes} from './ReactFiberLane.old';
 
 let didWarnAboutUndefinedSnapshotBeforeUpdate: Set<mixed> | null = null;
 if (__DEV__) {
@@ -387,6 +386,13 @@ function commitBeforeMutationEffects_complete() {
   }
 }
 
+/**
+ * BeforeMutation 阶段的主要工作
+ * 整个过程主要处理如下两种类型的 fiberNode
+ * 1. ClassComponent: 执行 getSnapshotBeforeUpdate 方法
+ * 2. HostRoot：清空 HostRoot 挂载的内容，方便 Mutation 阶段渲染。
+ * @param {Fiber} finishedWork
+ */
 function commitBeforeMutationEffectsOnFiber(finishedWork: Fiber) {
   const current = finishedWork.alternate;
   const flags = finishedWork.flags;
@@ -702,6 +708,13 @@ export function commitPassiveEffectDurations(
   }
 }
 
+/**
+ * Layout 阶段的主要工作
+ * @param {FiberRoot} finishedRoot
+ * @param {Fiber|null} current
+ * @param {Fiber} finishedWork
+ * @param {Lanes} committedLanes
+ */
 function commitLayoutEffectOnFiber(
   finishedRoot: FiberRoot,
   current: Fiber | null,
@@ -2082,6 +2095,15 @@ function recursivelyTraverseMutationEffects(
   setCurrentDebugFiberInDEV(prevDebugFiber);
 }
 
+/**
+ * Mutation 阶段的主要工作
+ * HostComponent:  进行 DOM 元素的增、删、改
+ * FC | ForwardRef | MemoComponent | SimpleMemoComponent: 执行 Effect destroy 回调， 然后再执行 effect create 回调
+ *
+ * @param {Fiber} finishedWork
+ * @param {FiberRoot} root
+ * @param {Lanes} lanes
+ */
 function commitMutationEffectsOnFiber(
   finishedWork: Fiber,
   root: FiberRoot,

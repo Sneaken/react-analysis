@@ -8,8 +8,8 @@
  */
 
 import {
-  registrationNameDependencies,
   possibleRegistrationNames,
+  registrationNameDependencies,
 } from '../events/EventRegistry';
 
 import {canUseDOM} from 'shared/ExecutionEnvironment';
@@ -22,30 +22,30 @@ import {
   setValueForProperty,
 } from './DOMPropertyOperations';
 import {
-  initWrapperState as ReactDOMInputInitWrapperState,
   getHostProps as ReactDOMInputGetHostProps,
+  initWrapperState as ReactDOMInputInitWrapperState,
   postMountWrapper as ReactDOMInputPostMountWrapper,
+  restoreControlledState as ReactDOMInputRestoreControlledState,
   updateChecked as ReactDOMInputUpdateChecked,
   updateWrapper as ReactDOMInputUpdateWrapper,
-  restoreControlledState as ReactDOMInputRestoreControlledState,
 } from './ReactDOMInput';
 import {
   postMountWrapper as ReactDOMOptionPostMountWrapper,
   validateProps as ReactDOMOptionValidateProps,
 } from './ReactDOMOption';
 import {
-  initWrapperState as ReactDOMSelectInitWrapperState,
   getHostProps as ReactDOMSelectGetHostProps,
+  initWrapperState as ReactDOMSelectInitWrapperState,
   postMountWrapper as ReactDOMSelectPostMountWrapper,
-  restoreControlledState as ReactDOMSelectRestoreControlledState,
   postUpdateWrapper as ReactDOMSelectPostUpdateWrapper,
+  restoreControlledState as ReactDOMSelectRestoreControlledState,
 } from './ReactDOMSelect';
 import {
-  initWrapperState as ReactDOMTextareaInitWrapperState,
   getHostProps as ReactDOMTextareaGetHostProps,
+  initWrapperState as ReactDOMTextareaInitWrapperState,
   postMountWrapper as ReactDOMTextareaPostMountWrapper,
-  updateWrapper as ReactDOMTextareaUpdateWrapper,
   restoreControlledState as ReactDOMTextareaRestoreControlledState,
+  updateWrapper as ReactDOMTextareaUpdateWrapper,
 } from './ReactDOMTextarea';
 import {track} from './inputValueTracking';
 import setInnerHTML from './setInnerHTML';
@@ -55,7 +55,7 @@ import {
   setValueForStyles,
   validateShorthandPropertyCollisionInDev,
 } from './CSSPropertyOperations';
-import {HTML_NAMESPACE, getIntrinsicNamespace} from '../shared/DOMNamespaces';
+import {getIntrinsicNamespace, HTML_NAMESPACE} from '../shared/DOMNamespaces';
 import {
   getPropertyInfo,
   shouldIgnoreAttribute,
@@ -70,13 +70,13 @@ import {validateProperties as validateInputProperties} from '../shared/ReactDOMN
 import {validateProperties as validateUnknownProperties} from '../shared/ReactDOMUnknownPropertyHook';
 
 import {
-  enableTrustedTypesIntegration,
-  enableCustomElementPropertySupport,
   enableClientRenderFallbackOnTextMismatch,
+  enableCustomElementPropertySupport,
+  enableTrustedTypesIntegration,
 } from 'shared/ReactFeatureFlags';
 import {
-  mediaEventTypes,
   listenToNonDelegatedEvent,
+  mediaEventTypes,
 } from '../events/DOMPluginEventSystem';
 
 let didWarnInvalidHydration = false;
@@ -480,6 +480,13 @@ export function createTextNode(
   );
 }
 
+/**
+ * 设置 DOM 属性
+ * @param domElement
+ * @param tag
+ * @param rawProps
+ * @param rootContainerElement
+ */
 export function setInitialProperties(
   domElement: Element,
   tag: string,
@@ -604,7 +611,15 @@ export function setInitialProperties(
   }
 }
 
-// Calculate the diff between the two objects.
+/**
+ * Calculate the diff between the two objects.
+ * @param {Element} domElement
+ * @param {string} tag
+ * @param {Object} lastRawProps
+ * @param {Object} nextRawProps
+ * @param {Element | Document | DocumentFragment} rootContainerElement
+ * @return {Array<*>}
+ */
 export function diffProperties(
   domElement: Element,
   tag: string,
@@ -616,9 +631,12 @@ export function diffProperties(
     validatePropertiesInDevelopment(tag, nextRawProps);
   }
 
+  // 保存变化属性的 key、value
   let updatePayload: null | Array<any> = null;
 
+  // 更新前的属性
   let lastProps: Object;
+  // 更新后的属性
   let nextProps: Object;
   switch (tag) {
     case 'input':
@@ -654,15 +672,19 @@ export function diffProperties(
   let propKey;
   let styleName;
   let styleUpdates = null;
+  // 标记删除"更新前有，更新后没有"的属性
   for (propKey in lastProps) {
     if (
+      // nextProps 存在 propKey
       nextProps.hasOwnProperty(propKey) ||
+      // propKey 是 lastProps 继承的
       !lastProps.hasOwnProperty(propKey) ||
       lastProps[propKey] == null
     ) {
       continue;
     }
     if (propKey === STYLE) {
+      // 处理 style
       const lastStyle = lastProps[propKey];
       for (styleName in lastStyle) {
         if (lastStyle.hasOwnProperty(styleName)) {
@@ -691,9 +713,11 @@ export function diffProperties(
     } else {
       // For all other deleted properties we add it to the queue. We use
       // the allowed property list in the commit phase instead.
+      // 其他更新后被删除的属性的键值对
       (updatePayload = updatePayload || []).push(propKey, null);
     }
   }
+  // 标记更新 "update 流程前后变化" 的属性
   for (propKey in nextProps) {
     const nextProp = nextProps[propKey];
     const lastProp = lastProps != null ? lastProps[propKey] : undefined;
@@ -705,6 +729,7 @@ export function diffProperties(
       continue;
     }
     if (propKey === STYLE) {
+      //  处理 style
       if (__DEV__) {
         if (nextProp) {
           // Freeze the next style object so that we can assume it won't be
@@ -748,6 +773,7 @@ export function diffProperties(
         styleUpdates = nextProp;
       }
     } else if (propKey === DANGEROUSLY_SET_INNER_HTML) {
+      // 处理 innerHTML
       const nextHtml = nextProp ? nextProp[HTML] : undefined;
       const lastHtml = lastProp ? lastProp[HTML] : undefined;
       if (nextHtml != null) {
@@ -760,6 +786,7 @@ export function diffProperties(
       }
     } else if (propKey === CHILDREN) {
       if (typeof nextProp === 'string' || typeof nextProp === 'number') {
+        // 处理单一文本类型的 children
         (updatePayload = updatePayload || []).push(propKey, '' + nextProp);
       }
     } else if (
@@ -769,6 +796,7 @@ export function diffProperties(
       // Noop
     } else if (registrationNameDependencies.hasOwnProperty(propKey)) {
       if (nextProp != null) {
+        // 处理 onScroll 事件
         // We eagerly listen to this even though we haven't committed yet.
         if (__DEV__ && typeof nextProp !== 'function') {
           warnForInvalidEventListener(propKey, nextProp);
@@ -786,6 +814,7 @@ export function diffProperties(
     } else {
       // For any other property we always add it to the queue and then we
       // filter it out using the allowed property list during the commit.
+      // 其他变化的属性的键值对
       (updatePayload = updatePayload || []).push(propKey, nextProp);
     }
   }
