@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 function Effect() {
   const ref = useRef(0);
+  const [obj, setObj] = useState({});
   const [_, update] = useState({});
   useEffect(() => {
     const timer = setInterval(() => {
@@ -15,6 +16,10 @@ function Effect() {
   useEffect(() => {
     console.log("ref.value =>", ref.current);
   }, [ref.current]);
+
+  useEffect(() => {
+    console.log("obj =>", obj);
+  }, [obj]);
 
   return (
     <div>
