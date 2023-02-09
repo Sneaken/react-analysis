@@ -135,11 +135,15 @@ export type Update<S, A> = {|
 
 export type UpdateQueue<S, A> = {|
   // 触发更新时产生的 update
+  // 是一个环状链表，始终指向链表的最后一个
   pending: Update<S, A> | null,
   interleaved: Update<S, A> | null,
   lanes: Lanes,
+  // 触发更新的操作
   dispatch: ((A) => mixed) | null,
+  // 上一次更新后的 reducer
   lastRenderedReducer: ((S, A) => S) | null,
+  // 上一次渲染后的值
   lastRenderedState: S | null,
 |};
 
@@ -150,15 +154,23 @@ if (__DEV__) {
 }
 
 export type Hook = {|
+  // 当前状态
   memoizedState: any,
+  // 初始状态
   baseState: any,
+  // 更新队列的基础状态
   baseQueue: Update<any, any> | null,
+  // 更新队列
   queue: any,
+  // 同一个组件的下一个 Hook，形成链表
   next: Hook | null,
 |};
 
 export type Effect = {|
-  // 用于区分 effect 类型
+  // 用于区分 effect 类型 Passive | Layout | Insertion
+  // Passive 代表 useEffect
+  // Layout 代表 useLayoutEffect
+  // Insertion 代表 useInsertionEffect
   tag: HookFlags,
   // effect 回调函数
   create: () => (() => void) | void,
@@ -381,7 +393,7 @@ function areHookInputsEqual(
 }
 
 /**
- * render一次函数组件
+ * render 一次函数组件
  * 如果在 rendering 中 触发了更新再 rerender, 直到上限 25 次 发出警告
  * @param current
  * @param workInProgress
@@ -433,6 +445,7 @@ export function renderWithHooks<Props, SecondArg>(
   // so memoizedState would be null during updates and mounts.
 
   if (__DEV__) {
+    // 这样设计的目的是为了检测 "Hooks 执行的上下文环境"
     if (current !== null && current.memoizedState !== null) {
       // update 的 时候
       ReactCurrentDispatcher.current = HooksDispatcherOnUpdateInDEV;
@@ -662,6 +675,10 @@ export function resetHooksAfterThrow(): void {
   localIdCounter = 0;
 }
 
+/**
+ * 初始化一个空 hook
+ * @return {Hook}
+ */
 function mountWorkInProgressHook(): Hook {
   const hook: Hook = {
     memoizedState: null,
@@ -761,7 +778,9 @@ function mountReducer<S, I, A>(
   initialArg: I,
   init?: (I) => S,
 ): [S, Dispatch<A>] {
+  // 创建 useReducer 对应的 hook
   const hook = mountWorkInProgressHook();
+  // 初始化 memoizedState
   let initialState;
   if (init !== undefined) {
     initialState = init(initialArg);
@@ -769,6 +788,7 @@ function mountReducer<S, I, A>(
     initialState = ((initialArg: any): S);
   }
   hook.memoizedState = hook.baseState = initialState;
+  // 初始化 hook.queue
   const queue: UpdateQueue<S, A> = {
     pending: null,
     interleaved: null,
@@ -1540,12 +1560,15 @@ function forceStoreRerender(fiber) {
 function mountState<S>(
   initialState: (() => S) | S,
 ): [S, Dispatch<BasicStateAction<S>>] {
+  // 创建 useState 对应的 hook
   const hook = mountWorkInProgressHook();
   if (typeof initialState === 'function') {
     // $FlowFixMe: Flow doesn't like mixed types
     initialState = initialState();
   }
+  // 初始化 memoizedState
   hook.memoizedState = hook.baseState = initialState;
+  // 初始化 hook.queue
   const queue: UpdateQueue<S, BasicStateAction<S>> = {
     pending: null,
     interleaved: null,
@@ -2282,7 +2305,9 @@ function dispatchSetState<S, A>(
     next: (null: any),
   };
 
+  // render 阶段是否触发更新
   if (isRenderPhaseUpdate(fiber)) {
+    // 将 update 放入更新队列中
     enqueueRenderPhaseUpdate(queue, update);
   } else {
     const alternate = fiber.alternate;

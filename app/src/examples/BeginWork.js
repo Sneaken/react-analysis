@@ -1,4 +1,13 @@
-import { Component, lazy, memo, Suspense, useCallback, useState } from "react";
+import {
+  Component,
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import { logJSONStringify } from "../utils/log";
 
 class Button extends Component {
@@ -34,7 +43,7 @@ const LazyCpn = lazy(
     new Promise((resolve) => {
       setTimeout(() => {
         resolve(import("../components/LazyCpn"));
-      }, 1000);
+      }, 10);
     })
 );
 
@@ -47,6 +56,51 @@ function NodeHeight() {
     setHeight(height);
   }, []);
   return <div ref={nodeRef}>this node's height is {height}px</div>;
+}
+
+function HooksInOtherHook({ name = "HooksInOtherHook" }) {
+  // useMemo(() => {
+  //   const [value2] = useState(0);
+  //   return value2;
+  // });
+
+  return <div>{name}</div>;
+}
+
+function init(initialCount) {
+  return { count: initialCount };
+}
+function reducer(state, action) {
+  switch (action.type) {
+    case "increment":
+      return { count: state.count + 1 };
+    case "decrement":
+      return { count: state.count - 1 };
+    case "reset":
+      return init(action.payload);
+    default:
+      throw new Error();
+  }
+}
+const initialCount = 0;
+function Hooks({ name = "Hooks" }) {
+  const [state, dispatch] = useReducer(reducer, { count: initialCount });
+  const [obj, setObj] = useState({ name: "name" });
+  useEffect(() => {
+    obj.name = "name2";
+    setObj(obj);
+  }, []);
+
+  useEffect(() => {
+    console.count(obj);
+  }, [obj]);
+  // const [state, dispatch] = useReducer(reducer, initialCount, init);
+  return (
+    <div>
+      <div>{name}</div>
+      <div>{JSON.stringify(obj)}</div>
+    </div>
+  );
 }
 
 const fallback = <div>loading</div>;
@@ -67,9 +121,12 @@ function BeginWork(props) {
       <MemoComponent />
       <LazyCpn count={count} />
       <NodeHeight />
+      <HooksInOtherHook count={count} />
+      <Hooks />
     </Suspense>
   );
 }
+
 BeginWork.defaultProps = {
   name: BeginWork.name,
 };

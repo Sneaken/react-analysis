@@ -139,6 +139,7 @@ export type Fiber = {|
 
   // The state used to create the output
   // 上一次渲染完成之后的 state
+  // FC 组件: fiberNode 保存的 hooks 链表中第一个 hook 的数据
   memoizedState: any,
 
   // Dependencies (contexts, events) for this fiber, if it has any
