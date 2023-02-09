@@ -1238,6 +1238,7 @@ function finishClassComponent(
   // React DevTools reads this flag.
   workInProgress.flags |= PerformedWork;
   if (current !== null && didCaptureError) {
+    // update 并且 存在异常
     // If we're recovering from an error, reconcile without reusing any of
     // the existing children. Conceptually, the normal children and the children
     // that are shown on error are two different sets, so we shouldn't reuse
@@ -1249,6 +1250,7 @@ function finishClassComponent(
       renderLanes,
     );
   } else {
+    // mount
     reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   }
 
@@ -3753,10 +3755,11 @@ function beginWork(
       }
     }
   } else {
+    // mount
     didReceiveUpdate = false;
 
     if (getIsHydrating() && isForkedChild(workInProgress)) {
-      // Check if this child belongs to a list of muliple children in
+      // Check if this child belongs to a list of multiple children in
       // its parent.
       //
       // In a true multi-threaded implementation, we would render children on
@@ -3781,7 +3784,7 @@ function beginWork(
   // 根据 tag 不同，进入不同的处理逻辑
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
-      // FC mount 进入的分支
+      // FC 组件 或者 长着像类组件(return { render(){} })的函数组件 mount时 进入的分支
       return mountIndeterminateComponent(
         current,
         workInProgress,
@@ -3803,7 +3806,7 @@ function beginWork(
       // FC update 的时候进入的分支
       const Component = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;
-      // 合并组件的默认值 defaultProps
+      // LazyComponent 需要合并默认值
       const resolvedProps =
         workInProgress.elementType === Component
           ? unresolvedProps

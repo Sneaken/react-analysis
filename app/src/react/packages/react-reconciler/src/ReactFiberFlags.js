@@ -30,9 +30,10 @@ export const ChildDeletion = /*                */ 0b00000000000000000000010000;
 export const ContentReset = /*                 */ 0b00000000000000000000100000;
 // 当 ClassComponent 中的 this.setState 执行时， 或者 ReactDOM.render 执行时传递了回调函数参数
 export const Callback = /*                     */ 0b00000000000000000001000000;
+// 存在异常，组件被挂起
 export const DidCapture = /*                   */ 0b00000000000000000010000000;
 export const ForceClientRender = /*            */ 0b00000000000000000100000000;
-// HostComponent ref 属性的创建与更新
+// 节点 ref 属性的创建与更新
 export const Ref = /*                          */ 0b00000000000000001000000000;
 // ClassComponent 存在更新，且定义了 getSnapshotBeforeUpdate 方法
 export const Snapshot = /*                     */ 0b00000000000000010000000000;

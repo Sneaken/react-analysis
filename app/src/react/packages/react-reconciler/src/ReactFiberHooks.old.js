@@ -134,6 +134,7 @@ export type Update<S, A> = {|
 |};
 
 export type UpdateQueue<S, A> = {|
+  // 触发更新时产生的 update
   pending: Update<S, A> | null,
   interleaved: Update<S, A> | null,
   lanes: Lanes,
@@ -379,6 +380,17 @@ function areHookInputsEqual(
   return true;
 }
 
+/**
+ * render一次函数组件
+ * 如果在 rendering 中 触发了更新再 rerender, 直到上限 25 次 发出警告
+ * @param current
+ * @param workInProgress
+ * @param Component
+ * @param props
+ * @param secondArg
+ * @param nextRenderLanes
+ * @return {*}
+ */
 export function renderWithHooks<Props, SecondArg>(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -419,17 +431,22 @@ export function renderWithHooks<Props, SecondArg>(
   // Using memoizedState to differentiate between mount/update only works if at least one stateful hook is used.
   // Non-stateful hooks (e.g. context) don't get added to memoizedState,
   // so memoizedState would be null during updates and mounts.
+
   if (__DEV__) {
     if (current !== null && current.memoizedState !== null) {
+      // update 的 时候
       ReactCurrentDispatcher.current = HooksDispatcherOnUpdateInDEV;
     } else if (hookTypesDev !== null) {
+      // mount 的时候
       // This dispatcher handles an edge case where a component is updating,
       // but no stateful hooks have been used.
       // We want to match the production code behavior (which will use HooksDispatcherOnMount),
       // but with the extra DEV validation to ensure hooks ordering hasn't changed.
       // This dispatcher does that.
+      console.warn('FBI warning: what happened?');
       ReactCurrentDispatcher.current = HooksDispatcherOnMountWithHookTypesInDEV;
     } else {
+      // 默认情况: hookTypes 是空的
       ReactCurrentDispatcher.current = HooksDispatcherOnMountInDEV;
     }
   } else {
@@ -442,6 +459,8 @@ export function renderWithHooks<Props, SecondArg>(
   let children = Component(props, secondArg);
 
   // Check if there was a render phase update
+  // 检查是否在 render 的时候有新的更新
+  // 存在更新就 rerender 直到到达上限 25 次
   if (didScheduleRenderPhaseUpdateDuringThisPass) {
     // Keep rendering in a loop for as long as render phase updates continue to
     // be scheduled. Use a counter to prevent infinite loops.
@@ -488,11 +507,13 @@ export function renderWithHooks<Props, SecondArg>(
   ReactCurrentDispatcher.current = ContextOnlyDispatcher;
 
   if (__DEV__) {
+    // 只有 render 以后 才会存在 hookTypesDev
     workInProgress._debugHookTypes = hookTypesDev;
   }
 
   // This check uses currentHook so that it works the same in DEV and prod bundles.
   // hookTypesDev could catch more cases (e.g. context) but only in DEV bundles.
+  // hooks render 后少了
   const didRenderTooFewHooks =
     currentHook !== null && currentHook.next !== null;
 

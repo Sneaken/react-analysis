@@ -1,10 +1,9 @@
-import "./examples/KeyWithIndex.css";
-import SingleDiff from "./examples/SingleDiff";
+import BeginWork from "./examples/BeginWork";
 
 const App = () => {
   return (
     <div>
-      <SingleDiff />
+      <BeginWork />
     </div>
   );
 };

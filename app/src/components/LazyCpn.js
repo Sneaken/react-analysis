@@ -1,9 +1,12 @@
-function LazyCpn() {
+import { logJSONStringify } from "../utils/log";
+
+function LazyCpn(props) {
+  logJSONStringify({ props });
   return <div>LazyCpn</div>;
 }
 
 LazyCpn.defaultProps = {
-  name: "defaultProps",
+  name: "LazyCpn",
 };
 
 export default LazyCpn;

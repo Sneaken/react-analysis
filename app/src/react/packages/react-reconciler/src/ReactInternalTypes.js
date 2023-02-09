@@ -95,7 +95,7 @@ export type Fiber = {|
   type: any,
 
   // The local state associated with this fiber.
-  // 跟当前Fiber相关本地状态（比如浏览器环境就是DOM节点）
+  // 跟当前Fiber相关本地状态（FC 组件就是 DOM 节点， CC 组件就是 类实例）
   stateNode: any,
 
   // Conceptual aliases

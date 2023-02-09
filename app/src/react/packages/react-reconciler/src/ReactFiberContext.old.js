@@ -9,14 +9,13 @@
 
 import type {Fiber} from './ReactInternalTypes';
 import type {StackCursor} from './ReactFiberStack.old';
+import {createCursor, pop, push} from './ReactFiberStack.old';
 
 import {isFiberMounted} from './ReactFiberTreeReflection';
 import {disableLegacyContext} from 'shared/ReactFeatureFlags';
 import {ClassComponent, HostRoot} from './ReactWorkTags';
 import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
 import checkPropTypes from 'shared/checkPropTypes';
-
-import {createCursor, push, pop} from './ReactFiberStack.old';
 
 let warnedAboutMissingGetChildContext;
 
@@ -58,6 +57,12 @@ function getUnmaskedContext(
   }
 }
 
+/**
+ * 将 Context 缓存在 DOM 属性上
+ * @param {Fiber} workInProgress
+ * @param {Object} unmaskedContext
+ * @param {Object} maskedContext
+ */
 function cacheContext(
   workInProgress: Fiber,
   unmaskedContext: Object,
@@ -72,6 +77,12 @@ function cacheContext(
   }
 }
 
+/**
+ * 给旧的 context 用法使用的
+ * @param {Fiber} workInProgress
+ * @param {Object} unmaskedContext
+ * @return {{}|*}
+ */
 function getMaskedContext(
   workInProgress: Fiber,
   unmaskedContext: Object,
