@@ -9,6 +9,15 @@
 
 import type {FiberRoot} from './ReactInternalTypes';
 import type {Transition} from './ReactFiberTracingMarkerComponent.old';
+import {
+  allowConcurrentByDefault,
+  enableSchedulingProfiler,
+  enableTransitionTracing,
+  enableUpdaterTracking,
+} from 'shared/ReactFeatureFlags';
+import {isDevToolsPresent} from './ReactFiberDevToolsHook.old';
+import {ConcurrentUpdatesByDefaultMode, NoMode} from './ReactTypeOfMode';
+import {clz32} from './clz32';
 
 // TODO: Ideally these types would be opaque but that doesn't work well with
 // our reconciler fork infra, since these leak into non-reconciler packages.
@@ -16,16 +25,6 @@ import type {Transition} from './ReactFiberTracingMarkerComponent.old';
 export type Lanes = number;
 export type Lane = number;
 export type LaneMap<T> = Array<T>;
-
-import {
-  enableSchedulingProfiler,
-  enableUpdaterTracking,
-  allowConcurrentByDefault,
-  enableTransitionTracing,
-} from 'shared/ReactFeatureFlags';
-import {isDevToolsPresent} from './ReactFiberDevToolsHook.old';
-import {ConcurrentUpdatesByDefaultMode, NoMode} from './ReactTypeOfMode';
-import {clz32} from './clz32';
 
 // Lane values below should be kept in sync with getLabelForLane(), used by react-devtools-timeline.
 // If those values are changed that package should be rebuilt and redeployed.
@@ -571,6 +570,12 @@ export function createLaneMap<T>(initial: T): LaneMap<T> {
   return laneMap;
 }
 
+/**
+ * update root lanes and eventTimes
+ * @param root
+ * @param updateLane
+ * @param eventTime
+ */
 export function markRootUpdated(
   root: FiberRoot,
   updateLane: Lane,

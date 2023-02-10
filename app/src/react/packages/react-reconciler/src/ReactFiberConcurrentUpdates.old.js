@@ -9,18 +9,18 @@
 
 import type {FiberRoot} from './ReactInternalTypes';
 import type {
-  UpdateQueue as HookQueue,
   Update as HookUpdate,
+  UpdateQueue as HookQueue,
 } from './ReactFiberHooks.old';
 import type {
   SharedQueue as ClassQueue,
   Update as ClassUpdate,
 } from './ReactFiberClassUpdateQueue.old';
 import type {Lane} from './ReactFiberLane.old';
+import {mergeLanes} from './ReactFiberLane.old';
 
 import {warnAboutUpdateOnNotYetMountedFiberInDEV} from './ReactFiberWorkLoop.old';
-import {mergeLanes} from './ReactFiberLane.old';
-import {NoFlags, Placement, Hydrating} from './ReactFiberFlags';
+import {Hydrating, NoFlags, Placement} from './ReactFiberFlags';
 import {HostRoot} from './ReactWorkTags';
 
 // An array of all update queues that received updates during the current
@@ -139,14 +139,23 @@ export function enqueueConcurrentRenderForLane(fiber: Fiber, lane: Lane) {
 export const unsafe_markUpdateLaneFromFiberToRoot =
   markUpdateLaneFromFiberToRoot;
 
+/**
+ * 更新 触发更新的节点 的 lanes
+ * 更新从 触发更新节点的父节点 到 根节点 的 childLanes
+ * @param sourceFiber
+ * @param lane
+ * @return {FiberRoot|null}
+ */
 function markUpdateLaneFromFiberToRoot(
   sourceFiber: Fiber,
   lane: Lane,
 ): FiberRoot | null {
   // Update the source fiber's lanes
+  // 更新 lanes
   sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
   let alternate = sourceFiber.alternate;
   if (alternate !== null) {
+    // 同步更新 lanes
     alternate.lanes = mergeLanes(alternate.lanes, lane);
   }
   if (__DEV__) {
@@ -179,6 +188,7 @@ function markUpdateLaneFromFiberToRoot(
     const root: FiberRoot = node.stateNode;
     return root;
   } else {
+    console.warn('FBI warning: 什么情况下遍历不到 HostRoot');
     return null;
   }
 }

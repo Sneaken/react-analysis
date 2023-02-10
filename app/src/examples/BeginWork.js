@@ -1,6 +1,7 @@
 import { Component, lazy, memo, Suspense, useCallback, useState } from "react";
 import { logJSONStringify } from "../utils/log";
 import { sleep } from "../utils/mixed";
+import { createPortal } from "react-dom";
 
 class Button extends Component {
   constructor() {
@@ -58,6 +59,14 @@ function HooksInOtherHook({ name = "HooksInOtherHook" }) {
 
 const fallback = <div>loading</div>;
 
+const Portal = document.createElement("div");
+Portal.id = "Portal";
+document.body.appendChild(Portal);
+
+function Modal({ children }) {
+  return createPortal(children, Portal);
+}
+
 function BeginWork({ name = "BeginWork" }) {
   const [count, setCount] = useState(0);
   logJSONStringify({ props: { ...arguments[0], name } });
@@ -74,9 +83,14 @@ function BeginWork({ name = "BeginWork" }) {
       <MemoComponent count={count} />
       <LazyCpn count={count} />
       <LazyMemoCpn count={count} />
-      <NodeHeight />
       <HooksInOtherHook count={count} />
-      <LazyForwardRefCpn />
+      <>
+        <LazyForwardRefCpn />
+      </>
+
+      <Modal>
+        <NodeHeight />
+      </Modal>
     </Suspense>
   );
 }

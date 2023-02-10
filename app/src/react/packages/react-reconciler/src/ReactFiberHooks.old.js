@@ -134,9 +134,10 @@ export type Update<S, A> = {|
 |};
 
 export type UpdateQueue<S, A> = {|
-  // 触发更新时产生的 update
+  // 正在等待处理的更新
   // 是一个环状链表，始终指向链表的最后一个
   pending: Update<S, A> | null,
+  // 一个插入的更新，即可能在更新处理期间被插入的更新
   interleaved: Update<S, A> | null,
   lanes: Lanes,
   // 触发更新的操作
@@ -2305,7 +2306,7 @@ function dispatchSetState<S, A>(
     next: (null: any),
   };
 
-  // render 阶段是否触发更新
+  // render 阶段是否触发其他更新
   if (isRenderPhaseUpdate(fiber)) {
     // 将 update 放入更新队列中
     enqueueRenderPhaseUpdate(queue, update);
@@ -2341,6 +2342,7 @@ function dispatchSetState<S, A>(
             // if the component re-renders for a different reason and by that
             // time the reducer has changed.
             // TODO: Do we still need to entangle transitions in this case?
+            // 命中优化策略
             enqueueConcurrentHookUpdateAndEagerlyBailout(
               fiber,
               queue,

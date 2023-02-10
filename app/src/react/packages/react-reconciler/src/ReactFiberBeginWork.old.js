@@ -901,6 +901,7 @@ function updateFragment(
   workInProgress: Fiber,
   renderLanes: Lanes,
 ) {
+  // ? 为什么是 pendingProps 而不是 pendingProps.children
   const nextChildren = workInProgress.pendingProps;
   reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   return workInProgress.child;
@@ -3846,9 +3847,11 @@ function beginWork(
     case HostRoot:
       return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
-      // 元素节点更新的时候进入的分支
+      // 元素节点 update 的时候进入的分支
       return updateHostComponent(current, workInProgress, renderLanes);
     case HostText:
+      // 文本节点 update 的时候进入的分支
+      // 其实这里什么都没做
       return updateHostText(current, workInProgress);
     case SuspenseComponent:
       return updateSuspenseComponent(current, workInProgress, renderLanes);
@@ -3857,6 +3860,7 @@ function beginWork(
     case ForwardRef: {
       const type = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;
+      // LazyComponent 需要合并默认值
       const resolvedProps =
         workInProgress.elementType === type
           ? unresolvedProps
@@ -3883,6 +3887,7 @@ function beginWork(
       const type = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;
       // Resolve outer props first, then resolve inner props.
+      // memo 组件 可能设置了 defaultProps
       let resolvedProps = resolveDefaultProps(type, unresolvedProps);
       if (__DEV__) {
         if (workInProgress.type !== workInProgress.elementType) {
@@ -3897,6 +3902,7 @@ function beginWork(
           }
         }
       }
+      // 原始组件可能设置了 defaultProps
       resolvedProps = resolveDefaultProps(type.type, resolvedProps);
       return updateMemoComponent(
         current,
