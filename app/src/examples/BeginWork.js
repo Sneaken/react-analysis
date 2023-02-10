@@ -1,5 +1,6 @@
 import { Component, lazy, memo, Suspense, useCallback, useState } from "react";
 import { logJSONStringify } from "../utils/log";
+import { sleep } from "../utils/mixed";
 
 class Button extends Component {
   constructor() {
@@ -20,20 +21,20 @@ function ClassLike() {
   };
 }
 
+// 加了这个就真的会被当成 ClassComponent
+// ClassLike.prototype.isReactComponent = {};
+
 function MemoComponent2({ name = "MemoComponent" }) {
   logJSONStringify({ props: { ...arguments[0], name } });
   return <div>MemoComponent</div>;
 }
 const MemoComponent = memo(MemoComponent2);
 
-const LazyCpn = lazy(
-  () =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(import("../components/LazyCpn"));
-      }, 10);
-    })
+const LazyCpn = lazy(() =>
+  sleep(10).then(() => import("../components/LazyCpn"))
 );
+const LazyMemoCpn = lazy(() => import("../components/LazyMemoCpn"));
+const LazyForwardRefCpn = lazy(() => import("../components/ForwardRefCpn"));
 
 function NodeHeight() {
   const [height, setHeight] = useState(0);
@@ -72,8 +73,10 @@ function BeginWork({ name = "BeginWork" }) {
       <ClassLike />
       <MemoComponent count={count} />
       <LazyCpn count={count} />
+      <LazyMemoCpn count={count} />
       <NodeHeight />
       <HooksInOtherHook count={count} />
+      <LazyForwardRefCpn />
     </Suspense>
   );
 }

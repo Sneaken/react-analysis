@@ -1489,7 +1489,9 @@ function mountLazyComponent(
   let Component = init(payload);
   // Store the unwrapped component in the type.
   workInProgress.type = Component;
+  // ClassComponent | FunctionComponent | ForwardRef | MemoComponent | IndeterminateComponent
   const resolvedTag = (workInProgress.tag = resolveLazyComponentTag(Component));
+  // 挂载默认值
   const resolvedProps = resolveDefaultProps(Component, props);
   let child;
   switch (resolvedTag) {
@@ -1499,6 +1501,7 @@ function mountLazyComponent(
         workInProgress.type = Component =
           resolveFunctionForHotReloading(Component);
       }
+      // current 为空表示 mount
       child = updateFunctionComponent(
         null,
         workInProgress,
@@ -1513,6 +1516,7 @@ function mountLazyComponent(
         workInProgress.type = Component =
           resolveClassForHotReloading(Component);
       }
+      // current 为空表示 mount
       child = updateClassComponent(
         null,
         workInProgress,
@@ -1527,6 +1531,7 @@ function mountLazyComponent(
         workInProgress.type = Component =
           resolveForwardRefForHotReloading(Component);
       }
+      // current 为空表示 mount
       child = updateForwardRef(
         null,
         workInProgress,
@@ -1550,10 +1555,12 @@ function mountLazyComponent(
           }
         }
       }
+      // current 为空表示 mount
       child = updateMemoComponent(
         null,
         workInProgress,
         Component,
+        // Memo组件 Component.type 才是实际上的 Component
         resolveDefaultProps(Component.type, resolvedProps), // The inner type can have defaults too
         renderLanes,
       );
@@ -3820,8 +3827,10 @@ function beginWork(
       );
     }
     case ClassComponent: {
+      // CC update 的时候进入的分支
       const Component = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;
+      // LazyComponent 需要合并默认值
       const resolvedProps =
         workInProgress.elementType === Component
           ? unresolvedProps
@@ -3837,6 +3846,7 @@ function beginWork(
     case HostRoot:
       return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
+      // 元素节点更新的时候进入的分支
       return updateHostComponent(current, workInProgress, renderLanes);
     case HostText:
       return updateHostText(current, workInProgress);
