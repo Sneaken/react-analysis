@@ -1,13 +1,4 @@
-import {
-  Component,
-  lazy,
-  memo,
-  Suspense,
-  useCallback,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import { Component, lazy, memo, Suspense, useCallback, useState } from "react";
 import { logJSONStringify } from "../utils/log";
 
 class Button extends Component {
@@ -29,13 +20,10 @@ function ClassLike() {
   };
 }
 
-function MemoComponent2(props) {
-  logJSONStringify({ props });
+function MemoComponent2({ name = "MemoComponent" }) {
+  logJSONStringify({ props: { ...arguments[0], name } });
   return <div>MemoComponent</div>;
 }
-MemoComponent2.defaultProps = {
-  name: "MemoComponent",
-};
 const MemoComponent = memo(MemoComponent2);
 
 const LazyCpn = lazy(
@@ -67,47 +55,11 @@ function HooksInOtherHook({ name = "HooksInOtherHook" }) {
   return <div>{name}</div>;
 }
 
-function init(initialCount) {
-  return { count: initialCount };
-}
-function reducer(state, action) {
-  switch (action.type) {
-    case "increment":
-      return { count: state.count + 1 };
-    case "decrement":
-      return { count: state.count - 1 };
-    case "reset":
-      return init(action.payload);
-    default:
-      throw new Error();
-  }
-}
-const initialCount = 0;
-function Hooks({ name = "Hooks" }) {
-  const [state, dispatch] = useReducer(reducer, { count: initialCount });
-  const [obj, setObj] = useState({ name: "name" });
-  useEffect(() => {
-    obj.name = "name2";
-    setObj(obj);
-  }, []);
-
-  useEffect(() => {
-    console.count(obj);
-  }, [obj]);
-  // const [state, dispatch] = useReducer(reducer, initialCount, init);
-  return (
-    <div>
-      <div>{name}</div>
-      <div>{JSON.stringify(obj)}</div>
-    </div>
-  );
-}
-
 const fallback = <div>loading</div>;
 
-function BeginWork(props) {
+function BeginWork({ name = "BeginWork" }) {
   const [count, setCount] = useState(0);
-  logJSONStringify({ props });
+  logJSONStringify({ props: { ...arguments[0], name } });
   return (
     <Suspense fallback={fallback}>
       <Button
@@ -118,17 +70,11 @@ function BeginWork(props) {
         {count}
       </Button>
       <ClassLike />
-      <MemoComponent />
+      <MemoComponent count={count} />
       <LazyCpn count={count} />
       <NodeHeight />
       <HooksInOtherHook count={count} />
-      <Hooks />
     </Suspense>
   );
 }
-
-BeginWork.defaultProps = {
-  name: BeginWork.name,
-};
-
 export default BeginWork;
