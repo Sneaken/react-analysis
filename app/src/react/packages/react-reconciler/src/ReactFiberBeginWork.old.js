@@ -901,7 +901,10 @@ function updateFragment(
   workInProgress: Fiber,
   renderLanes: Lanes,
 ) {
-  // ? 为什么是 pendingProps 而不是 pendingProps.children
+  // 为什么是 pendingProps 而不是 pendingProps.children ?
+  // reconcileChildFibers 的时候做过处理
+  // 当 newChild.type 是 Fragment 并且没有 key 的时候
+  // newChild.props = newChild.props.children
   const nextChildren = workInProgress.pendingProps;
   reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   return workInProgress.child;
