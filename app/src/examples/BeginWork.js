@@ -34,6 +34,9 @@ const MemoComponent = memo(MemoComponent2);
 const LazyCpn = lazy(() =>
   sleep(10).then(() => import("../components/LazyCpn"))
 );
+const lazyCase = lazy(() =>
+  sleep(10).then(() => import("../components/LazyCase"))
+);
 const LazyMemoCpn = lazy(() => import("../components/LazyMemoCpn"));
 const LazyForwardRefCpn = lazy(() => import("../components/ForwardRefCpn"));
 
@@ -82,19 +85,15 @@ function BeginWork({ name = "BeginWork" }) {
       <ClassLike />
       <MemoComponent count={count} />
       <LazyCpn count={count} />
+      {lazyCase}
       <LazyMemoCpn count={count} />
       <HooksInOtherHook count={count} />
       <>
         <LazyForwardRefCpn />
       </>
-
       <Modal>
         <NodeHeight />
       </Modal>
-      {{ count }}
-      {Modal}
-      <div>{{ count }}</div>
-      <div>{Modal}</div>
     </Suspense>
   );
 }

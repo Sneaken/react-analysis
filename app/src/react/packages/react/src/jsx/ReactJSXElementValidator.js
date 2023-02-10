@@ -16,10 +16,10 @@ import getComponentNameFromType from 'shared/getComponentNameFromType';
 import checkPropTypes from 'shared/checkPropTypes';
 import {
   getIteratorFn,
-  REACT_FORWARD_REF_TYPE,
-  REACT_MEMO_TYPE,
-  REACT_FRAGMENT_TYPE,
   REACT_ELEMENT_TYPE,
+  REACT_FORWARD_REF_TYPE,
+  REACT_FRAGMENT_TYPE,
+  REACT_MEMO_TYPE,
 } from 'shared/ReactSymbols';
 import {warnAboutSpreadingKeyToJSX} from 'shared/ReactFeatureFlags';
 import hasOwnProperty from 'shared/hasOwnProperty';
@@ -192,6 +192,7 @@ function validateChildKeys(node, parentType) {
       }
     } else if (isValidElement(node)) {
       // This element was passed in a valid location.
+      // 在这里屏蔽 不需要检验 key
       if (node._store) {
         node._store.validated = true;
       }

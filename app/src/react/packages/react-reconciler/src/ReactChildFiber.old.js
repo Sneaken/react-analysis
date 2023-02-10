@@ -64,6 +64,7 @@ if (__DEV__) {
     if (child === null || typeof child !== 'object') {
       return;
     }
+
     if (!child._store || child._store.validated || child.key != null) {
       return;
     }
@@ -1334,6 +1335,7 @@ function ChildReconciler(shouldTrackSideEffects) {
 
     // Handle object types
     if (typeof newChild === 'object' && newChild !== null) {
+      // 如果是 ReactElement 对象
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE:
           return placeSingleChild(
@@ -1354,6 +1356,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             ),
           );
         case REACT_LAZY_TYPE:
+          // 懒加载节点
           const payload = newChild._payload;
           const init = newChild._init;
           // TODO: This function is supposed to be non-recursive.
@@ -1365,6 +1368,7 @@ function ChildReconciler(shouldTrackSideEffects) {
           );
       }
 
+      // 如果是数组节点
       if (isArray(newChild)) {
         return reconcileChildrenArray(
           returnFiber,
@@ -1374,6 +1378,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         );
       }
 
+      // 如果是一个可迭代函数
       if (getIteratorFn(newChild)) {
         return reconcileChildrenIterator(
           returnFiber,
