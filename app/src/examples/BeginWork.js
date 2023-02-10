@@ -91,6 +91,10 @@ function BeginWork({ name = "BeginWork" }) {
       <Modal>
         <NodeHeight />
       </Modal>
+      {{ count }}
+      {Modal}
+      <div>{{ count }}</div>
+      <div>{Modal}</div>
     </Suspense>
   );
 }

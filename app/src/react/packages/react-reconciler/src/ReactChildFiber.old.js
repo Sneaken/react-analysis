@@ -556,12 +556,13 @@ function ChildReconciler(shouldTrackSideEffects) {
         created.return = returnFiber;
         return created;
       }
-
+      // 多节点 diff 如果其中一个 child 是对象的话，实际上是在这里抛出异常的
       throwOnInvalidObjectType(returnFiber, newChild);
     }
 
     if (__DEV__) {
       if (typeof newChild === 'function') {
+        // 多节点 diff 如果其中一个 child 是 function 的话，实际上是这这里排除异常的
         warnOnFunctionType(returnFiber);
       }
     }
@@ -623,11 +624,13 @@ function ChildReconciler(shouldTrackSideEffects) {
         return updateFragment(returnFiber, oldFiber, newChild, lanes, null);
       }
 
+      // 多节点 diff 的时候，逛到这， 第一轮遍历
       throwOnInvalidObjectType(returnFiber, newChild);
     }
 
     if (__DEV__) {
       if (typeof newChild === 'function') {
+        // 多节点 diff 的时候，逛到这，第一轮遍历
         warnOnFunctionType(returnFiber);
       }
     }
@@ -689,11 +692,13 @@ function ChildReconciler(shouldTrackSideEffects) {
         return updateFragment(returnFiber, matchedFiber, newChild, lanes, null);
       }
 
+      // 多节点 diff 逛到这
       throwOnInvalidObjectType(returnFiber, newChild);
     }
 
     if (__DEV__) {
       if (typeof newChild === 'function') {
+        // 多节点 diff 逛到这
         warnOnFunctionType(returnFiber);
       }
     }
@@ -1378,6 +1383,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         );
       }
 
+      // 单节点 diff 如果是对象，实际上是在这里抛出异常的
       throwOnInvalidObjectType(returnFiber, newChild);
     }
 
@@ -1397,11 +1403,13 @@ function ChildReconciler(shouldTrackSideEffects) {
 
     if (__DEV__) {
       if (typeof newChild === 'function') {
+        // 单节点 diff 如果是函数的话，实际上是在这里抛出异常的
         warnOnFunctionType(returnFiber);
       }
     }
 
     // Remaining cases are all treated as empty.
+    // 其他情况下 update 的时候，删除父级剩余的child
     return deleteRemainingChildren(returnFiber, currentFirstChild);
   }
 
