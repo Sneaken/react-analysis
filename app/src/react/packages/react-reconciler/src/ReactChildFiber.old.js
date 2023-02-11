@@ -608,6 +608,14 @@ function ChildReconciler(shouldTrackSideEffects) {
     return null;
   }
 
+  /**
+   *
+   * @param returnFiber
+   * @param oldFiber
+   * @param newChild
+   * @param lanes
+   * @return {Fiber|null}
+   */
   function updateSlot(
     returnFiber: Fiber,
     oldFiber: Fiber | null,
@@ -626,6 +634,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // we can continue to replace it without aborting even if it is not a text
       // node.
       if (key !== null) {
+        // 从 非文本节点 变成了 文本节点，开始进行第二轮遍历
         return null;
       }
       return updateTextNode(returnFiber, oldFiber, '' + newChild, lanes);
@@ -843,6 +852,10 @@ function ChildReconciler(shouldTrackSideEffects) {
     // 下一个 oldFiber
     let nextOldFiber = null;
     // 开始第一轮遍历
+    //
+    // 第一轮遍历尝试逐个复用节点
+    // 如果节点位置没有发生变化 那一定是某个节点的属性发生了变化
+    //
     // old fiber 还存在并且新节点还没遍历完
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       if (oldFiber.index > newIdx) {
@@ -936,6 +949,9 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     // 开始第二轮遍历
+    //
+    // 第二轮遍历处理剩余节点
+    //
     // break 跳过来的, 一般都是 key 发生了变化
     // 根据 key（优先） 或者 index 来缓存节点（剩余节点）
     // 为了快速找到 "key 对应的 oldFiber"

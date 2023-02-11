@@ -94,6 +94,7 @@ function BeginWork({ name = "BeginWork" }) {
       <Modal>
         <NodeHeight />
       </Modal>
+      {count % 2 ? <p key="string">123</p> : "123"}
     </Suspense>
   );
 }
