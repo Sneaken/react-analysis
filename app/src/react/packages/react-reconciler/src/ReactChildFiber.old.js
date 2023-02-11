@@ -269,6 +269,11 @@ function resolveLazy(lazyType) {
  * @constructor
  */
 function ChildReconciler(shouldTrackSideEffects) {
+  /**
+   * 标记删除父节点的子节点
+   * @param returnFiber
+   * @param childToDelete
+   */
   function deleteChild(returnFiber: Fiber, childToDelete: Fiber): void {
     if (!shouldTrackSideEffects) {
       // Noop.
@@ -284,6 +289,12 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
   }
 
+  /**
+   * update 的是时候，标记删除 returnFiber 从 currentFirstChild（包括） 开始的后续所有节点
+   * @param returnFiber
+   * @param currentFirstChild
+   * @return {null}
+   */
   function deleteRemainingChildren(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
@@ -373,6 +384,11 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
   }
 
+  /**
+   * update 的时候 给 FiberNode 打上 Placement flag
+   * @param newFiber
+   * @return {Fiber}
+   */
   function placeSingleChild(newFiber: Fiber): Fiber {
     // This is simpler for the single child case. We only need to do a
     // placement for inserting new children.
@@ -1183,8 +1199,11 @@ function ChildReconciler(shouldTrackSideEffects) {
   }
 
   function reconcileSingleElement(
+    // workInProgress
     returnFiber: Fiber,
+    // current.child
     currentFirstChild: Fiber | null,
+    // newChild => FC 组件是 renderWithHooks 返回值
     element: ReactElement,
     lanes: Lanes,
   ): Fiber {
@@ -1199,7 +1218,8 @@ function ChildReconciler(shouldTrackSideEffects) {
         const elementType = element.type;
         if (elementType === REACT_FRAGMENT_TYPE) {
           if (child.tag === Fragment) {
-            // 标记删除兄弟节点
+            // 能走到这里的 Fragment 都是具有key 的（不带key的 Fragment 直接被它的子节点替换了）
+            // 标记删除 从兄弟节点开始的所有后续节点
             deleteRemainingChildren(returnFiber, child.sibling);
             const existing = useFiber(child, element.props.children);
             existing.return = returnFiber;
@@ -1211,13 +1231,16 @@ function ChildReconciler(shouldTrackSideEffects) {
           }
         } else {
           if (
+            // 更新前后 节点类型没发生变化
             child.elementType === elementType || // Keep this check inline, so it only runs on the false path:
+            // 热更新了
             (__DEV__
               ? isCompatibleFamilyForHotReloading(child, element)
               : false) || // Lazy types should reconcile their resolved type.
             // We need to do this after the Hot Reloading check above,
             // because hot reloading has different semantics than prod because
             // it doesn't resuspend. So we can't let the call below suspend.
+            // lazy节点 props 更新
             (typeof elementType === 'object' &&
               elementType !== null &&
               elementType.$$typeof === REACT_LAZY_TYPE &&
@@ -1252,7 +1275,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       child = child.sibling;
     }
 
-    // 没有DOM节点就创建新的Fiber
+    // 没有找到能够复用的 fiberNode 就创建新的 fiberNode
     if (element.type === REACT_FRAGMENT_TYPE) {
       const created = createFiberFromFragment(
         element.props.children,
@@ -1310,9 +1333,9 @@ function ChildReconciler(shouldTrackSideEffects) {
   // itself. They will be added to the side-effect list as we pass through the
   // children and the parent.
   function reconcileChildFibers(
-    returnFiber: Fiber,
-    currentFirstChild: Fiber | null,
-    newChild: any,
+    returnFiber: Fiber, // workInProgress
+    currentFirstChild: Fiber | null, //  current.child
+    newChild: any, // FC 组件是 renderWithHooks 来的
     lanes: Lanes,
   ): Fiber | null {
     // This function is not recursive.
@@ -1338,6 +1361,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // 如果是 ReactElement 对象
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE:
+          // jsx 对象
           return placeSingleChild(
             reconcileSingleElement(
               returnFiber,
@@ -1347,6 +1371,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             ),
           );
         case REACT_PORTAL_TYPE:
+          // 通过 ReactDOM.createPortal 创建的对象
           return placeSingleChild(
             reconcileSinglePortal(
               returnFiber,

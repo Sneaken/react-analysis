@@ -10,24 +10,23 @@
 /* eslint-disable react-internal/prod-error-codes */
 
 import type {ReactElement} from 'shared/ReactElementType';
-import type {Fiber} from './ReactInternalTypes';
-import type {FiberRoot} from './ReactInternalTypes';
+import type {Fiber, FiberRoot} from './ReactInternalTypes';
 import type {Instance} from './ReactFiberHostConfig';
 import type {ReactNodeList} from 'shared/ReactTypes';
 
 import {
+  flushPassiveEffects,
   flushSync,
   scheduleUpdateOnFiber,
-  flushPassiveEffects,
 } from './ReactFiberWorkLoop.old';
 import {enqueueConcurrentRenderForLane} from './ReactFiberConcurrentUpdates.old';
 import {updateContainer} from './ReactFiberReconciler.old';
 import {emptyContextObject} from './ReactFiberContext.old';
-import {SyncLane, NoTimestamp} from './ReactFiberLane.old';
+import {NoTimestamp, SyncLane} from './ReactFiberLane.old';
 import {
   ClassComponent,
-  FunctionComponent,
   ForwardRef,
+  FunctionComponent,
   HostComponent,
   HostPortal,
   HostRoot,
@@ -36,8 +35,8 @@ import {
 } from './ReactWorkTags';
 import {
   REACT_FORWARD_REF_TYPE,
-  REACT_MEMO_TYPE,
   REACT_LAZY_TYPE,
+  REACT_MEMO_TYPE,
 } from 'shared/ReactSymbols';
 
 export type Family = {|
@@ -131,6 +130,12 @@ export function resolveForwardRefForHotReloading(type: any): any {
   }
 }
 
+/**
+ * 判断 element 这个元素是不是热更新了
+ * @param fiber
+ * @param element
+ * @return {boolean}
+ */
 export function isCompatibleFamilyForHotReloading(
   fiber: Fiber,
   element: ReactElement,
