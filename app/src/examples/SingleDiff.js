@@ -1,5 +1,7 @@
 import { lazy, useState } from "react";
 import ClassCpn from "../components/ClassCpn";
+import LazyMemoCpn from "../components/LazyMemoCpn";
+import ForwardRefCpn from "../components/ForwardRefCpn";
 
 const LazyCpn = lazy(() => import("../components/LazyCpn"));
 
@@ -74,6 +76,12 @@ const SingleDiff = () => {
       {/*  <LazyCpn count={count} />*/}
       {/*</div>*/}
       {/*<Fragments />*/}
+      <div>
+        <LazyMemoCpn />
+      </div>
+      <div>
+        <ForwardRefCpn />
+      </div>
     </div>
   );
 };

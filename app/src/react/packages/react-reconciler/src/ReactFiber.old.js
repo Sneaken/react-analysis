@@ -11,89 +11,89 @@ import type {ReactElement} from 'shared/ReactElementType';
 import type {ReactFragment, ReactPortal, ReactScope} from 'shared/ReactTypes';
 import type {Fiber} from './ReactInternalTypes';
 import type {RootTag} from './ReactRootTags';
+import {ConcurrentRoot} from './ReactRootTags';
 import type {WorkTag} from './ReactWorkTags';
+import {
+  CacheComponent,
+  ClassComponent,
+  ContextConsumer,
+  ContextProvider,
+  DehydratedFragment,
+  ForwardRef,
+  Fragment,
+  FunctionComponent,
+  HostComponent,
+  HostPortal,
+  HostRoot,
+  HostText,
+  IndeterminateComponent,
+  LazyComponent,
+  LegacyHiddenComponent,
+  MemoComponent,
+  Mode,
+  OffscreenComponent,
+  Profiler,
+  ScopeComponent,
+  SimpleMemoComponent,
+  SuspenseComponent,
+  SuspenseListComponent,
+  TracingMarkerComponent,
+} from './ReactWorkTags';
 import type {TypeOfMode} from './ReactTypeOfMode';
+import {
+  ConcurrentMode,
+  ConcurrentUpdatesByDefaultMode,
+  DebugTracingMode,
+  NoMode,
+  ProfileMode,
+  StrictEffectsMode,
+  StrictLegacyMode,
+} from './ReactTypeOfMode';
 import type {Lanes} from './ReactFiberLane.old';
+import {NoLanes} from './ReactFiberLane.old';
 import type {SuspenseInstance} from './ReactFiberHostConfig';
 import type {
-  OffscreenProps,
   OffscreenInstance,
+  OffscreenProps,
 } from './ReactFiberOffscreenComponent';
 
 import {
+  allowConcurrentByDefault,
   createRootStrictEffectsByDefault,
   enableCache,
-  enableStrictEffects,
+  enableDebugTracing,
+  enableLegacyHidden,
   enableProfilerTimer,
   enableScopeAPI,
-  enableLegacyHidden,
+  enableStrictEffects,
   enableSyncDefaultUpdates,
-  allowConcurrentByDefault,
   enableTransitionTracing,
-  enableDebugTracing,
 } from 'shared/ReactFeatureFlags';
 import {NoFlags, Placement, StaticMask} from './ReactFiberFlags';
-import {ConcurrentRoot} from './ReactRootTags';
-import {
-  IndeterminateComponent,
-  ClassComponent,
-  HostRoot,
-  HostComponent,
-  HostText,
-  HostPortal,
-  ForwardRef,
-  Fragment,
-  Mode,
-  ContextProvider,
-  ContextConsumer,
-  Profiler,
-  SuspenseComponent,
-  SuspenseListComponent,
-  DehydratedFragment,
-  FunctionComponent,
-  MemoComponent,
-  SimpleMemoComponent,
-  LazyComponent,
-  ScopeComponent,
-  OffscreenComponent,
-  LegacyHiddenComponent,
-  CacheComponent,
-  TracingMarkerComponent,
-} from './ReactWorkTags';
 import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFromFiber';
 
 import {isDevToolsPresent} from './ReactFiberDevToolsHook.old';
 import {
   resolveClassForHotReloading,
-  resolveFunctionForHotReloading,
   resolveForwardRefForHotReloading,
+  resolveFunctionForHotReloading,
 } from './ReactFiberHotReloading.old';
-import {NoLanes} from './ReactFiberLane.old';
 import {
-  NoMode,
-  ConcurrentMode,
-  DebugTracingMode,
-  ProfileMode,
-  StrictLegacyMode,
-  StrictEffectsMode,
-  ConcurrentUpdatesByDefaultMode,
-} from './ReactTypeOfMode';
-import {
+  REACT_CACHE_TYPE,
+  REACT_CONTEXT_TYPE,
+  REACT_DEBUG_TRACING_MODE_TYPE,
   REACT_FORWARD_REF_TYPE,
   REACT_FRAGMENT_TYPE,
-  REACT_DEBUG_TRACING_MODE_TYPE,
-  REACT_STRICT_MODE_TYPE,
+  REACT_LAZY_TYPE,
+  REACT_LEGACY_HIDDEN_TYPE,
+  REACT_MEMO_TYPE,
+  REACT_OFFSCREEN_TYPE,
   REACT_PROFILER_TYPE,
   REACT_PROVIDER_TYPE,
-  REACT_CONTEXT_TYPE,
-  REACT_SUSPENSE_TYPE,
-  REACT_SUSPENSE_LIST_TYPE,
-  REACT_MEMO_TYPE,
-  REACT_LAZY_TYPE,
   REACT_SCOPE_TYPE,
-  REACT_OFFSCREEN_TYPE,
-  REACT_LEGACY_HIDDEN_TYPE,
-  REACT_CACHE_TYPE,
+  REACT_STRICT_MODE_TYPE,
+  REACT_SUSPENSE_LIST_TYPE,
+  REACT_SUSPENSE_TYPE,
   REACT_TRACING_MARKER_TYPE,
 } from 'shared/ReactSymbols';
 
@@ -115,6 +115,15 @@ if (__DEV__) {
   }
 }
 
+/**
+ * FiberNode 构造函数
+ * 一个空的 FiberNode 节点 首先有四个被赋值的属性 tag | key | mode | pendingProps
+ * @param tag
+ * @param pendingProps
+ * @param key
+ * @param mode
+ * @constructor
+ */
 function FiberNode(
   tag: WorkTag,
   pendingProps: mixed,
@@ -217,6 +226,11 @@ const createFiber = function (
   return new FiberNode(tag, pendingProps, key, mode);
 };
 
+/**
+ * 如果函数的原型链上存在 isReactComponent 对象就可以看为是 ClassComponent
+ * @param Component
+ * @return {boolean}
+ */
 function shouldConstruct(Component: Function) {
   const prototype = Component.prototype;
   return !!(prototype && prototype.isReactComponent);
@@ -245,7 +259,13 @@ export function resolveLazyComponentTag(Component: Function): WorkTag {
   return IndeterminateComponent;
 }
 
-// This is used to create an alternate fiber to do work on.
+/**
+ * This is used to create an alternate fiber to do work on.
+ * 创建/复用 一个 workInProgress 节点
+ * @param {Fiber} current
+ * @param {any} pendingProps
+ * @return {Fiber}
+ */
 export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
   let workInProgress = current.alternate;
   if (workInProgress === null) {
@@ -272,9 +292,12 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
       workInProgress._debugHookTypes = current._debugHookTypes;
     }
 
+    // 将这个新创建的 workInProgress 与 current 相互链接
     workInProgress.alternate = current;
     current.alternate = workInProgress;
   } else {
+    // tag, key, mode, elementType, stateNode, return, alternate 没变,
+    // 其余(生产环境的) 全部重置 （从 current 上面 copy 一份）
     workInProgress.pendingProps = pendingProps;
     // Needed because Blocks store data on type.
     workInProgress.type = current.type;
@@ -465,6 +488,17 @@ export function createHostRootFiber(
   return createFiber(HostRoot, null, null, mode);
 }
 
+/**
+ * 创建 fiberNode
+ * 有两个属性需要计算 fiberTag，resolvedType
+ * @param type
+ * @param key
+ * @param pendingProps
+ * @param owner
+ * @param mode
+ * @param lanes
+ * @return {Fiber}
+ */
 export function createFiberFromTypeAndProps(
   type: any, // React$ElementType
   key: null | string,
@@ -473,21 +507,26 @@ export function createFiberFromTypeAndProps(
   mode: TypeOfMode,
   lanes: Lanes,
 ): Fiber {
+  // 从这里创建的 fiberNode 默认 tag 是这个
   let fiberTag = IndeterminateComponent;
   // The resolved type is set if we know what the final type will be. I.e. it's not lazy.
   let resolvedType = type;
   if (typeof type === 'function') {
     if (shouldConstruct(type)) {
+      // 发现是 类组件
       fiberTag = ClassComponent;
       if (__DEV__) {
+        // 热更新
         resolvedType = resolveClassForHotReloading(resolvedType);
       }
     } else {
       if (__DEV__) {
+        // 热更新
         resolvedType = resolveFunctionForHotReloading(resolvedType);
       }
     }
   } else if (typeof type === 'string') {
+    // 元素节点
     fiberTag = HostComponent;
   } else {
     getTag: switch (type) {
@@ -590,7 +629,10 @@ export function createFiberFromTypeAndProps(
   }
 
   const fiber = createFiber(fiberTag, pendingProps, key, mode);
+  // elementType 不会改变
   fiber.elementType = type;
+  // 只有 Lazy 组件 type 和 elementType 会不一致，
+  // 在 Lazy 组件还没有加载完的时候 resolveType 为 null
   fiber.type = resolvedType;
   fiber.lanes = lanes;
 
@@ -601,6 +643,13 @@ export function createFiberFromTypeAndProps(
   return fiber;
 }
 
+/**
+ * 根据 JSX 对象创建 fiberNode
+ * @param {ReactElement} element
+ * @param {TypeOfMode} mode
+ * @param {Lanes} lanes
+ * @return {Fiber}
+ */
 export function createFiberFromElement(
   element: ReactElement,
   mode: TypeOfMode,
@@ -612,6 +661,7 @@ export function createFiberFromElement(
   }
   const type = element.type;
   const key = element.key;
+  // mount 时产生的 props 变成 pendingProps
   const pendingProps = element.props;
   const fiber = createFiberFromTypeAndProps(
     type,
@@ -628,6 +678,14 @@ export function createFiberFromElement(
   return fiber;
 }
 
+/**
+ * 从 Fragment 创建一个 FiberNode (Fragment 的有效属性就 key 和 children)
+ * @param elements
+ * @param mode
+ * @param lanes
+ * @param key
+ * @return {Fiber}
+ */
 export function createFiberFromFragment(
   elements: ReactFragment,
   mode: TypeOfMode,
