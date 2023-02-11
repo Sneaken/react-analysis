@@ -419,6 +419,14 @@ function ChildReconciler(shouldTrackSideEffects) {
     return newFiber;
   }
 
+  /**
+   * 更新文本节点内容
+   * @param returnFiber
+   * @param current
+   * @param textContent
+   * @param lanes
+   * @return {Fiber}
+   */
   function updateTextNode(
     returnFiber: Fiber,
     current: Fiber | null,
@@ -427,6 +435,10 @@ function ChildReconciler(shouldTrackSideEffects) {
   ) {
     if (current === null || current.tag !== HostText) {
       // Insert
+      // 不存在旧节点 || 旧节点不是文本节点
+      // 当 旧节点不是文本节点时，旧节点何时被删除的？
+      // 因为 oldFiber 存在，并且 newFiber.alternate 不存在，说明 fiberNode 是新创建的
+      // 这样 oldFiber 就应该标记删除
       const created = createFiberFromText(textContent, returnFiber.mode, lanes);
       created.return = returnFiber;
       return created;
@@ -634,9 +646,10 @@ function ChildReconciler(shouldTrackSideEffects) {
       // we can continue to replace it without aborting even if it is not a text
       // node.
       if (key !== null) {
-        // 从 非文本节点 变成了 文本节点，开始进行第二轮遍历
+        // 从 带key的非文本节点 变成了 文本节点，开始进行第二轮遍历
         return null;
       }
+      // 都不带key 就走 update 流程
       return updateTextNode(returnFiber, oldFiber, '' + newChild, lanes);
     }
 
@@ -889,6 +902,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         if (oldFiber && newFiber.alternate === null) {
           // We matched the slot, but we didn't reuse the existing fiber, so we
           // need to delete the existing child.
+          // 说明 newFiber 是新创建的，而不是复用的
           // key 相同 type 不同，导致不可复用，会将 oldFiber 标记为删除，继续遍历
           deleteChild(returnFiber, oldFiber);
         }

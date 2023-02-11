@@ -82,19 +82,19 @@ function BeginWork({ name = "BeginWork" }) {
       >
         {count}
       </Button>
-      <ClassLike />
-      <MemoComponent count={count} />
-      <LazyCpn count={count} />
-      {lazyCase}
-      <LazyMemoCpn count={count} />
-      <HooksInOtherHook count={count} />
-      <>
-        <LazyForwardRefCpn />
-      </>
-      <Modal>
-        <NodeHeight />
-      </Modal>
-      {count % 2 ? <p key="string">123</p> : "123"}
+      {/*<ClassLike />*/}
+      {/*<MemoComponent count={count} />*/}
+      {/*<LazyCpn count={count} />*/}
+      {/*{lazyCase}*/}
+      {/*<LazyMemoCpn count={count} />*/}
+      {/*<HooksInOtherHook count={count} />*/}
+      {/*<>*/}
+      {/*  <LazyForwardRefCpn />*/}
+      {/*</>*/}
+      {/*<Modal>*/}
+      {/*  <NodeHeight />*/}
+      {/*</Modal>*/}
+      {count % 2 ? <p>123</p> : "123"}
     </Suspense>
   );
 }
