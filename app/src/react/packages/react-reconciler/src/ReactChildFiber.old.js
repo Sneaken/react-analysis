@@ -439,6 +439,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // 当 旧节点不是文本节点时，旧节点何时被删除的？
       // 因为 oldFiber 存在，并且 newFiber.alternate 不存在，说明 fiberNode 是新创建的
       // 这样 oldFiber 就应该标记删除
+      // 不存在 elementType, type
       const created = createFiberFromText(textContent, returnFiber.mode, lanes);
       created.return = returnFiber;
       return created;
@@ -511,6 +512,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       current.stateNode.implementation !== portal.implementation
     ) {
       // Insert
+      // 不存在 elementType, type
       const created = createFiberFromPortal(portal, returnFiber.mode, lanes);
       created.return = returnFiber;
       return created;
@@ -531,6 +533,7 @@ function ChildReconciler(shouldTrackSideEffects) {
   ): Fiber {
     if (current === null || current.tag !== Fragment) {
       // Insert
+      // 不存在旧节点 || 旧节点不是 Fragment 节点
       const created = createFiberFromFragment(
         fragment,
         returnFiber.mode,
@@ -559,6 +562,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // Text nodes don't have keys. If the previous node is implicitly keyed
       // we can continue to replace it without aborting even if it is not a text
       // node.
+      // 不存在 elementType, type
       const created = createFiberFromText(
         '' + newChild,
         returnFiber.mode,
@@ -581,6 +585,7 @@ function ChildReconciler(shouldTrackSideEffects) {
           return created;
         }
         case REACT_PORTAL_TYPE: {
+          // 不存在 elementType, type
           const created = createFiberFromPortal(
             newChild,
             returnFiber.mode,
@@ -597,6 +602,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       }
 
       if (isArray(newChild) || getIteratorFn(newChild)) {
+        // 不存在 elementType, type
         const created = createFiberFromFragment(
           newChild,
           returnFiber.mode,
@@ -654,11 +660,13 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (typeof newChild === 'object' && newChild !== null) {
+      // newChild 是 JSX 对象
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE: {
           if (newChild.key === key) {
             return updateElement(returnFiber, oldFiber, newChild, lanes);
           } else {
+            // 跳出 去第二轮遍历
             return null;
           }
         }
@@ -666,21 +674,26 @@ function ChildReconciler(shouldTrackSideEffects) {
           if (newChild.key === key) {
             return updatePortal(returnFiber, oldFiber, newChild, lanes);
           } else {
+            // 跳出 去第二轮遍历
             return null;
           }
         }
         case REACT_LAZY_TYPE: {
           const payload = newChild._payload;
           const init = newChild._init;
+          // 加载组件 再走一遍流程
           return updateSlot(returnFiber, oldFiber, init(payload), lanes);
         }
       }
 
+      // 如果是数组或者可迭代对象
       if (isArray(newChild) || getIteratorFn(newChild)) {
         if (key !== null) {
+          // 如果 更新前存在 key, 说明结构便了
+          // 跳出 去第二轮遍历
           return null;
         }
-
+        // 能够复用 updateFragment 逻辑 ?
         return updateFragment(returnFiber, oldFiber, newChild, lanes, null);
       }
 
@@ -695,6 +708,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       }
     }
 
+    // 其他情况， 跳出 去第二轮遍历
     return null;
   }
 
@@ -1244,6 +1258,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     // The existing first child is not a text node so we need to create one
     // and delete the existing ones.
     deleteRemainingChildren(returnFiber, currentFirstChild);
+    // 不存在 elementType, type
     const created = createFiberFromText(textContent, returnFiber.mode, lanes);
     created.return = returnFiber;
     return created;
@@ -1329,6 +1344,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     // 没有找到能够复用的 fiberNode 就创建新的 fiberNode
     // 从 jsx 对象变为 fiberNode
     if (element.type === REACT_FRAGMENT_TYPE) {
+      // 不存在 elementType, type
       const created = createFiberFromFragment(
         element.props.children,
         returnFiber.mode,
@@ -1376,6 +1392,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       child = child.sibling;
     }
 
+    // 不存在 elementType, type
     const created = createFiberFromPortal(portal, returnFiber.mode, lanes);
     created.return = returnFiber;
     return created;
