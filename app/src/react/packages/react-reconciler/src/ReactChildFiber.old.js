@@ -93,6 +93,13 @@ if (__DEV__) {
   };
 }
 
+/**
+ *
+ * @param {Fiber} returnFiber
+ * @param {Fiber | null} current
+ * @param {ReactElement} element
+ * @return {*|ref|Function}
+ */
 function coerceRef(
   returnFiber: Fiber,
   current: Fiber | null,
@@ -107,6 +114,7 @@ function coerceRef(
     if (__DEV__) {
       // TODO: Clean this up once we turn on the string ref warning for
       // everyone, because the strict mode case will no longer be relevant
+      // 严格模式下 string ref 提示 error
       if (
         (returnFiber.mode & StrictLegacyMode || warnAboutStringRefs) && // We warn in ReactElement.js if owner and self are equal for string refs
         // because these cannot be automatically converted to an arrow function
@@ -151,6 +159,7 @@ function coerceRef(
       if (owner) {
         const ownerFiber = ((owner: any): Fiber);
 
+        // 函数组件内部不能使用 string ref
         if (ownerFiber.tag !== ClassComponent) {
           throw new Error(
             'Function components cannot have string refs. ' +
@@ -185,6 +194,7 @@ function coerceRef(
       ) {
         return current.ref;
       }
+      // ClassComponent 的 string ref 被替换为这个
       const ref = function (value) {
         let refs = resolvedInst.refs;
         if (refs === emptyRefsObject) {
@@ -218,6 +228,10 @@ function coerceRef(
       }
     }
   }
+  // 一个 合法的 ref 种类有三种：
+  // function
+  // string (类组件)
+  // createRef() || useRef()
   return mixedRef;
 }
 
@@ -340,6 +354,13 @@ function ChildReconciler(shouldTrackSideEffects) {
     return existingChildren;
   }
 
+  /**
+   * 能复用 fiber 节点就复用
+   * 不能复用就新建一个 fiber 节点
+   * @param fiber
+   * @param pendingProps
+   * @return {Fiber}
+   */
   function useFiber(fiber: Fiber, pendingProps: mixed): Fiber {
     // We currently set sibling to null and index to 0 here because it is easy
     // to forget to do before returning it. E.g. for the single child case.
@@ -1221,6 +1242,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             // 标记删除 从兄弟节点开始的所有后续节点
             deleteRemainingChildren(returnFiber, child.sibling);
             const existing = useFiber(child, element.props.children);
+            // Fragment 不需要考虑 ref
             existing.return = returnFiber;
             if (__DEV__) {
               existing._debugSource = element._source;

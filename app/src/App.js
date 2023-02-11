@@ -1,9 +1,9 @@
-import BeginWork from "./examples/BeginWork";
+import SingleDiff from "./examples/SingleDiff";
 
 const App = () => {
   return (
     <div>
-      <BeginWork />
+      <SingleDiff />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { lazy, useState } from "react";
+import ClassCpn from "../components/ClassCpn";
 
 const LazyCpn = lazy(() => import("../components/LazyCpn"));
 
@@ -14,13 +15,12 @@ const SingleDiff = () => {
   const [count, setCount] = useState(0);
   return (
     <div>
-      <button
+      <ClassCpn
         onClick={() => {
           setCount(count + 1);
         }}
-      >
-        {count}
-      </button>
+        count={count}
+      />
       {/*<>*/}
       {/*  <p key="key">1</p>*/}
       {/*  <p key={count}>2</p>*/}
@@ -73,7 +73,7 @@ const SingleDiff = () => {
       {/*  /!* 更新 count 的 值来触发 lazy 组件的 singleDiff*!/*/}
       {/*  <LazyCpn count={count} />*/}
       {/*</div>*/}
-      <Fragments />
+      {/*<Fragments />*/}
     </div>
   );
 };
