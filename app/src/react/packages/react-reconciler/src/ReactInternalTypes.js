@@ -129,6 +129,11 @@ export type Fiber = {|
 
   // Input is the data coming into process this fiber. Arguments. Props.
   // 新的变动带来的新的props(待更新的props)
+  // HostText 就是 string
+  // Fragment 就是 ReactFragment
+  // HostPortal 就是 ReactNodeList | []
+  // OffscreenComponent | LegacyHiddenComponent 就是 OffscreenProps
+  // 其他情况就是 any 或者 null
   pendingProps: any, // This type will be more specific once we overload the tag.
   // 上一次渲染完成之后的 props
   memoizedProps: any, // The props used to create the output.
