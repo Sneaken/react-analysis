@@ -1218,7 +1218,6 @@ function ChildReconciler(shouldTrackSideEffects) {
         const elementType = element.type;
         if (elementType === REACT_FRAGMENT_TYPE) {
           if (child.tag === Fragment) {
-            // 能走到这里的 Fragment 都是具有key 的（不带key的 Fragment 直接被它的子节点替换了）
             // 标记删除 从兄弟节点开始的所有后续节点
             deleteRemainingChildren(returnFiber, child.sibling);
             const existing = useFiber(child, element.props.children);
@@ -1347,7 +1346,8 @@ function ChildReconciler(shouldTrackSideEffects) {
     // Handle top level unkeyed fragments as if they were arrays.
     // This leads to an ambiguity between <>{[...]}</> and <>...</>.
     // We treat the ambiguous cases above the same.
-    // 没有 key 的 Fragment 会调整 props 结构
+    // 如果一个组件是由 Fragment 开始的话， 并且这个组件没有设置 key
+    // 那么就缩减层级将 props.children 直接赋给 newChild
     const isUnkeyedTopLevelFragment =
       typeof newChild === 'object' &&
       newChild !== null &&
