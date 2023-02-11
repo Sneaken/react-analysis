@@ -1276,6 +1276,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     // 没有找到能够复用的 fiberNode 就创建新的 fiberNode
+    // 从 jsx 对象变为 fiberNode
     if (element.type === REACT_FRAGMENT_TYPE) {
       const created = createFiberFromFragment(
         element.props.children,
