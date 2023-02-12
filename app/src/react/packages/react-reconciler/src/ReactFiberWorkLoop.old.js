@@ -1584,6 +1584,10 @@ function handleError(root, thrownValue): void {
   } while (true);
 }
 
+/**
+ * 推入一个默认 throw Error 的 dispatch， 并返回之前的 dispatch 以便后面恢复
+ * @return {ReactComponent|Dispatcher}
+ */
 function pushDispatcher() {
   const prevDispatcher = ReactCurrentDispatcher.current;
   ReactCurrentDispatcher.current = ContextOnlyDispatcher;
@@ -1597,6 +1601,10 @@ function pushDispatcher() {
   }
 }
 
+/**
+ * 恢复成之前的 dispatch
+ * @param prevDispatcher
+ */
 function popDispatcher(prevDispatcher) {
   ReactCurrentDispatcher.current = prevDispatcher;
 }
@@ -1666,6 +1674,7 @@ export function renderHasNotSuspendedYet(): boolean {
 
 function renderRootSync(root: FiberRoot, lanes: Lanes) {
   const prevExecutionContext = executionContext;
+  // 标记当前进入 render 上下文
   executionContext |= RenderContext;
   const prevDispatcher = pushDispatcher();
 
@@ -1712,7 +1721,9 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
   } while (true);
   resetContextDependencies();
 
+  // 标记当前回到之前的上下文 一般是 NoContext
   executionContext = prevExecutionContext;
+  // 恢复到之前的 dispatch
   popDispatcher(prevDispatcher);
 
   if (workInProgress !== null) {
