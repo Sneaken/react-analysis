@@ -399,7 +399,6 @@ function ChildReconciler(shouldTrackSideEffects) {
     if (current !== null) {
       // update
       const oldIndex = current.index;
-      current.key && console.log({key: current.key, oldIndex, lastPlacedIndex});
       if (oldIndex < lastPlacedIndex) {
         // 节点往右边(后边)移动
         // This is a move.
@@ -939,7 +938,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         if (oldFiber === null) {
           oldFiber = nextOldFiber;
         }
-        // key 不同导致不可复用，立即跳出遍历
+        // key 不同导致没匹配到能够复用的节点，立即跳出遍历
         break;
       }
       if (shouldTrackSideEffects) {
