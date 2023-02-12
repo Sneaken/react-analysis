@@ -72,31 +72,26 @@ function Modal({ children }) {
 
 function BeginWork({ name = "BeginWork" }) {
   const [count, setCount] = useState(0);
-  logJSONStringify({ props: { ...arguments[0], name } });
+  const [list, setList] = useState([]);
   return (
     <Suspense fallback={fallback}>
       <Button
         onClick={() => {
-          setCount(count + 1);
+          const it = count + 1;
+          list.push(it);
+          // 不解构的缺点是 不了解源码的人，修改逻辑可能会发生问题
+          setList(list);
+          setCount(it);
         }}
       >
         {count}
       </Button>
-      {/*<ClassLike />*/}
-      {/*<MemoComponent count={count} />*/}
-      {/*<LazyCpn count={count} />*/}
-      {/*{lazyCase}*/}
-      {/*<LazyMemoCpn count={count} />*/}
-      {/*<HooksInOtherHook count={count} />*/}
-      {/*<>*/}
-      {/*  <LazyForwardRefCpn />*/}
-      {/*</>*/}
-      {/*<Modal>*/}
-      {/*  <NodeHeight />*/}
-      {/*</Modal>*/}
-      {/*{count % 2 ? <p>123</p> : "123"}*/}
-      {Array.from({ length: 10 }).map((_, idx) => {
-        return <div key={idx}>{idx}</div>;
+      {list.map((it) => {
+        return (
+          <div key={it} onClick={() => setList(list.filter((i) => i !== it))}>
+            {it}
+          </div>
+        );
       })}
     </Suspense>
   );
