@@ -1,4 +1,12 @@
-import { Component, lazy, memo, Suspense, useCallback, useState } from "react";
+import {
+  Component,
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { logJSONStringify } from "../utils/log";
 import { sleep } from "../utils/mixed";
 import { createPortal } from "react-dom";
@@ -70,29 +78,84 @@ function Modal({ children }) {
   return createPortal(children, Portal);
 }
 
+function SortList({ lastValue }) {
+  const [list, setList] = useState([]);
+
+  useEffect(() => {
+    setList([...list, lastValue]);
+  }, [lastValue]);
+
+  return (
+    <>
+      {list.map((it, idx) => {
+        return (
+          <div
+            key={it}
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              margin: 10,
+            }}
+          >
+            <div>{it}</div>
+            <button
+              onClick={() => {
+                if (idx - 1 < 0) return;
+                [list[idx], list[idx - 1]] = [list[idx - 1], list[idx]];
+                setList([...list]);
+              }}
+            >
+              和上一个交换
+            </button>
+            <button
+              onClick={() => {
+                if (idx - 2 < 0) return;
+                [list[idx], list[idx - 2]] = [list[idx - 2], list[idx]];
+                setList([...list]);
+              }}
+            >
+              和上两个交换
+            </button>
+            <button
+              onClick={() => {
+                if (idx === list.length - 1) return;
+                [list[idx], list[idx + 1]] = [list[idx + 1], list[idx]];
+                setList([...list]);
+              }}
+            >
+              和下一个交换
+            </button>
+            <button
+              onClick={() => {
+                if (idx >= list.length - 2) return;
+                [list[idx], list[idx + 2]] = [list[idx + 2], list[idx]];
+                setList([...list]);
+              }}
+            >
+              和下两个交换
+            </button>
+            <button onClick={() => setList(list.filter((i) => i !== it))}>
+              clear
+            </button>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 function BeginWork({ name = "BeginWork" }) {
   const [count, setCount] = useState(0);
-  const [list, setList] = useState([]);
   return (
     <Suspense fallback={fallback}>
       <Button
         onClick={() => {
-          const it = count + 1;
-          list.push(it);
-          // 不解构的缺点是 不了解源码的人，修改逻辑可能会发生问题
-          setList(list);
-          setCount(it);
+          setCount(count + 1);
         }}
       >
         {count}
       </Button>
-      {list.map((it) => {
-        return (
-          <div key={it} onClick={() => setList(list.filter((i) => i !== it))}>
-            {it}
-          </div>
-        );
-      })}
+      <SortList lastValue={count} />
     </Suspense>
   );
 }
