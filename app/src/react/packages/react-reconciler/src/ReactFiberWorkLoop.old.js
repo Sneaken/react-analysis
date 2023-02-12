@@ -1859,14 +1859,21 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   }
 
   resetCurrentDebugFiberInDEV();
+  // pendingProps 可以变更到 memoizedProps 上了
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
+    // 直到没有 child 了, 那么就可以开始 completeWork 了
     completeUnitOfWork(unitOfWork);
   } else {
+    // 交给下一个节点
+    // next 就是 workInProgress.child
+    // 所以是按 dfs 的顺序遍历的
     workInProgress = next;
   }
 
+  // ReactCurrentOwner.current 到此结束， 那从什么时候开始被赋值的呢？
+  // 在各个组件被 update/mount 的时候
   ReactCurrentOwner.current = null;
 }
 
