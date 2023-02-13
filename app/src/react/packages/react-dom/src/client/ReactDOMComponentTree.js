@@ -15,20 +15,19 @@ import type {
 } from '../shared/ReactDOMTypes';
 import type {
   Container,
-  TextInstance,
   Instance,
-  SuspenseInstance,
   Props,
+  SuspenseInstance,
+  TextInstance,
 } from './ReactDOMHostConfig';
+import {getParentSuspenseInstance} from './ReactDOMHostConfig';
 
 import {
   HostComponent,
-  HostText,
   HostRoot,
+  HostText,
   SuspenseComponent,
 } from 'react-reconciler/src/ReactWorkTags';
-
-import {getParentSuspenseInstance} from './ReactDOMHostConfig';
 
 import {enableScopeAPI} from 'shared/ReactFeatureFlags';
 
@@ -50,6 +49,11 @@ export function detachDeletedInstance(node: Instance): void {
   delete (node: any)[internalEventHandlesSetKey];
 }
 
+/**
+ * 将 fiber 节点的信息挂载到 DOM 实例上
+ * @param hostInst
+ * @param node
+ */
 export function precacheFiberNode(
   hostInst: Fiber,
   node: Instance | TextInstance | SuspenseInstance | ReactScopeInstance,
@@ -196,6 +200,11 @@ export function getFiberCurrentPropsFromNode(
   return (node: any)[internalPropsKey] || null;
 }
 
+/**
+ * 将 fiber 的 pendingProps 信息存贮在 DOM 实例上
+ * @param node
+ * @param props
+ */
 export function updateFiberProps(
   node: Instance | TextInstance | SuspenseInstance,
   props: Props,

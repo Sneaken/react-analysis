@@ -221,6 +221,7 @@ if (supportsMutation) {
   appendAllChildren = function (
     parent: Instance,
     workInProgress: Fiber,
+    // 虽然下面两个没用上，但是写了算是同一使用方式
     needsVisibilityToggle: boolean,
     isHidden: boolean,
   ) {
@@ -240,7 +241,8 @@ if (supportsMutation) {
         // the portal directly.
       } else if (node.child !== null) {
         // 继续向下遍历，直到找到第一层 DOM 元素类型
-        node.child.return = node;
+        node.child.return = node; // 这不是在 beginWork 设置过么? 感觉这是为了防止代码逻辑在 beginWork 中被修改？
+        // 交替遍历
         node = node.child;
         continue;
       }
@@ -248,16 +250,19 @@ if (supportsMutation) {
       if (node === workInProgress) {
         return;
       }
+      // 从最后一个节点开始往有遍历， 右边没有兄弟节点了就往前遍历
       // 如果没有兄弟节点，则向父 fiberNode 遍历
       while (node.sibling === null) {
         // 终止情况2：回到最初执行步骤1所在层
         if (node.return === null || node.return === workInProgress) {
           return;
         }
+        // 交替遍历
         node = node.return;
       }
       // 对兄弟 fiberNode 执行步骤1
-      node.sibling.return = node.return;
+      node.sibling.return = node.return; // 这不也是在 beginWork 中设置过的么
+      // 交替遍历
       node = node.sibling;
     }
   };
@@ -286,9 +291,11 @@ if (supportsMutation) {
     // If we have an alternate, that means this is an update and we need to
     // schedule a side-effect to do the updates.
     const oldProps = current.memoizedProps;
+    // newProps => workInProgress.pendingProps
     if (oldProps === newProps) {
       // In mutation mode, this is sufficient for a bailout because
       // we won't touch this node even if children changed.
+      // 命中 bailout 路径
       return;
     }
 
@@ -318,6 +325,7 @@ if (supportsMutation) {
       markUpdate(workInProgress);
     }
   };
+
   updateHostText = function (
     current: Fiber,
     workInProgress: Fiber,
@@ -674,21 +682,25 @@ function cutOffTailIfNeeded(
 }
 
 /**
- *
+ * 收集 subTreeFlags 和 childLanes
  * @param {Fiber} completedWork
  * @return {boolean}
  */
 function bubbleProperties(completedWork: Fiber) {
+  // 命中优化路径, fiberNode 没有发生需要触发渲染变化
   const didBailout =
     completedWork.alternate !== null &&
     completedWork.alternate.child === completedWork.child;
 
   let newChildLanes = NoLanes;
+  // 子孙节点的 flags
   let subtreeFlags = NoFlags;
 
   if (!didBailout) {
+    // 没有命中优化路径
     // Bubble up the earliest expiration time.
     if (enableProfilerTimer && (completedWork.mode & ProfileMode) !== NoMode) {
+      // 处于性能分析模式
       // In profiling mode, resetChildExpirationTime is also used to reset
       // profiler durations.
       let actualDuration = completedWork.actualDuration;
@@ -716,12 +728,14 @@ function bubbleProperties(completedWork: Fiber) {
         actualDuration += child.actualDuration;
 
         treeBaseDuration += child.treeBaseDuration;
+        // 交替遍历
         child = child.sibling;
       }
 
       completedWork.actualDuration = actualDuration;
       completedWork.treeBaseDuration = treeBaseDuration;
     } else {
+      // 不处于性能分析模式
       let child = completedWork.child;
       while (child !== null) {
         newChildLanes = mergeLanes(
@@ -745,6 +759,7 @@ function bubbleProperties(completedWork: Fiber) {
     // 附加在当前 fiberNode 的 subtreeFlags 上
     completedWork.subtreeFlags |= subtreeFlags;
   } else {
+    // 命中优化路径
     // Bubble up the earliest expiration time.
     if (enableProfilerTimer && (completedWork.mode & ProfileMode) !== NoMode) {
       // In profiling mode, resetChildExpirationTime is also used to reset
@@ -782,6 +797,7 @@ function bubbleProperties(completedWork: Fiber) {
         // so we should bubble those up even during a bailout. All the other
         // flags have a lifetime only of a single render + commit, so we should
         // ignore them.
+        // 得是 LayoutStatic | PassiveStatic | RefStatic 这三种之一 或者 NoFlags
         subtreeFlags |= child.subtreeFlags & StaticMask;
         subtreeFlags |= child.flags & StaticMask;
 
@@ -891,6 +907,22 @@ function completeDehydratedSuspenseBoundary(
   }
 }
 
+/**
+ * 两件事
+ * 1. DOM 实例 挂载到 fiber 的 stateNode 上
+ * 2 .flags 冒泡
+ *
+ * return 一遍都是 null, 除了以下三种情况会 return fiber
+ * SuspenseListComponent
+ *   list 还没渲染结束的时候
+ * SuspenseComponent
+ *   SSR workInProgress
+ *   throw Error workInProgress
+ * @param current
+ * @param workInProgress
+ * @param renderLanes
+ * @return {Fiber|null}
+ */
 function completeWork(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -1067,6 +1099,7 @@ function completeWork(
           // 添加子 DOM
           appendAllChildren(instance, workInProgress, false, false);
 
+          // DOM 实例是这这个时候挂载到 fiber 上去的
           workInProgress.stateNode = instance;
 
           // Certain renderers require commit-time effects for initial mount.
@@ -1082,6 +1115,7 @@ function completeWork(
               currentHostContext,
             )
           ) {
+            // 标记更新
             markUpdate(workInProgress);
           }
         }
@@ -1099,11 +1133,13 @@ function completeWork(
     case HostText: {
       const newText = newProps;
       if (current && workInProgress.stateNode != null) {
+        // update
         const oldText = current.memoizedProps;
         // If we have an alternate, that means this is an update and we need
         // to schedule a side-effect to do the updates.
         updateHostText(current, workInProgress, oldText, newText);
       } else {
+        // mount
         if (typeof newText !== 'string') {
           if (workInProgress.stateNode === null) {
             throw new Error(
@@ -1117,10 +1153,12 @@ function completeWork(
         const currentHostContext = getHostContext();
         const wasHydrated = popHydrationState(workInProgress);
         if (wasHydrated) {
+          // SSR
           if (prepareToHydrateHostTextInstance(workInProgress)) {
             markUpdate(workInProgress);
           }
         } else {
+          // 创建文本节点
           workInProgress.stateNode = createTextInstance(
             newText,
             rootContainerInstance,
@@ -1154,6 +1192,7 @@ function completeWork(
           );
         if (!fallthroughToNormalSuspensePath) {
           if (workInProgress.flags & ShouldCapture) {
+            // SSR
             // Special case. There were remaining unhydrated nodes. We treat
             // this as a mismatch. Revert to client rendering.
             return workInProgress;

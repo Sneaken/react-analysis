@@ -1896,10 +1896,13 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
     // The current, flushed, state of this fiber is the alternate. Ideally
     // nothing should rely on this, but relying on it here means that we don't
     // need an additional field on the work in progress.
+    // current 不一定存在 因为 completedWork 可能是新创建的
     const current = completedWork.alternate;
+    // returnFiber 一定存在 因为不管怎样 completedWork 都绑定了 return
     const returnFiber = completedWork.return;
 
     // Check if the work completed or if something threw.
+    // 判断 completedWork 是否不存在标志 Incomplete
     if ((completedWork.flags & Incomplete) === NoFlags) {
       setCurrentDebugFiberInDEV(completedWork);
       let next;
@@ -1907,6 +1910,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
         !enableProfilerTimer ||
         (completedWork.mode & ProfileMode) === NoMode
       ) {
+        // 没有处于 ProfileMode 模式
         next = completeWork(current, completedWork, subtreeRenderLanes);
       } else {
         startProfilerTimer(completedWork);
@@ -1918,6 +1922,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
 
       if (next !== null) {
         // Completing this fiber spawned new work. Work on that next.
+        // next 存在 说明 Suspense 渲染还没结束 或者 Suspense 渲染中出现异常
         workInProgress = next;
         return;
       }

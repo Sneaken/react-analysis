@@ -140,6 +140,7 @@ export type Fiber = {|
 
   // A queue of state updates and callbacks.
   // 该 Fiber 对应的组件产生的 Update 会存放在这个队列里面
+  // HostComponent: 变更产生的键值对
   updateQueue: mixed,
 
   // The state used to create the output
@@ -160,9 +161,11 @@ export type Fiber = {|
   mode: TypeOfMode,
 
   // Effect
+  // 标记这个 fiber 节点存在哪些操作
   flags: Flags,
+  // 标记这个 fiber 节点的子孙节点中存在哪些操作
   subtreeFlags: Flags,
-  // 需要删除的 fiber 节点
+  // 存储需要删除的 fiber 节点
   deletions: Array<Fiber> | null,
 
   // Singly linked list fast path to the next fiber with side-effects.

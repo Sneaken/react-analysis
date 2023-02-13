@@ -287,11 +287,16 @@ export function createInstance(
   );
   // 将 fiber 信息也存放的 DOM 元素上
   precacheFiberNode(internalInstanceHandle, domElement);
-  // 将 fiber 的 props 存放在 DOM 元素上
+  // 将 fiber 的 pendingProps 存放在 DOM 元素上
   updateFiberProps(domElement, props);
   return domElement;
 }
 
+/**
+ * 往 DOM 实例上追加 child
+ * @param parentInstance
+ * @param child
+ */
 export function appendInitialChild(
   parentInstance: Instance,
   child: Instance | TextInstance,
@@ -329,6 +334,17 @@ export function finalizeInitialChildren(
   }
 }
 
+/**
+ * 准备更新
+ * return fiber 变更的键值对
+ * @param domElement
+ * @param type
+ * @param oldProps
+ * @param newProps
+ * @param rootContainerInstance
+ * @param hostContext
+ * @return {Array<*>}
+ */
 export function prepareUpdate(
   domElement: Instance,
   type: string,
