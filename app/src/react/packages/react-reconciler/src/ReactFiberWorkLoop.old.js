@@ -269,15 +269,23 @@ const RenderContext = /*                */ 0b010;
 const CommitContext = /*                */ 0b100;
 
 type RootExitStatus = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+// 表示根组件正在运行
 const RootInProgress = 0;
+// 表示根组件在执行时遇到了一个致命错误，无法继续执行
 const RootFatalErrored = 1;
+// 表示根组件在执行时遇到了一个错误，但是可以继续运行
 const RootErrored = 2;
+// 表示根组件已暂停，等待其他资源的加载
 const RootSuspended = 3;
+// 表示根组件已被暂停，但有一个延迟，以等待其他资源的加载
 const RootSuspendedWithDelay = 4;
+// 表示根组件已完成执行
 const RootCompleted = 5;
+// 表示根组件未完成执行，可能时由于暂停或者错误导致的
 const RootDidNotComplete = 6;
 
 // Describes where we are in the React execution stack
+// 用来描述当前是处于哪个上下文中
 let executionContext: ExecutionContext = NoContext;
 // The root we're working on
 let workInProgressRoot: FiberRoot | null = null;
@@ -298,6 +306,7 @@ export let subtreeRenderLanes: Lanes = NoLanes;
 const subtreeRenderLanesCursor: StackCursor<Lanes> = createCursor(NoLanes);
 
 // Whether to root completed, errored, suspended, etc.
+// 根组件的退出状态
 let workInProgressRootExitStatus: RootExitStatus = RootInProgress;
 // A fatal error, if one is thrown
 let workInProgressRootFatalError: mixed = null;
