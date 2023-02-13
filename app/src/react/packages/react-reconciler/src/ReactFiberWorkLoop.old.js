@@ -1883,7 +1883,11 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
-    // 直到没有 child 了, 那么就可以开始 completeWork 了
+    // 直到没有产生 fiber, 那么就可以开始 completeWork 了
+    // 什么时候 beginWork return null?
+    // 1. workInProgress.child 为 null
+    // 2. HostText mount/update
+    // 3. 命中 bailout 优化路径
     completeUnitOfWork(unitOfWork);
   } else {
     // 交给下一个节点
@@ -1997,6 +2001,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
 
   // We've reached the root.
   if (workInProgressRootExitStatus === RootInProgress) {
+    // 根组件已完成执行
     workInProgressRootExitStatus = RootCompleted;
   }
 }
