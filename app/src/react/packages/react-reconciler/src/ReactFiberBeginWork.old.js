@@ -462,7 +462,11 @@ function updateMemoComponent(
   renderLanes: Lanes,
 ): null | Fiber {
   if (current === null) {
+    // mount
     const type = Component.type;
+    // 满足以下条件会被降级成 SimpleMemoComponent 组件
+    // 1. 不带 defaultProps 的 函数组件
+    // 2. 没有设置 memo 的 第二个参数
     if (
       isSimpleFunctionComponent(type) &&
       Component.compare === null &&
@@ -596,6 +600,7 @@ function updateSimpleMemoComponent(
     }
   }
   if (current !== null) {
+    // update
     const prevProps = current.memoizedProps;
     if (
       shallowEqual(prevProps, nextProps) &&
@@ -3887,6 +3892,7 @@ function beginWork(
     case ContextConsumer:
       return updateContextConsumer(current, workInProgress, renderLanes);
     case MemoComponent: {
+      // memo 组件 mount / update
       const type = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;
       // Resolve outer props first, then resolve inner props.
