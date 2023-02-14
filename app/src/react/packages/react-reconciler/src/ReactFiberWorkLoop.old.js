@@ -1789,6 +1789,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
   workInProgressRoot = null;
   workInProgressRootRenderLanes = NoLanes;
 
+  // 如果退出结果正正常就要交给 commitRoot 了， reconciler 阶段正式结束
   return workInProgressRootExitStatus;
 }
 
@@ -2022,10 +2023,12 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
     const siblingFiber = completedWork.sibling;
     if (siblingFiber !== null) {
       // If there is more work to do in this returnFiber, do that next.
+      // 从兄弟节点开始 beginWork 流程
       workInProgress = siblingFiber;
       return;
     }
     // Otherwise, return to the parent
+    // 向父级开始 completeWork 流程
     completedWork = returnFiber;
     // Update the next thing we're working on in case something throws.
     workInProgress = completedWork;
@@ -2033,7 +2036,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
 
   // We've reached the root.
   if (workInProgressRootExitStatus === RootInProgress) {
-    // 根组件已完成执行
+    // 根组件已完成执行, 标记退出结果
     workInProgressRootExitStatus = RootCompleted;
   }
 }
