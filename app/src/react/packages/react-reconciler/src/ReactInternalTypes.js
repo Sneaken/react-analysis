@@ -363,6 +363,8 @@ type TransitionTracingOnlyFiberRootProperties = {|
 // Exported FiberRoot type includes all properties,
 // To avoid requiring potentially error-prone :any casts throughout the project.
 // The types are defined separately within this file to ensure they stay in sync.
+// 整个应用的状态树。
+// 它还包含了应用的一些全局信息，比如当前的状态、事件处理、组件的渲染等。
 export type FiberRoot = {
   ...BaseFiberRootProperties,
   ...SuspenseCallbackOnlyFiberRootProperties,

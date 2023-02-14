@@ -2127,6 +2127,7 @@ function commitRootImpl(
       }
     }
   }
+  // 此时已经把 finishedWork 以及 finishedLanes 重置了
   root.finishedWork = null;
   root.finishedLanes = NoLanes;
 
@@ -2211,7 +2212,9 @@ function commitRootImpl(
     const previousPriority = getCurrentUpdatePriority();
     setCurrentUpdatePriority(DiscreteEventPriority);
 
+    // RenderContext 或者 BatchedContext
     const prevExecutionContext = executionContext;
+    // 标记进入 Commit 上下文
     executionContext |= CommitContext;
 
     // Reset this to null before calling lifecycles
