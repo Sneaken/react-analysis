@@ -77,6 +77,7 @@ export const MountPassiveDev = /*              */ 0b10000000000000000000000000;
 // Groups of flags that are used in the commit phase to skip over trees that
 // don't contain effects, by checking subtreeFlags.
 
+// 节点在渲染前
 export const BeforeMutationMask =
   // TODO: Remove Update flag from before mutation phase by re-landing Visibility
   // flag logic (see #20043)
@@ -90,6 +91,7 @@ export const BeforeMutationMask =
       ChildDeletion | Visibility
     : 0);
 
+// 节点在进行渲染
 export const MutationMask =
   Placement |
   Update |
@@ -98,9 +100,12 @@ export const MutationMask =
   Ref |
   Hydrating |
   Visibility;
+
+// 节点的布局被更新
 export const LayoutMask = Update | Callback | Ref | Visibility;
 
 // TODO: Split into PassiveMountMask and PassiveUnmountMask
+// 节点正在进行被动更新（执行销毁函数？）
 export const PassiveMask = Passive | ChildDeletion;
 
 // Union of tags that don't get reset on clones.
