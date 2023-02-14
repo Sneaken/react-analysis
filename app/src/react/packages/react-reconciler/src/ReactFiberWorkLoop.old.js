@@ -1303,6 +1303,7 @@ function performSyncWorkOnRoot(root) {
   const finishedWork: Fiber = (root.current.alternate: any);
   root.finishedWork = finishedWork;
   root.finishedLanes = lanes;
+  // commit 阶段的起点
   commitRoot(
     root,
     workInProgressRootRecoverableErrors,
@@ -2176,6 +2177,7 @@ function commitRootImpl(
       // the previous render and commit if we throttle the commit
       // with setTimeout
       pendingPassiveTransitions = transitions;
+      // TODO: 不太清除这里是干什么的
       scheduleCallback(NormalSchedulerPriority, () => {
         flushPassiveEffects();
         // This render triggered passive effects: release the root cache pool
@@ -2191,16 +2193,19 @@ function commitRootImpl(
   // to check for the existence of `firstEffect` to satisfy Flow. I think the
   // only other reason this optimization exists is because it affects profiling.
   // Reconsider whether this is necessary.
+  // 子孙元素是否存在副作用
   const subtreeHasEffects =
     (finishedWork.subtreeFlags &
       (BeforeMutationMask | MutationMask | LayoutMask | PassiveMask)) !==
     NoFlags;
+  // 根元素是否存在副作用
   const rootHasEffect =
     (finishedWork.flags &
       (BeforeMutationMask | MutationMask | LayoutMask | PassiveMask)) !==
     NoFlags;
 
   if (subtreeHasEffects || rootHasEffect) {
+    // 进入三个子阶段
     const prevTransition = ReactCurrentBatchConfig.transition;
     ReactCurrentBatchConfig.transition = null;
     const previousPriority = getCurrentUpdatePriority();
@@ -2250,6 +2255,10 @@ function commitRootImpl(
     // the mutation phase, so that the previous tree is still current during
     // componentWillUnmount, but before the layout phase, so that the finished
     // work is current during componentDidMount/Update.
+    // Mutation 节点完成"UI 相关副作用"后，fiber Tree 切换
+    // 为什么选择这个时候切换 fiber tree？
+    // 因为对于 ClassComponent, 当执行 componentWillUnMount 时, current fiber tree 仍对应 UI 中的树，
+    // 当执行 componentDidMount/Update 时, current fiber tree 已经对应本次更新的 fiber tree.
     root.current = finishedWork;
 
     // The next phase is the layout phase, where we call effects that read
@@ -2288,6 +2297,7 @@ function commitRootImpl(
     setCurrentUpdatePriority(previousPriority);
     ReactCurrentBatchConfig.transition = prevTransition;
   } else {
+    // 本次更新没有三个子阶段的副作用
     // No effects.
     root.current = finishedWork;
     // Measure these anyway so the flamegraph explicitly shows that there were
