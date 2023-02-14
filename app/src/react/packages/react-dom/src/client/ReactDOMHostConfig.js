@@ -704,6 +704,10 @@ export function unhideTextInstance(
   textInstance.nodeValue = text;
 }
 
+/**
+ * 清空容器内容
+ * @param container
+ */
 export function clearContainer(container: Container): void {
   if (container.nodeType === ELEMENT_NODE) {
     ((container: any): Element).textContent = '';

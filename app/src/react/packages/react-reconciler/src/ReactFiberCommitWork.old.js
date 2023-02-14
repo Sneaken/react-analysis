@@ -268,6 +268,13 @@ function safelyAttachRef(current: Fiber, nearestMountedAncestor: Fiber | null) {
   }
 }
 
+/**
+ * 安全地卸载 ref
+ * 如果是 createRef 或者是 useRef 的 ref 就直接将 ref.current 设置为 null
+ * 如果是 useCallbackRef 就会执行 ref(null)
+ * @param current
+ * @param nearestMountedAncestor
+ */
 function safelyDetachRef(current: Fiber, nearestMountedAncestor: Fiber | null) {
   const ref = current.ref;
   if (ref !== null) {
@@ -306,6 +313,12 @@ function safelyDetachRef(current: Fiber, nearestMountedAncestor: Fiber | null) {
   }
 }
 
+/**
+ * 安全地执行 destroy 函数
+ * @param current
+ * @param nearestMountedAncestor
+ * @param destroy
+ */
 function safelyCallDestroy(
   current: Fiber,
   nearestMountedAncestor: Fiber | null,
@@ -324,7 +337,10 @@ let focusedInstanceHandle: null | Fiber = null;
 let shouldFireAfterActiveInstanceBlur: boolean = false;
 
 /**
- *
+ * 也是按照 dfs 顺序遍历
+ * 整个过程主要处理如下两种类型的 fiberNode
+ * 1. ClassComponent: 执行 getSnapshotBeforeUpdate 方法
+ * 2. HostRoot：清空 HostRoot 挂载的内容，方便 Mutation 阶段渲染。
  * @param root
  * @param firstChild
  * @return {boolean}
@@ -346,6 +362,9 @@ export function commitBeforeMutationEffects(
   return shouldFire;
 }
 
+/**
+ * 遍历 nextEffect 直到 deletions 全部执行完 commitBeforeMutationEffects_complete
+ */
 function commitBeforeMutationEffects_begin() {
   while (nextEffect !== null) {
     const fiber = nextEffect;
@@ -364,18 +383,25 @@ function commitBeforeMutationEffects_begin() {
     }
 
     const child = fiber.child;
+    // 如果这个 fiber 的子孙节点中存在 BeforeMutationMask(Update|Snapshot) 这些 flags 就一直向下遍历
     if (
       (fiber.subtreeFlags & BeforeMutationMask) !== NoFlags &&
       child !== null
     ) {
-      child.return = fiber;
+      child.return = fiber; // 为什么又要设置一遍父级节点?
+      // 当 subTree 存在 BeforeMutationMask, 并且存在 child 的时候，交给 child 继续遍历
       nextEffect = child;
     } else {
+      // 不存在 child 或者 这个 fiber 包含这些标记（上轮遍历子孙节点存在 BeforeMutationMask，但是现在孙节点不存在，那肯定就是子节点存在了）
       commitBeforeMutationEffects_complete();
+      // 执行完 此时 nextEffect 是 兄弟节点 继续遍历
     }
   }
 }
 
+/**
+ * 迭代执行 commitBeforeMutationEffectsOnFiber，直到存在兄弟节点
+ */
 function commitBeforeMutationEffects_complete() {
   while (nextEffect !== null) {
     const fiber = nextEffect;
@@ -390,10 +416,12 @@ function commitBeforeMutationEffects_complete() {
     const sibling = fiber.sibling;
     if (sibling !== null) {
       sibling.return = fiber.return;
+      // 交给兄弟节点，继续走 commitBeforeMutationEffects_begin
       nextEffect = sibling;
       return;
     }
 
+    // 不存在兄弟节点，就往上遍历父级
     nextEffect = fiber.return;
   }
 }
@@ -425,6 +453,7 @@ function commitBeforeMutationEffectsOnFiber(finishedWork: Fiber) {
   }
 
   if ((flags & Snapshot) !== NoFlags) {
+    // 如果 ClassComponent | HostRoot 存在更新
     setCurrentDebugFiberInDEV(finishedWork);
 
     switch (finishedWork.tag) {
@@ -469,9 +498,11 @@ function commitBeforeMutationEffectsOnFiber(finishedWork: Fiber) {
             }
           }
           const snapshot = instance.getSnapshotBeforeUpdate(
+            // 判断是不是懒加载
             finishedWork.elementType === finishedWork.type
               ? prevProps
-              : resolveDefaultProps(finishedWork.type, prevProps),
+              : // merge 一下 defaultProps
+                resolveDefaultProps(finishedWork.type, prevProps),
             prevState,
           );
           if (__DEV__) {
@@ -486,6 +517,7 @@ function commitBeforeMutationEffectsOnFiber(finishedWork: Fiber) {
               );
             }
           }
+          // 更新前的快照也会被挂载在实例上
           instance.__reactInternalSnapshotBeforeUpdate = snapshot;
         }
         break;
@@ -1336,6 +1368,10 @@ function commitDetachRef(current: Fiber) {
   }
 }
 
+/**
+ * 为什么要重置父节点？
+ * @param fiber
+ */
 function detachFiberMutation(fiber: Fiber) {
   // Cut off the return pointer to disconnect it from the tree.
   // This enables us to detect and warn against state updates on an unmounted component.
@@ -1628,9 +1664,20 @@ function insertOrAppendPlacementNode(
 // deleted subtree.
 // TODO: Update these during the whole mutation phase, not just during
 // a deletion.
+// 当前组件的父实例，可以是一个实例，也可以是一个容器
 let hostParent: Instance | Container | null = null;
+// 用来表示当前组件的父容器是否是一个容器
 let hostParentIsContainer: boolean = false;
 
+/**
+ * 删除逻辑比较复杂，原因在于当删除一个 DOM 元素的时候，还需要考虑:
+ * - 其子树中所有组件的 unmount 逻辑
+ * - 其子树中所有 ref 属性的卸载操作
+ * - 其子树中所有 Effect 相关 Hook 的 destroy 回调执行
+ * @param root
+ * @param returnFiber
+ * @param deletedFiber
+ */
 function commitDeletionEffects(
   root: FiberRoot,
   returnFiber: Fiber,
@@ -1655,25 +1702,30 @@ function commitDeletionEffects(
     // TODO: Instead of searching up the fiber return path on every deletion, we
     // can track the nearest host component on the JS stack as we traverse the
     // tree during the commit phase. This would make insertions faster, too.
+
     let parent = returnFiber;
     findParent: while (parent !== null) {
       switch (parent.tag) {
         case HostComponent: {
+          // 当前组件是一个DOM 实例
           hostParent = parent.stateNode;
           hostParentIsContainer = false;
           break findParent;
         }
         case HostRoot: {
+          // 当前组件是一个容器
           hostParent = parent.stateNode.containerInfo;
           hostParentIsContainer = true;
           break findParent;
         }
         case HostPortal: {
+          // 当前组件是一个容器
           hostParent = parent.stateNode.containerInfo;
           hostParentIsContainer = true;
           break findParent;
         }
       }
+      // 交给父级 继续遍历
       parent = parent.return;
     }
     if (hostParent === null) {
@@ -1683,6 +1735,7 @@ function commitDeletionEffects(
       );
     }
     commitDeletionEffectsOnFiber(root, returnFiber, deletedFiber);
+    // 重置状态
     hostParent = null;
     hostParentIsContainer = false;
   } else {
@@ -1690,9 +1743,16 @@ function commitDeletionEffects(
     commitDeletionEffectsOnFiber(root, returnFiber, deletedFiber);
   }
 
+  // 重置父节点
   detachFiberMutation(deletedFiber);
 }
 
+/**
+ * 递归遍历 deletion effects
+ * @param finishedRoot
+ * @param nearestMountedAncestor
+ * @param parent
+ */
 function recursivelyTraverseDeletionEffects(
   finishedRoot,
   nearestMountedAncestor,
@@ -1702,10 +1762,21 @@ function recursivelyTraverseDeletionEffects(
   let child = parent.child;
   while (child !== null) {
     commitDeletionEffectsOnFiber(finishedRoot, nearestMountedAncestor, child);
+    // 向兄弟节点遍历
     child = child.sibling;
   }
 }
 
+/**
+ * commit 删除 fiber 的操作
+ * 主要干三件事
+ * 1. 执行 unmount 逻辑
+ * 2. ref 属性卸载
+ * 3. Effect 的相关 Hook 的 destroy 操作
+ * @param finishedRoot
+ * @param nearestMountedAncestor
+ * @param deletedFiber
+ */
 function commitDeletionEffectsOnFiber(
   finishedRoot: FiberRoot,
   nearestMountedAncestor: Fiber,
@@ -1740,6 +1811,7 @@ function commitDeletionEffectsOnFiber(
         hostParent = prevHostParent;
         hostParentIsContainer = prevHostParentIsContainer;
 
+        // 在这里删除 DOM 实例
         if (hostParent !== null) {
           // Now that all the child effects have unmounted, we can remove the
           // node from the tree.
@@ -1837,12 +1909,14 @@ function commitDeletionEffectsOnFiber(
               const {destroy, tag} = effect;
               if (destroy !== undefined) {
                 if ((tag & HookInsertion) !== NoHookEffect) {
+                  // 先执行 useInsertionEffect 的销毁函数
                   safelyCallDestroy(
                     deletedFiber,
                     nearestMountedAncestor,
                     destroy,
                   );
                 } else if ((tag & HookLayout) !== NoHookEffect) {
+                  // 再执行 useLayoutEffect 的 销毁函数
                   if (enableSchedulingProfiler) {
                     markComponentLayoutEffectUnmountStarted(deletedFiber);
                   }
@@ -1872,6 +1946,7 @@ function commitDeletionEffectsOnFiber(
                   }
                 }
               }
+              // 遍历下一个 effect
               effect = effect.next;
             } while (effect !== firstEffect);
           }
@@ -2065,6 +2140,7 @@ export function commitMutationEffects(
   finishedWork: Fiber,
   committedLanes: Lanes,
 ) {
+  // 设置 inProgressRoot 以及其 lanes
   inProgressLanes = committedLanes;
   inProgressRoot = root;
 
@@ -2072,6 +2148,7 @@ export function commitMutationEffects(
   commitMutationEffectsOnFiber(finishedWork, root, committedLanes);
   setCurrentDebugFiberInDEV(finishedWork);
 
+  // 清空 inProgressRoot
   inProgressLanes = null;
   inProgressRoot = null;
 }

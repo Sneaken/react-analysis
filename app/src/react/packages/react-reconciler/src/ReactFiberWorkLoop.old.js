@@ -2227,6 +2227,7 @@ function commitRootImpl(
     // The first phase a "before mutation" phase. We use this phase to read the
     // state of the host tree right before we mutate it. This is where
     // getSnapshotBeforeUpdate is called.
+    // 以 dfs 的 方式执行完 beforeMutation 阶段
     const shouldFireAfterActiveInstanceBlur = commitBeforeMutationEffects(
       root,
       finishedWork,
