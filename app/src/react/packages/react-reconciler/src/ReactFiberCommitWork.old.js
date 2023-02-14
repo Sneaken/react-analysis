@@ -173,15 +173,19 @@ if (__DEV__) {
 // Used during the commit phase to track the state of the Offscreen component stack.
 // Allows us to avoid traversing the return path to find the nearest Offscreen ancestor.
 // Only used when enableSuspenseLayoutEffectSemantics is enabled.
+// 记录了是否隐藏了在屏幕外的子树
 let offscreenSubtreeIsHidden: boolean = false;
 let offscreenSubtreeWasHidden: boolean = false;
 
 const PossiblyWeakSet = typeof WeakSet === 'function' ? WeakSet : Set;
 
+// 下一个要被处理的fiber, 用于管理 effect
 let nextEffect: Fiber | null = null;
 
 // Used for Profiling builds to track updaters.
+// 当前正在渲染的 rootFiber 对应的 lanes
 let inProgressLanes: Lanes | null = null;
+// 当前正在渲染的 rootFiber
 let inProgressRoot: FiberRoot | null = null;
 
 export function reportUncaughtErrorInDEV(error: mixed) {
@@ -314,9 +318,17 @@ function safelyCallDestroy(
   }
 }
 
+// 管理 焦点处理
 let focusedInstanceHandle: null | Fiber = null;
+// 失去焦点后是否要触发某个事件
 let shouldFireAfterActiveInstanceBlur: boolean = false;
 
+/**
+ *
+ * @param root
+ * @param firstChild
+ * @return {boolean}
+ */
 export function commitBeforeMutationEffects(
   root: FiberRoot,
   firstChild: Fiber,
