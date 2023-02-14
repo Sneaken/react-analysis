@@ -1262,7 +1262,7 @@ function performSyncWorkOnRoot(root) {
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     throw new Error('Should not already be working.');
   }
-
+  // 排除所有的被动效果，使它们的副作用生效（执行销毁函数）?
   flushPassiveEffects();
 
   let lanes = getNextLanes(root, NoLanes);
@@ -1299,6 +1299,7 @@ function performSyncWorkOnRoot(root) {
 
   // We now have a consistent tree. Because this is a sync render, we
   // will commit it even if something suspended.
+  // fiber tree 已经构建完毕，需要提交渲染出来了
   const finishedWork: Fiber = (root.current.alternate: any);
   root.finishedWork = finishedWork;
   root.finishedLanes = lanes;
@@ -1310,6 +1311,7 @@ function performSyncWorkOnRoot(root) {
 
   // Before exiting, make sure there's a callback scheduled for the next
   // pending level.
+  // 用于确保根 Fiber 树被计划进行更新，如果还没有被计划，则触发更新。
   ensureRootIsScheduled(root, now());
 
   return null;
@@ -1478,6 +1480,14 @@ export function popRenderLanes(fiber: Fiber) {
   popFromStack(subtreeRenderLanesCursor, fiber);
 }
 
+/**
+ * 在更新过程中创建一个新的 Fiber 栈，并将其与当前正在进行更新的 Fiber 根节点关联。
+ *
+ * 在 React 中，每一次更新都需要创建一个新的 Fiber 栈， 这个栈用于记录当前组件的更新状态。
+ * @param root
+ * @param lanes
+ * @return {Fiber}
+ */
 function prepareFreshStack(root: FiberRoot, lanes: Lanes): Fiber {
   root.finishedWork = null;
   root.finishedLanes = NoLanes;
@@ -1504,6 +1514,7 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes): Fiber {
     }
   }
   workInProgressRoot = root;
+  // 创建 workInProgress
   const rootWorkInProgress = createWorkInProgress(root.current, null);
   workInProgress = rootWorkInProgress;
   workInProgressRootRenderLanes =
@@ -1727,6 +1738,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
     }
 
     workInProgressTransitions = getTransitionsForLanes(root, lanes);
+    // 在这里创建的 workInProgress
     prepareFreshStack(root, lanes);
   }
 
