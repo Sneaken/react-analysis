@@ -1,10 +1,7 @@
-const App = () => {
-  return (
-    <div>
-      Hello
-      <span>World</span>
-    </div>
-  );
-};
+import BeginWork from "./examples/BeginWork";
+
+function App() {
+  return <BeginWork />;
+}
 
 export default App;

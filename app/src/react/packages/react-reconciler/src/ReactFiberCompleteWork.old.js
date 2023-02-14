@@ -928,6 +928,12 @@ function completeWork(
   workInProgress: Fiber,
   renderLanes: Lanes,
 ): Fiber | null {
+  console.log(
+    'completeWork',
+    workInProgress?.elementType?.name ??
+      workInProgress?.type?.name ??
+      workInProgress?.elementType,
+  );
   const newProps = workInProgress.pendingProps;
   // Note: This intentionally doesn't check if we're hydrating because comparing
   // to the current tree provider fiber is just as fast and less error-prone.

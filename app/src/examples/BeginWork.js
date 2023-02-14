@@ -155,8 +155,74 @@ function BeginWork({ name = "BeginWork" }) {
       >
         {count}
       </Button>
-      <SortList lastValue={count} />
+      <div>
+        <p>{count}</p>
+        <div>
+          <p>{count + 1}</p>
+          <span>{count + 2}</span>
+          <div>{count + 3}</div>
+        </div>
+        <span>{count + 2}</span>
+        <div>{count + 3}</div>
+      </div>
+
+      <div>
+        <p>{count}</p>
+        <div>
+          <p>{count + 1}</p>
+          <span>{count + 2}</span>
+          <div>{count + 3}</div>
+        </div>
+        <span>{count + 2}</span>
+        <div>{count + 3}</div>
+      </div>
     </Suspense>
   );
 }
+// beginWork rootFiber
+// beginWork App
+// beginWork BeginWork
+// beginWork Symbol(react.suspense)
+// beginWork Symbol(react.offscreen)
+// beginWork Button
+// beginWork button
+// completeWork button
+// completeWork Button
+// beginWork div
+// beginWork p
+// completeWork p
+// beginWork div
+// beginWork p
+// completeWork p
+// beginWork span
+// completeWork span
+// beginWork div
+// completeWork div
+// completeWork div
+// beginWork span
+// completeWork span
+// beginWork div
+// completeWork div
+// completeWork div
+// beginWork div
+// beginWork p
+// completeWork p
+// beginWork div
+// beginWork p
+// completeWork p
+// beginWork span
+// completeWork span
+// beginWork div
+// completeWork div
+// completeWork div
+// beginWork span
+// completeWork span
+// beginWork div
+// completeWork div
+// completeWork div
+// completeWork Symbol(react.offscreen)
+// completeWork Symbol(react.suspense)
+// completeWork BeginWork
+// completeWork App
+// completeWork rootFiber
 export default BeginWork;
