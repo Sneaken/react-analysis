@@ -8,30 +8,41 @@
  */
 
 import type {Lane, Lanes} from './ReactFiberLane.old';
-
 import {
+  DefaultLane,
+  getHighestPriorityLane,
+  IdleLane,
+  includesNonIdleWork,
+  InputContinuousLane,
   NoLane,
   SyncLane,
-  InputContinuousLane,
-  DefaultLane,
-  IdleLane,
-  getHighestPriorityLane,
-  includesNonIdleWork,
 } from './ReactFiberLane.old';
 
 export opaque type EventPriority = Lane;
 
+// 离散事件的优先级
 export const DiscreteEventPriority: EventPriority = SyncLane;
+// 连续事件的优先级
 export const ContinuousEventPriority: EventPriority = InputContinuousLane;
+// 默认事件的优先级
 export const DefaultEventPriority: EventPriority = DefaultLane;
+// 空闲事件的优先级
 export const IdleEventPriority: EventPriority = IdleLane;
 
 let currentUpdatePriority: EventPriority = NoLane;
 
+/**
+ * 获取当前事件的优先级
+ * @return {EventPriority}
+ */
 export function getCurrentUpdatePriority(): EventPriority {
   return currentUpdatePriority;
 }
 
+/**
+ * 设置当前更新的优先级
+ * @param {EventPriority} newPriority
+ */
 export function setCurrentUpdatePriority(newPriority: EventPriority) {
   currentUpdatePriority = newPriority;
 }
