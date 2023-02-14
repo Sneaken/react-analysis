@@ -2025,6 +2025,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
       // If there is more work to do in this returnFiber, do that next.
       // 从兄弟节点开始 beginWork 流程
       workInProgress = siblingFiber;
+      // 一般是从这里 return 出去
       return;
     }
     // Otherwise, return to the parent
@@ -2034,6 +2035,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
     workInProgress = completedWork;
   } while (completedWork !== null);
 
+  // 每次更新其实就执行到这里一次，就是最后那次 (因为其他情况都 return 出去了)
   // We've reached the root.
   if (workInProgressRootExitStatus === RootInProgress) {
     // 根组件已完成执行, 标记退出结果
