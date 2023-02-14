@@ -398,38 +398,58 @@ export function getRenderTargetTime(): number {
   return workInProgressRootRenderTargetTime;
 }
 
+// 表示是否发生了未捕获的错误。
 let hasUncaughtError = false;
+// 第一个未捕获的错误，如果存在。
 let firstUncaughtError = null;
+// 表示已经失败的遗留错误边界。
 let legacyErrorBoundariesThatAlreadyFailed: Set<mixed> | null = null;
 
 // Only used when enableProfilerNestedUpdateScheduledHook is true;
 // to track which root is currently committing layout effects.
 let rootCommittingMutationOrLayoutEffects: FiberRoot | null = null;
 
+// 表示当前根是否有任何被动效果
 let rootDoesHavePassiveEffects: boolean = false;
+// 指向具有待处理被动效果的 FiberRoot 对象的引用。
 let rootWithPendingPassiveEffects: FiberRoot | null = null;
+// 表示待处理被动效果的 lanes 的值。
 let pendingPassiveEffectsLanes: Lanes = NoLanes;
+// 存储了有待处理被动效果的纤维的引用。
 let pendingPassiveProfilerEffects: Array<Fiber> = [];
+// 表示剩余待处理被动效果的 lanes 的值。
 let pendingPassiveEffectsRemainingLanes: Lanes = NoLanes;
+// 存储了待处理被动转换的引用，如果没有待处理的转换，则为 null。
 let pendingPassiveTransitions: Array<Transition> | null = null;
 
 // Use these to prevent an infinite loop of nested updates
+// 嵌套更新的最大限制
 const NESTED_UPDATE_LIMIT = 50;
+// 当前正在进行的嵌套更新数
 let nestedUpdateCount: number = 0;
+// 当前正在进行嵌套更新的根
 let rootWithNestedUpdates: FiberRoot | null = null;
+// 表示是否正在刷新 effect
 let isFlushingPassiveEffects = false;
+// 表示是否在被动效果期间进行了更新计划。
 let didScheduleUpdateDuringPassiveEffects = false;
 
+// 最多可以嵌套多少层被动更新，用于限制嵌套的被动更新数量。
 const NESTED_PASSIVE_UPDATE_LIMIT = 50;
+// 当前已经嵌套的被动更新数量。
 let nestedPassiveUpdateCount: number = 0;
+// 目前正在执行被动更新的根 Fiber 对象。
 let rootWithPassiveNestedUpdates: FiberRoot | null = null;
 
 // If two updates are scheduled within the same event, we should treat their
 // event times as simultaneous, even if the actual clock time has advanced
 // between the first and second call.
+// 当前事件的时间戳，用于管理被动更新的顺序。
 let currentEventTime: number = NoTimestamp;
+// 当前正在进行的转换的 lanes（任务队列）。
 let currentEventTransitionLane: Lanes = NoLanes;
 
+// 是否正在运行插入效果，这是一种特殊的被动效果。
 let isRunningInsertionEffect = false;
 
 export function getWorkInProgressRoot(): FiberRoot | null {
