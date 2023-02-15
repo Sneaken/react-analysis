@@ -781,6 +781,9 @@ export function commitPassiveEffectDurations(
 
 /**
  * Layout 阶段的主要工作
+ * 1. FC: 按顺序执行 useLayoutEffect 的 create 函数
+ * 2. ClassComponent: mount/update 执行 componentDidMount/Update && commitUpdateQueue
+ * 3. 挂载 ref
  * @param {FiberRoot} finishedRoot
  * @param {Fiber|null} current
  * @param {Fiber} finishedWork
@@ -812,6 +815,7 @@ function commitLayoutEffectOnFiber(
           ) {
             try {
               startLayoutEffectTimer();
+              // 执行 useLayoutEffect 的 create 函数
               commitHookEffectListMount(
                 HookLayout | HookHasEffect,
                 finishedWork,
@@ -828,8 +832,10 @@ function commitLayoutEffectOnFiber(
       case ClassComponent: {
         const instance = finishedWork.stateNode;
         if (finishedWork.flags & Update) {
+          // 存在更新
           if (!offscreenSubtreeWasHidden) {
             if (current === null) {
+              // ClassComponent mount 逻辑
               // We could update instance props and state here,
               // but instead we rely on them being set during last render.
               // TODO: revisit this when we implement resuming.
@@ -867,6 +873,7 @@ function commitLayoutEffectOnFiber(
               ) {
                 try {
                   startLayoutEffectTimer();
+                  // 执行 componentDidMount
                   instance.componentDidMount();
                 } finally {
                   recordLayoutEffectDuration(finishedWork);
@@ -875,6 +882,7 @@ function commitLayoutEffectOnFiber(
                 instance.componentDidMount();
               }
             } else {
+              // ClassComponent update 逻辑
               const prevProps =
                 finishedWork.elementType === finishedWork.type
                   ? current.memoizedProps
@@ -920,6 +928,7 @@ function commitLayoutEffectOnFiber(
               ) {
                 try {
                   startLayoutEffectTimer();
+                  // 执行 componentDidUpdate
                   instance.componentDidUpdate(
                     prevProps,
                     prevState,
@@ -1007,6 +1016,7 @@ function commitLayoutEffectOnFiber(
         // These effects should only be committed when components are first mounted,
         // aka when there is no current/alternate.
         if (current === null && finishedWork.flags & Update) {
+          // mount 的 时候聚焦 或者 加载图片
           const type = finishedWork.type;
           const props = finishedWork.memoizedProps;
           commitMount(instance, type, props, finishedWork);
@@ -1314,6 +1324,10 @@ function hideOrUnhideAllChildren(finishedWork, isHidden) {
   }
 }
 
+/**
+ * 挂载 ref
+ * @param finishedWork
+ */
 function commitAttachRef(finishedWork: Fiber) {
   const ref = finishedWork.ref;
   if (ref !== null) {
@@ -2698,6 +2712,7 @@ function commitLayoutEffects_begin(
     const fiber = nextEffect;
     const firstChild = fiber.child;
 
+    // OffscreenComponent 的显隐逻辑
     if (
       enableSuspenseLayoutEffectSemantics &&
       fiber.tag === OffscreenComponent &&
@@ -2732,12 +2747,14 @@ function commitLayoutEffects_begin(
 
         let child = firstChild;
         while (child !== null) {
+          // 纵向遍历
           nextEffect = child;
           commitLayoutEffects_begin(
             child, // New root; bubble back up to here and stop.
             root,
             committedLanes,
           );
+          // 横向遍历
           child = child.sibling;
         }
 
@@ -2752,9 +2769,11 @@ function commitLayoutEffects_begin(
     }
 
     if ((fiber.subtreeFlags & LayoutMask) !== NoFlags && firstChild !== null) {
+      // 如果 fiber 子孙节点 存在  LayoutMask 标记, 继续向下遍历
       firstChild.return = fiber;
       nextEffect = firstChild;
     } else {
+      // 当前节点存在 LayoutMask 标记
       commitLayoutMountEffects_complete(subtreeRoot, root, committedLanes);
     }
   }
@@ -2768,6 +2787,7 @@ function commitLayoutMountEffects_complete(
   while (nextEffect !== null) {
     const fiber = nextEffect;
     if ((fiber.flags & LayoutMask) !== NoFlags) {
+      // 当前节点存在 LayoutMask 标记
       const current = fiber.alternate;
       setCurrentDebugFiberInDEV(fiber);
       try {
@@ -2778,6 +2798,7 @@ function commitLayoutMountEffects_complete(
       resetCurrentDebugFiberInDEV();
     }
 
+    // 这是什么意思？
     if (fiber === subtreeRoot) {
       nextEffect = null;
       return;
@@ -2786,10 +2807,12 @@ function commitLayoutMountEffects_complete(
     const sibling = fiber.sibling;
     if (sibling !== null) {
       sibling.return = fiber.return;
+      // 如果存在兄弟节点，就继续 commitLayoutMountEffects_begin 中的遍历
       nextEffect = sibling;
       return;
     }
 
+    // 向上遍历
     nextEffect = fiber.return;
   }
 }

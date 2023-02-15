@@ -2277,6 +2277,7 @@ function commitRootImpl(
     if (enableSchedulingProfiler) {
       markLayoutEffectsStarted(lanes);
     }
+    // 进入 Layout 阶段
     commitLayoutEffects(finishedWork, root, lanes);
     if (__DEV__) {
       if (enableDebugTracing) {
@@ -2296,6 +2297,7 @@ function commitRootImpl(
     // opportunity to paint.
     requestPaint();
 
+    // Commit 阶段结束， 重置上下文
     executionContext = prevExecutionContext;
 
     // Reset the priority to the previous non-sync value.

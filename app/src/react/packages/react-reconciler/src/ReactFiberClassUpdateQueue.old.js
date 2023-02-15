@@ -85,29 +85,28 @@
 // resources, but the final state is always the same.
 
 import type {Fiber, FiberRoot} from './ReactInternalTypes';
-import type {Lanes, Lane} from './ReactFiberLane.old';
-
+import type {Lane, Lanes} from './ReactFiberLane.old';
 import {
+  intersectLanes,
+  isSubsetOfLanes,
+  isTransitionLane,
+  markRootEntangled,
+  mergeLanes,
   NoLane,
   NoLanes,
-  isSubsetOfLanes,
-  mergeLanes,
-  isTransitionLane,
-  intersectLanes,
-  markRootEntangled,
 } from './ReactFiberLane.old';
 import {
   enterDisallowedContextReadInDEV,
   exitDisallowedContextReadInDEV,
 } from './ReactFiberNewContext.old';
-import {Callback, ShouldCapture, DidCapture} from './ReactFiberFlags';
+import {Callback, DidCapture, ShouldCapture} from './ReactFiberFlags';
 
 import {debugRenderPhaseSideEffectsForStrictMode} from 'shared/ReactFeatureFlags';
 
 import {StrictLegacyMode} from './ReactTypeOfMode';
 import {
-  markSkippedUpdateLanes,
   isUnsafeClassRenderPhaseUpdate,
+  markSkippedUpdateLanes,
 } from './ReactFiberWorkLoop.old';
 import {
   enqueueConcurrentClassUpdate,
@@ -675,6 +674,14 @@ export function checkHasForceUpdateAfterProcessing(): boolean {
   return hasForceUpdate;
 }
 
+/**
+ * 遍历 updateQueue 中的每一个更新，并将更新应用到 DOM 上。
+ * 更新的应用可能会改变 DOM 的结构或者属性，或者触发一些副作用，比如触发事件或者发送请求等。
+ * 更新的应用过程可能会涉及到对 fiber 树的遍历，比如收集副作用等，这也是 commitUpdateQueue 这个函数存在的原因。
+ * @param finishedWork
+ * @param finishedQueue
+ * @param instance
+ */
 export function commitUpdateQueue<State>(
   finishedWork: Fiber,
   finishedQueue: UpdateQueue<State>,
