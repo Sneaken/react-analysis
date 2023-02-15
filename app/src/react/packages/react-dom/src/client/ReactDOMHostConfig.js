@@ -482,6 +482,15 @@ export function commitMount(
   }
 }
 
+/**
+ * DOM 属性变更，DOM 实例上 重新挂载对应 fiber 的 newProps
+ * @param domElement
+ * @param updatePayload
+ * @param type
+ * @param oldProps
+ * @param newProps
+ * @param internalInstanceHandle
+ */
 export function commitUpdate(
   domElement: Instance,
   updatePayload: Array<mixed>,

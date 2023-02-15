@@ -146,6 +146,48 @@ function SortList({ lastValue }) {
 
 function BeginWork({ name = "BeginWork" }) {
   const [count, setCount] = useState(0);
+
+  // useEffect(() => {
+  //   console.log("useEffect create");
+  //   return () => {
+  //     console.log("useEffect destroy");
+  //   };
+  // }, [count]);
+  //
+  // useLayoutEffect(() => {
+  //   console.log("useLayoutEffect create");
+  //   return () => {
+  //     console.log("useLayoutEffect destroy");
+  //   };
+  // }, [count]);
+  //
+  // useEffect(() => {
+  //   console.log("useEffect2 create");
+  //   return () => {
+  //     console.log("useEffect2 destroy");
+  //   };
+  // }, [count]);
+  //
+  // useInsertionEffect(() => {
+  //   console.log("useInsertionEffect create");
+  //   return () => {
+  //     console.log("useInsertionEffect destroy");
+  //   };
+  // }, [count]);
+  //
+  // useLayoutEffect(() => {
+  //   console.log("useLayoutEffect2 create");
+  //   return () => {
+  //     console.log("useLayoutEffect2 destroy");
+  //   };
+  // }, [count]);
+  //
+  // useInsertionEffect(() => {
+  //   console.log("useInsertionEffect2 create");
+  //   return () => {
+  //     console.log("useInsertionEffect2 destroy");
+  //   };
+  // }, [count]);
   return (
     <Suspense fallback={fallback}>
       <Button
@@ -155,74 +197,10 @@ function BeginWork({ name = "BeginWork" }) {
       >
         {count}
       </Button>
-      <div>
-        <p>{count}</p>
-        <div>
-          <p>{count + 1}</p>
-          <span>{count + 2}</span>
-          <div>{count + 3}</div>
-        </div>
-        <span>{count + 2}</span>
-        <div>{count + 3}</div>
-      </div>
-
-      <div>
-        <p>{count}</p>
-        <div>
-          <p>{count + 1}</p>
-          <span>{count + 2}</span>
-          <div>{count + 3}</div>
-        </div>
-        <span>{count + 2}</span>
-        <div>{count + 3}</div>
-      </div>
+      <div key={count}>{count}</div>
+      <div key={count + 2}>{count}</div>
     </Suspense>
   );
 }
-// beginWork rootFiber
-// beginWork App
-// beginWork BeginWork
-// beginWork Symbol(react.suspense)
-// beginWork Symbol(react.offscreen)
-// beginWork Button
-// beginWork button
-// completeWork button
-// completeWork Button
-// beginWork div
-// beginWork p
-// completeWork p
-// beginWork div
-// beginWork p
-// completeWork p
-// beginWork span
-// completeWork span
-// beginWork div
-// completeWork div
-// completeWork div
-// beginWork span
-// completeWork span
-// beginWork div
-// completeWork div
-// completeWork div
-// beginWork div
-// beginWork p
-// completeWork p
-// beginWork div
-// beginWork p
-// completeWork p
-// beginWork span
-// completeWork span
-// beginWork div
-// completeWork div
-// completeWork div
-// beginWork span
-// completeWork span
-// beginWork div
-// completeWork div
-// completeWork div
-// completeWork Symbol(react.offscreen)
-// completeWork Symbol(react.suspense)
-// completeWork BeginWork
-// completeWork App
-// completeWork rootFiber
+
 export default BeginWork;

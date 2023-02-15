@@ -141,6 +141,7 @@ export type Fiber = {|
   // A queue of state updates and callbacks.
   // 该 Fiber 对应的组件产生的 Update 会存放在这个队列里面
   // HostComponent: 变更产生的键值对
+  // FC: FunctionComponentUpdateQueue
   updateQueue: mixed,
 
   // The state used to create the output

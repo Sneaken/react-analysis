@@ -194,6 +194,7 @@ type StoreConsistencyCheck<T> = {|
 |};
 
 export type FunctionComponentUpdateQueue = {|
+  // 环形链表
   lastEffect: Effect | null,
   stores: Array<StoreConsistencyCheck<any>> | null,
 |};

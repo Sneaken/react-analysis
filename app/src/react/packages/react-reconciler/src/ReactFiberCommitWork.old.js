@@ -560,6 +560,12 @@ function commitBeforeMutationEffectsDeletion(deletion: Fiber) {
   }
 }
 
+/**
+ * 执行指定 effect Hooks 的全部 destroy 回调函数
+ * @param flags
+ * @param finishedWork
+ * @param nearestMountedAncestor
+ */
 function commitHookEffectListUnmount(
   flags: HookFlags,
   finishedWork: Fiber,
@@ -573,44 +579,60 @@ function commitHookEffectListUnmount(
     let effect = firstEffect;
     do {
       if ((effect.tag & flags) === flags) {
-        // Unmount
+        // 包含指定 flags 的 Unmount
         const destroy = effect.destroy;
         effect.destroy = undefined;
         if (destroy !== undefined) {
+          // 如果存在回调函数
           if (enableSchedulingProfiler) {
+            // devTools 函数
             if ((flags & HookPassive) !== NoHookEffect) {
+              // 如果是 useEffect 回调
               markComponentPassiveEffectUnmountStarted(finishedWork);
             } else if ((flags & HookLayout) !== NoHookEffect) {
+              // 如果是 useLayoutEffect 回调
               markComponentLayoutEffectUnmountStarted(finishedWork);
             }
           }
 
           if (__DEV__) {
             if ((flags & HookInsertion) !== NoHookEffect) {
+              // 如果是 useInsertionEffect 回调
               setIsRunningInsertionEffect(true);
             }
           }
+          // 执行回调函数
           safelyCallDestroy(finishedWork, nearestMountedAncestor, destroy);
           if (__DEV__) {
             if ((flags & HookInsertion) !== NoHookEffect) {
+              // 如果是 useInsertionEffect 回调
               setIsRunningInsertionEffect(false);
             }
           }
 
           if (enableSchedulingProfiler) {
+            // devTools 函数
             if ((flags & HookPassive) !== NoHookEffect) {
+              // 如果是 useEffect 回调
               markComponentPassiveEffectUnmountStopped();
             } else if ((flags & HookLayout) !== NoHookEffect) {
+              // 如果是 useLayoutEffect 回调
               markComponentLayoutEffectUnmountStopped();
             }
           }
         }
       }
+      // 交给下一个 effect
       effect = effect.next;
     } while (effect !== firstEffect);
   }
 }
 
+/**
+ * 执行指定 effect Hooks 的全部 create 回调函数, 并将返回值 赋给 destroy
+ * @param flags
+ * @param finishedWork
+ */
 function commitHookEffectListMount(flags: HookFlags, finishedWork: Fiber) {
   const updateQueue: FunctionComponentUpdateQueue | null =
     (finishedWork.updateQueue: any);
@@ -620,7 +642,10 @@ function commitHookEffectListMount(flags: HookFlags, finishedWork: Fiber) {
     let effect = firstEffect;
     do {
       if ((effect.tag & flags) === flags) {
+        // 包含指定 flags 的 Mount
+
         if (enableSchedulingProfiler) {
+          // devTools
           if ((flags & HookPassive) !== NoHookEffect) {
             markComponentPassiveEffectMountStarted(finishedWork);
           } else if ((flags & HookLayout) !== NoHookEffect) {
@@ -628,13 +653,13 @@ function commitHookEffectListMount(flags: HookFlags, finishedWork: Fiber) {
           }
         }
 
-        // Mount
         const create = effect.create;
         if (__DEV__) {
           if ((flags & HookInsertion) !== NoHookEffect) {
             setIsRunningInsertionEffect(true);
           }
         }
+        // 执行 create 并且获取 destroy 函数
         effect.destroy = create();
         if (__DEV__) {
           if ((flags & HookInsertion) !== NoHookEffect) {
@@ -643,6 +668,7 @@ function commitHookEffectListMount(flags: HookFlags, finishedWork: Fiber) {
         }
 
         if (enableSchedulingProfiler) {
+          // devTools
           if ((flags & HookPassive) !== NoHookEffect) {
             markComponentPassiveEffectMountStopped();
           } else if ((flags & HookLayout) !== NoHookEffect) {
@@ -695,6 +721,7 @@ function commitHookEffectListMount(flags: HookFlags, finishedWork: Fiber) {
           }
         }
       }
+      // 交给下一个 effect
       effect = effect.next;
     } while (effect !== firstEffect);
   }
@@ -1369,26 +1396,29 @@ function commitDetachRef(current: Fiber) {
 }
 
 /**
+ * Cut off the return pointer to disconnect it from the tree.
+ * This enables us to detect and warn against state updates on an unmounted component.
+ * It also prevents events from bubbling from within disconnected components.
+ *
+ * Ideally, we should also clear the child pointer of the parent alternate to let this
+ * get GC:ed but we don't know which for sure which parent is the current
+ * one so we'll settle for GC:ing the subtree of this child.
+ * This child itself will be GC:ed when the parent updates the next time.
+ *
+ * Note that we can't clear child or sibling pointers yet.
+ * They're needed for passive effects and for findDOMNode.
+ * We defer those fields, and all other cleanup, to the passive phase (see detachFiberAfterEffects).
+ *
+ * Don't reset the alternate yet, either. We need that so we can detach the
+ * alternate's fields in the passive phase. Clearing the return pointer is
+ * sufficient for findDOMNode semantics.
+ *
  * 为什么要重置父节点？
+ * 使我们能够检测并警告未安装组件的状态更新。它还可以防止事件从断开连接的组件中冒泡。
+ * 为了 GC 。
  * @param fiber
  */
 function detachFiberMutation(fiber: Fiber) {
-  // Cut off the return pointer to disconnect it from the tree.
-  // This enables us to detect and warn against state updates on an unmounted component.
-  // It also prevents events from bubbling from within disconnected components.
-  //
-  // Ideally, we should also clear the child pointer of the parent alternate to let this
-  // get GC:ed but we don't know which for sure which parent is the current
-  // one so we'll settle for GC:ing the subtree of this child.
-  // This child itself will be GC:ed when the parent updates the next time.
-  //
-  // Note that we can't clear child or sibling pointers yet.
-  // They're needed for passive effects and for findDOMNode.
-  // We defer those fields, and all other cleanup, to the passive phase (see detachFiberAfterEffects).
-  //
-  // Don't reset the alternate yet, either. We need that so we can detach the
-  // alternate's fields in the passive phase. Clearing the return pointer is
-  // sufficient for findDOMNode semantics.
   const alternate = fiber.alternate;
   if (alternate !== null) {
     alternate.return = null;
@@ -1557,6 +1587,10 @@ function getHostSibling(fiber: Fiber): ?Instance {
   }
 }
 
+/**
+ * 正式往容器执行 追加 或者 插入 操作
+ * @param finishedWork
+ */
 function commitPlacement(finishedWork: Fiber): void {
   if (!supportsMutation) {
     return;
@@ -1598,6 +1632,12 @@ function commitPlacement(finishedWork: Fiber): void {
   }
 }
 
+/**
+ * 往容器内插入或者追加 DOM 元素
+ * @param node
+ * @param before
+ * @param parent
+ */
 function insertOrAppendPlacementNodeIntoContainer(
   node: Fiber,
   before: ?Instance,
@@ -1703,6 +1743,8 @@ function commitDeletionEffects(
     // can track the nearest host component on the JS stack as we traverse the
     // tree during the commit phase. This would make insertions faster, too.
 
+    // 这个迭代主要是用来干嘛的?
+    // 为了找到 DOM 容器，来移除 child
     let parent = returnFiber;
     findParent: while (parent !== null) {
       switch (parent.tag) {
@@ -1748,7 +1790,7 @@ function commitDeletionEffects(
 }
 
 /**
- * 递归遍历 deletion effects
+ * 按层递归遍历 deletion effects
  * @param finishedRoot
  * @param nearestMountedAncestor
  * @param parent
@@ -2135,6 +2177,14 @@ export function isSuspenseBoundaryBeingHidden(
   return false;
 }
 
+/**
+ * Mutation 阶段的主要工作
+ * HostComponent:  进行 DOM 元素的增、删、改
+ * FC | ForwardRef | MemoComponent | SimpleMemoComponent: 执行 Effect destroy 回调， 然后再执行 effect create 回调
+ * @param root
+ * @param finishedWork
+ * @param committedLanes
+ */
 export function commitMutationEffects(
   root: FiberRoot,
   finishedWork: Fiber,
@@ -2153,6 +2203,14 @@ export function commitMutationEffects(
   inProgressRoot = null;
 }
 
+/**
+ * 两件事
+ * 1. 遍历父节点的 deletions
+ * 2. mutation 阶段的 effect
+ * @param root
+ * @param parentFiber
+ * @param lanes
+ */
 function recursivelyTraverseMutationEffects(
   root: FiberRoot,
   parentFiber: Fiber,
@@ -2173,11 +2231,17 @@ function recursivelyTraverseMutationEffects(
   }
 
   const prevDebugFiber = getCurrentDebugFiberInDEV();
+  // 判断子孙节点是否存在 MutationMask (Placement | Update | ChildDeletion | ContentReset | Ref | Hydrating | Visibility) 这些标记
   if (parentFiber.subtreeFlags & MutationMask) {
+    // 如果存在就 遍历子节点 执行 Mutation 阶段的主要内容
+    // HostComponent:  进行 DOM 元素的增、删、改
+    // FC | ForwardRef | MemoComponent | SimpleMemoComponent: 执行 Effect destroy 回调， 然后再执行 effect create 回调
     let child = parentFiber.child;
     while (child !== null) {
       setCurrentDebugFiberInDEV(child);
+      // 从这里开始递归处理
       commitMutationEffectsOnFiber(child, root, lanes);
+      // 继续遍历兄弟节点
       child = child.sibling;
     }
   }
@@ -2186,8 +2250,11 @@ function recursivelyTraverseMutationEffects(
 
 /**
  * Mutation 阶段的主要工作
+ * 能卸载 ref 的 卸载 ref
+ * 其他的主要分组件
  * HostComponent:  进行 DOM 元素的增、删、改
  * FC | ForwardRef | MemoComponent | SimpleMemoComponent: 执行 Effect destroy 回调， 然后再执行 effect create 回调
+ * HostRoot
  *
  * @param {Fiber} finishedWork
  * @param {FiberRoot} root
@@ -2213,6 +2280,7 @@ function commitMutationEffectsOnFiber(
       commitReconciliationEffects(finishedWork);
 
       if (flags & Update) {
+        // update
         try {
           commitHookEffectListUnmount(
             HookInsertion | HookHasEffect,
@@ -2314,6 +2382,7 @@ function commitMutationEffectsOnFiber(
             finishedWork.updateQueue = null;
             if (updatePayload !== null) {
               try {
+                // 提交变更
                 commitUpdate(
                   instance,
                   updatePayload,
@@ -2336,6 +2405,7 @@ function commitMutationEffectsOnFiber(
       return;
     }
     case HostText: {
+      // 文本节点应该如何理解？
       recursivelyTraverseMutationEffects(root, finishedWork, lanes);
       commitReconciliationEffects(finishedWork);
 
@@ -2366,14 +2436,19 @@ function commitMutationEffectsOnFiber(
       return;
     }
     case HostRoot: {
+      // 递归处理 Mutation 阶段的各种事情
       recursivelyTraverseMutationEffects(root, finishedWork, lanes);
+      // 执行 插入 和 追加 DOM 元素
       commitReconciliationEffects(finishedWork);
 
       if (flags & Update) {
+        // 存在 Update 标记
         if (supportsMutation && supportsHydration) {
           if (current !== null) {
+            // update
             const prevRootState: RootState = current.memoizedState;
             if (prevRootState.isDehydrated) {
+              // SSR
               try {
                 commitHydratedContainer(root.containerInfo);
               } catch (error) {
@@ -2548,12 +2623,18 @@ function commitMutationEffectsOnFiber(
     }
   }
 }
+
+/**
+ * 正式提交 Placement 操作
+ * @param finishedWork
+ */
 function commitReconciliationEffects(finishedWork: Fiber) {
   // Placement effects (insertions, reorders) can be scheduled on any fiber
   // type. They needs to happen after the children effects have fired, but
   // before the effects on this fiber have fired.
   const flags = finishedWork.flags;
   if (flags & Placement) {
+    // 存在 Placement 标记
     try {
       commitPlacement(finishedWork);
     } catch (error) {
@@ -2563,9 +2644,11 @@ function commitReconciliationEffects(finishedWork: Fiber) {
     // inserted, before any life-cycles like componentDidMount gets called.
     // TODO: findDOMNode doesn't rely on this any more but isMounted does
     // and isMounted is deprecated anyway so we should be able to kill this.
+    // 处理完移除 Placement 标记
     finishedWork.flags &= ~Placement;
   }
   if (flags & Hydrating) {
+    // SSR
     finishedWork.flags &= ~Hydrating;
   }
 }
