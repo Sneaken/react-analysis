@@ -1518,6 +1518,12 @@ function emptyPortalContainer(current: Fiber) {
   replaceContainerChildren(containerInfo, emptyChildSet);
 }
 
+/**
+ * 从当前 fiberNode 向上遍历，获取第一个类型为 HostComponent | HostRoot | HostPortal 三者之一的祖先 fiberNode
+ * 找到执行 DOM 操作的目标元素的父级 DOM 元素
+ * @param fiber
+ * @return {Fiber}
+ */
 function getHostParentFiber(fiber: Fiber): Fiber {
   let parent = fiber.return;
   while (parent !== null) {
@@ -1541,6 +1547,13 @@ function isHostParent(fiber: Fiber): boolean {
   );
 }
 
+/**
+ * 找到用来执行 insertBefore 的 before DOM元素
+ * 为什么遍历那么复杂？
+ * 因为 DOM 元素的层级并不一定和 fiber 节点一一对应
+ * @param fiber
+ * @return {*|null}
+ */
 function getHostSibling(fiber: Fiber): ?Instance {
   // We're going to search forward into the tree until we find a sibling host
   // node. Unfortunately, if multiple insertions are done in a row we have to
@@ -1549,10 +1562,12 @@ function getHostSibling(fiber: Fiber): ?Instance {
   let node: Fiber = fiber;
   siblings: while (true) {
     // If we didn't find anything, let's try the next sibling.
+    // 找到一个DOM元素
     while (node.sibling === null) {
       if (node.return === null || isHostParent(node.return)) {
         // If we pop out of the root or hit the parent the fiber we are the
         // last sibling.
+        // 如果最终都没有找到 before，则只能选择插入到父 DOM 元素的末尾
         return null;
       }
       node = node.return;
@@ -1571,7 +1586,7 @@ function getHostSibling(fiber: Fiber): ?Instance {
         continue siblings;
       }
       // If we don't have a child, try the siblings instead.
-      // We also skip portals because they are not part of this host tree.
+      // We also skip portals because they ar\e not part of this host tree.
       if (node.child === null || node.tag === HostPortal) {
         continue siblings;
       } else {
@@ -1597,6 +1612,7 @@ function commitPlacement(finishedWork: Fiber): void {
   }
 
   // Recursively insert all host nodes into the parent.
+  // 找到执行 DOM 操作的目标元素的父级 DOM 元素
   const parentFiber = getHostParentFiber(finishedWork);
 
   // Note: these two variables *must* always be updated together.
@@ -1610,6 +1626,7 @@ function commitPlacement(finishedWork: Fiber): void {
         parentFiber.flags &= ~ContentReset;
       }
 
+      // 找到 DOM 元素的兄弟元素
       const before = getHostSibling(finishedWork);
       // We only have the top Fiber that was inserted but we need to recurse down its
       // children to find all the terminal nodes.
@@ -2075,6 +2092,7 @@ function commitDeletionEffectsOnFiber(
     }
   }
 }
+
 function commitSuspenseCallback(finishedWork: Fiber) {
   // TODO: Move this to passive phase
   const newState: SuspenseState | null = finishedWork.memoizedState;
