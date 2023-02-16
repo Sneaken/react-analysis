@@ -181,7 +181,9 @@ export type Fiber = {|
   // 子树中最后一个 side effect
   lastEffect: Fiber | null,
 
+  // 本次更新后该 fiberNode 中 "待执行的 lanes"
   lanes: Lanes,
+  // 本次更新后该 fiberNode 子孙中 "待执行的lanes"
   childLanes: Lanes,
 
   // This is a pooled version of a Fiber. Every fiber that gets updated will

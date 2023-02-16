@@ -3796,6 +3796,7 @@ function beginWork(
   // the update queue. However, there's an exception: SimpleMemoComponent
   // sometimes bails out later in the begin phase. This indicates that we should
   // move this assignment out of the common path and into each branch.
+  // 在 beginWork 中重置 lanes, 代表 "对应 lanes 被消费"
   workInProgress.lanes = NoLanes;
 
   // 根据 tag 不同，进入不同的处理逻辑

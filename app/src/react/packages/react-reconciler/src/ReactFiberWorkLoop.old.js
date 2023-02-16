@@ -810,6 +810,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
       scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
     }
     if (supportsMicrotasks) {
+      // React 的批量更新比较复杂，同时存在宏任务和微任务的场景
       // Flush the queue in a microtask.
       if (__DEV__ && ReactCurrentActQueue.current !== null) {
         // Inside `act`, use our internal `act` queue so that these get flushed
@@ -917,10 +918,15 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
   // TODO: We only check `didTimeout` defensively, to account for a Scheduler
   // bug we're still investigating. Once the bug in Scheduler is fixed,
   // we can remove this, since we track expiration ourselves.
+  // 是否开启时间切片
   const shouldTimeSlice =
+    // 不存在阻塞页面渲染的 lanes
     !includesBlockingLane(root, lanes) &&
+    // 不存在过期的 lanes
     !includesExpiredLane(root, lanes) &&
+    // Scheduler 调度的回调函数 未过期
     (disableSchedulerTimeoutInWorkLoop || !didTimeout);
+  // 如果以上三那个阶段不同时满足，render 阶段会同步执行 不可打断
   let exitStatus = shouldTimeSlice
     ? renderRootConcurrent(root, lanes)
     : renderRootSync(root, lanes);
@@ -1903,6 +1909,7 @@ function renderRootConcurrent(root: FiberRoot, lanes: Lanes) {
 /** @noinline */
 function workLoopConcurrent() {
   // Perform work until Scheduler asks us to yield
+  // 可以打断的迭代
   while (workInProgress !== null && !shouldYield()) {
     performUnitOfWork(workInProgress);
   }
@@ -2145,7 +2152,9 @@ function commitRootImpl(
     }
   }
   // 此时已经把 finishedWork 以及 finishedLanes 重置了
+  // 重置本次更新的 HostRootFiber
   root.finishedWork = null;
+  // 重置本次更新的 lanes
   root.finishedLanes = NoLanes;
 
   if (finishedWork === root.current) {
@@ -2157,16 +2166,21 @@ function commitRootImpl(
 
   // commitRoot never returns a continuation; it always finishes synchronously.
   // So we can clear these now to allow a new callback to be scheduled.
+  // 重置本次更新调度的回调函数
   root.callbackNode = null;
+  // 重置本次更新调度的回调函数优先级
   root.callbackPriority = NoLane;
 
   // Update the first and last pending times on this root. The new first
   // pending time is whatever is left on the root fiber.
+  // HostRootFiber 以及子孙 fiber 中所有待执行 lane 的集合
   let remainingLanes = mergeLanes(finishedWork.lanes, finishedWork.childLanes);
+  // lanes 相关重置操作
   markRootFinished(root, remainingLanes);
 
   if (root === workInProgressRoot) {
     // We can reset these now that they are finished.
+    // 已经进入 commit 阶段， 重置 wip 相关全局变量
     workInProgressRoot = null;
     workInProgress = null;
     workInProgressRootRenderLanes = NoLanes;

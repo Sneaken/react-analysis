@@ -185,6 +185,7 @@ function getHighestPriorityLanes(lanes: Lanes | Lane): Lanes {
 
 /**
  * workInProgressRootRenderLanes 的选定逻辑
+ * 基于 root.pendingLanes 选出本次更新的 lanes
  * @param root
  * @param wipLanes
  * @return {Lanes}
@@ -340,6 +341,12 @@ export function getMostRecentEventTime(root: FiberRoot, lanes: Lanes): number {
   return mostRecentEventTime;
 }
 
+/**
+ * 过期时间的计算方式
+ * @param lane
+ * @param currentTime
+ * @return {number}
+ */
 function computeExpirationTime(lane: Lane, currentTime: number) {
   switch (lane) {
     case SyncLane:
@@ -402,6 +409,12 @@ function computeExpirationTime(lane: Lane, currentTime: number) {
   }
 }
 
+/**
+ * 根据交互发生的时间为更新对应的lanes设置过期时间
+ * 基于 root.pendingLanes 标记过期 lanes
+ * @param root
+ * @param currentTime
+ */
 export function markStarvedLanesAsExpired(
   root: FiberRoot,
   currentTime: number,
@@ -419,6 +432,7 @@ export function markStarvedLanesAsExpired(
   // expiration time. If so, we'll assume the update is being starved and mark
   // it as expired to force it to finish.
   let lanes = pendingLanes;
+  // 遍历 root.pendingLanes
   while (lanes > 0) {
     const index = pickArbitraryLaneIndex(lanes);
     const lane = 1 << index;
@@ -428,15 +442,18 @@ export function markStarvedLanesAsExpired(
       // Found a pending lane with no expiration time. If it's not suspended, or
       // if it's pinged, assume it's CPU-bound. Compute a new expiration time
       // using the current time.
+      // 为未设置过期时间的 pendingLane 设置过期时间
       if (
         (lane & suspendedLanes) === NoLanes ||
         (lane & pingedLanes) !== NoLanes
       ) {
         // Assumes timestamps are monotonically increasing.
+        // 为 pendingLanes 中 "非挂起的 lane" 或 "解除挂起的 lane" 设置过期时间
         expirationTimes[index] = computeExpirationTime(lane, currentTime);
       }
     } else if (expirationTime <= currentTime) {
       // This lane expired
+      // 记录过期 lane
       root.expiredLanes |= lane;
     }
 
@@ -446,6 +463,7 @@ export function markStarvedLanesAsExpired(
 
 // This returns the highest priority pending lanes regardless of whether they
 // are suspended.
+// 获取当前 FiberRootNode 下 "未执行的更新 对应的优先级最高的 lanes"
 export function getHighestPriorityPendingLanes(root: FiberRoot) {
   return getHighestPriorityLanes(root.pendingLanes);
 }
@@ -479,6 +497,12 @@ export function includesOnlyTransitions(lanes: Lanes) {
   return (lanes & TransitionLanes) === lanes;
 }
 
+/**
+ * 是否包含会阻塞页面交互的 lane
+ * @param root
+ * @param lanes
+ * @return {boolean}
+ */
 export function includesBlockingLane(root: FiberRoot, lanes: Lanes) {
   if (
     allowConcurrentByDefault &&
@@ -654,17 +678,21 @@ export function markRootMutableRead(root: FiberRoot, updateLane: Lane) {
 }
 
 export function markRootFinished(root: FiberRoot, remainingLanes: Lanes) {
+  // 从 "所有待执行 lanes" 中移除 "本次更新后待执行 lanes",
+  // 代表 "pendingLanes" 中存在本次更新中执行的 lanes
   const noLongerPendingLanes = root.pendingLanes & ~remainingLanes;
 
+  // 用 "HostRootFiber 及其子孙中待执行的 lanes" 更新 pendingLanes
   root.pendingLanes = remainingLanes;
 
   // Let's try everything again
+  // 重置 lanes
   root.suspendedLanes = NoLanes;
   root.pingedLanes = NoLanes;
 
+  // 从各种 lanes 中移除 "已被消费的lanes"
   root.expiredLanes &= remainingLanes;
   root.mutableReadLanes &= remainingLanes;
-
   root.entangledLanes &= remainingLanes;
 
   const entanglements = root.entanglements;
@@ -673,6 +701,7 @@ export function markRootFinished(root: FiberRoot, remainingLanes: Lanes) {
 
   // Clear the lanes that no longer have pending work
   let lanes = noLongerPendingLanes;
+  // 重置过期时间及 "纠缠的lanes"
   while (lanes > 0) {
     const index = pickArbitraryLaneIndex(lanes);
     const lane = 1 << index;
