@@ -261,7 +261,7 @@ type ExecutionContext = number;
 
 // 未处于 React 上下文
 export const NoContext = /*             */ 0b000;
-// 处于 batchedUpdates 上下文
+// 处于 批量更新 上下文
 const BatchedContext = /*               */ 0b001;
 // 处于 render 阶段
 const RenderContext = /*                */ 0b010;
@@ -292,6 +292,7 @@ let workInProgressRoot: FiberRoot | null = null;
 // The fiber we're working on
 let workInProgress: Fiber | null = null;
 // The lanes we're rendering
+// 当前应用 render 阶段需要处理的 lanes
 let workInProgressRootRenderLanes: Lanes = NoLanes;
 
 // Stack that allows components to change the render lanes for its subtree
@@ -302,6 +303,7 @@ let workInProgressRootRenderLanes: Lanes = NoLanes;
 //
 // Most things in the work loop should deal with workInProgressRootRenderLanes.
 // Most things in begin/complete phases should deal with subtreeRenderLanes.
+// 子树在 render 阶段包含的 lane
 export let subtreeRenderLanes: Lanes = NoLanes;
 const subtreeRenderLanesCursor: StackCursor<Lanes> = createCursor(NoLanes);
 
@@ -314,6 +316,7 @@ let workInProgressRootFatalError: mixed = null;
 // slightly different than `renderLanes` because `renderLanes` can change as you
 // enter and exit an Offscreen tree. This value is the combination of all render
 // lanes for the entire render phase.
+// render 阶段所有可能出现的 lane
 let workInProgressRootIncludedLanes: Lanes = NoLanes;
 // The work left over by components that were visited during this render. Only
 // includes unprocessed updates, not work in bailed out children.
@@ -475,13 +478,20 @@ export function getCurrentTime() {
   return now();
 }
 
+/**
+ * 决定 lane 优先级信息
+ * @param fiber
+ * @return {Lane|Lanes}
+ */
 export function requestUpdateLane(fiber: Fiber): Lane {
   // Special cases
   const mode = fiber.mode;
   if ((mode & ConcurrentMode) === NoMode) {
+    // 非并发模式，产生同步优先级
     return (SyncLane: Lane);
   } else if (
     !deferRenderPhaseUpdateToNextBatch &&
+    // render 阶段更新
     (executionContext & RenderContext) !== NoContext &&
     workInProgressRootRenderLanes !== NoLanes
   ) {
@@ -494,11 +504,13 @@ export function requestUpdateLane(fiber: Fiber): Lane {
     // This behavior is only a fallback. The flag only exists until we can roll
     // out the setState warning, since existing code might accidentally rely on
     // the current behavior.
+    // render 阶段产生的 update, 返回 render 阶段进行中的优先级
     return pickArbitraryLane(workInProgressRootRenderLanes);
   }
 
   const isTransition = requestCurrentTransition() !== NoTransition;
   if (isTransition) {
+    // transition 相关优先级
     if (__DEV__ && ReactCurrentBatchConfig.transition !== null) {
       const transition = ReactCurrentBatchConfig.transition;
       if (!transition._updatedFibers) {
@@ -527,6 +539,9 @@ export function requestUpdateLane(fiber: Fiber): Lane {
   // The opaque type returned by the host config is internally a lane, so we can
   // use that directly.
   // TODO: Move this type conversion to the event priority module.
+  // 使用手动设置的优先级
+  // runWithPriority 方法可以设置 "回调函数上下文的优先级"
+  // 通过这种方式设置优先级后，回调函数在执行期间，可以通过 getCurrentUpdatePriority 方法获取 "手动设置的优先级"
   const updateLane: Lane = (getCurrentUpdatePriority(): any);
   if (updateLane !== NoLane) {
     return updateLane;
@@ -538,6 +553,7 @@ export function requestUpdateLane(fiber: Fiber): Lane {
   // The opaque type returned by the host config is internally a lane, so we can
   // use that directly.
   // TODO: Move this type conversion to the event priority module.
+  // 获取事件的优先级
   const eventLane: Lane = (getCurrentEventPriority(): any);
   return eventLane;
 }
@@ -822,6 +838,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
     }
     newCallbackNode = null;
   } else {
+    // 将 EventPriority 转换为 Scheduler 的优先级
     let schedulerPriorityLevel;
     switch (lanesToEventPriority(nextLanes)) {
       case DiscreteEventPriority:

@@ -261,10 +261,13 @@ type BaseFiberRootProperties = {|
   eventTimes: LaneMap<number>,
   expirationTimes: LaneMap<number>,
   hiddenUpdates: LaneMap<Array<ConcurrentUpdate> | null>,
-
+  // 当前 FiberRootNode 下 "待执行的 update 对应的 lanes" 的集合
   pendingLanes: Lanes,
+  // 当前 FiberRootNode 下 "由于 Suspense 而挂起的 update 对应的 lane" 的集合
   suspendedLanes: Lanes,
+  // 当前 FiberRootNode 下 "由于请求成功，Suspense 取消挂起的 update 对应 lane" 的集合
   pingedLanes: Lanes,
+  // 当前 FiberRootNode 下 "由于过期，需要同步，不可中断执行 render 阶段的 update 对应 lane" 的集合
   expiredLanes: Lanes,
   mutableReadLanes: Lanes,
 

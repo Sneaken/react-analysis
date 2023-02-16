@@ -79,16 +79,26 @@ export function isHigherEventPriority(
   return a !== 0 && a < b;
 }
 
+/**
+ * 将 lanes 转换成 EventPriority
+ * @param lanes
+ * @return {EventPriority}
+ */
 export function lanesToEventPriority(lanes: Lanes): EventPriority {
+  // 获取 lanes 中优先级最高的 lane
   const lane = getHighestPriorityLane(lanes);
+  // 如果优先级高于 DiscreteEventPriority, 返回 DiscreteEventPriority
   if (!isHigherEventPriority(DiscreteEventPriority, lane)) {
     return DiscreteEventPriority;
   }
+  // 如果优先级高于 ContinuousEventPriority, 返回 ContinuousEventPriority
   if (!isHigherEventPriority(ContinuousEventPriority, lane)) {
     return ContinuousEventPriority;
   }
+  // 如果包含 "非idle的任务" 返回 DefaultEventPriority
   if (includesNonIdleWork(lane)) {
     return DefaultEventPriority;
   }
+  // 最后返回 IdleEventPriority
   return IdleEventPriority;
 }
