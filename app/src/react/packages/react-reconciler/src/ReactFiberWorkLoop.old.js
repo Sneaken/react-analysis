@@ -1370,8 +1370,16 @@ export function deferredUpdates<A>(fn: () => A): A {
   }
 }
 
+/**
+ * 手动批量更新
+ * 执行前附加批处理上下文
+ * @param fn
+ * @param a
+ * @return {R}
+ */
 export function batchedUpdates<A, R>(fn: (A) => R, a: A): R {
   const prevExecutionContext = executionContext;
+  // 附加批处理的上下文
   executionContext |= BatchedContext;
   try {
     return fn(a);
