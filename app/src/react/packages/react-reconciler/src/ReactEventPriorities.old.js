@@ -18,13 +18,14 @@ import {
   SyncLane,
 } from './ReactFiberLane.old';
 
+// 这些都是事件的优先级，不是调度的优先级
 export opaque type EventPriority = Lane;
 
-// 离散事件的优先级
+// 离散事件的优先级, 例如 click, input, focus, blur, touchstart
 export const DiscreteEventPriority: EventPriority = SyncLane;
-// 连续事件的优先级
+// 连续事件的优先级, 例如 drag, mousemove, scroll, touchmove, wheel
 export const ContinuousEventPriority: EventPriority = InputContinuousLane;
-// 默认事件的优先级
+// 默认事件的优先级, 例如通过计时器周期性触发更新，这种情况产生的 update 不属于 "交互产生的 update", 所以优先级是默认的优先级
 export const DefaultEventPriority: EventPriority = DefaultLane;
 // 空闲事件的优先级
 export const IdleEventPriority: EventPriority = IdleLane;
