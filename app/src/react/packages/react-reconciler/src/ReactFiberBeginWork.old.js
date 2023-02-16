@@ -3384,6 +3384,7 @@ function bailoutOnAlreadyFinishedWork(
 
   // Check if the children have any pending work.
   if (!includesSomeLane(renderLanes, workInProgress.childLanes)) {
+    // 命中优化策略
     // The children don't have any work either. We can skip them.
     // TODO: Once we add back resuming, we should check if the children are
     // a work-in-progress set. If so, we need to transfer their effects.

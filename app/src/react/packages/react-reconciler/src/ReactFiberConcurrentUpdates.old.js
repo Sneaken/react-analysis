@@ -140,6 +140,7 @@ export const unsafe_markUpdateLaneFromFiberToRoot =
   markUpdateLaneFromFiberToRoot;
 
 /**
+ * lanes 冒泡
  * 更新 触发更新的节点 的 lanes
  * 更新从 触发更新节点的父节点 到 根节点 的 childLanes
  * @param sourceFiber
@@ -151,7 +152,7 @@ function markUpdateLaneFromFiberToRoot(
   lane: Lane,
 ): FiberRoot | null {
   // Update the source fiber's lanes
-  // 更新 lanes
+  // 选定的 lane 附加在源 fiberNode 的 lanes 中
   sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
   let alternate = sourceFiber.alternate;
   if (alternate !== null) {
@@ -170,6 +171,7 @@ function markUpdateLaneFromFiberToRoot(
   let node = sourceFiber;
   let parent = sourceFiber.return;
   while (parent !== null) {
+    // 选定的 lane 附加在每一级父 fiberNode 的 childLanes 中
     parent.childLanes = mergeLanes(parent.childLanes, lane);
     alternate = parent.alternate;
     if (alternate !== null) {

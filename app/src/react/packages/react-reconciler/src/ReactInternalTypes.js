@@ -258,6 +258,7 @@ type BaseFiberRootProperties = {|
   // task that the root will work on.
   callbackNode: *,
   callbackPriority: Lane,
+  // 交互发生的时间
   eventTimes: LaneMap<number>,
   expirationTimes: LaneMap<number>,
   hiddenUpdates: LaneMap<Array<ConcurrentUpdate> | null>,

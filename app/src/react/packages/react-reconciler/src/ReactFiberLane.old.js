@@ -183,33 +183,48 @@ function getHighestPriorityLanes(lanes: Lanes | Lane): Lanes {
   }
 }
 
+/**
+ * workInProgressRootRenderLanes 的选定逻辑
+ * @param root
+ * @param wipLanes
+ * @return {Lanes}
+ */
 export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
   // Early bailout if there's no pending work left.
   const pendingLanes = root.pendingLanes;
   if (pendingLanes === NoLanes) {
+    // 没有未完成的 lanes
     return NoLanes;
   }
 
   let nextLanes = NoLanes;
 
+  // 由于请求 Suspense 挂起，标记的 lanes
   const suspendedLanes = root.suspendedLanes;
+  // Suspense 请求完毕后，解锁之前挂起的流程，标记的 lanes
   const pingedLanes = root.pingedLanes;
 
   // Do not work on any idle work until all the non-idle work has finished,
   // even if the work is suspended.
+  // 非空闲的lanes
   const nonIdlePendingLanes = pendingLanes & NonIdleLanes;
+
   if (nonIdlePendingLanes !== NoLanes) {
+    // 非空闲 lanes 中排除挂起的 lanes
     const nonIdleUnblockedLanes = nonIdlePendingLanes & ~suspendedLanes;
     if (nonIdleUnblockedLanes !== NoLanes) {
+      // 获取 "非空闲的 lanes" 中优先级最高的 lanes
       nextLanes = getHighestPriorityLanes(nonIdleUnblockedLanes);
     } else {
       const nonIdlePingedLanes = nonIdlePendingLanes & pingedLanes;
       if (nonIdlePingedLanes !== NoLanes) {
+        // 获取 "被解锁的lanes" 中优先级最高的 lanes
         nextLanes = getHighestPriorityLanes(nonIdlePingedLanes);
       }
     }
   } else {
     // The only remaining work is Idle.
+    // 获取空闲 lanes 中优先级最高的 lanes
     const unblockedLanes = pendingLanes & ~suspendedLanes;
     if (unblockedLanes !== NoLanes) {
       nextLanes = getHighestPriorityLanes(unblockedLanes);
@@ -236,6 +251,7 @@ export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
     // bother waiting until the root is complete.
     (wipLanes & suspendedLanes) === NoLanes
   ) {
+    // Suspense 挂起相关情况
     const nextLane = getHighestPriorityLane(nextLanes);
     const wipLane = getHighestPriorityLane(wipLanes);
     if (
@@ -262,6 +278,7 @@ export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
     // and default updates, so they render in the same batch. The only reason
     // they use separate lanes is because continuous updates should interrupt
     // transitions, but default updates should not.
+    // 将 InputContinuousLane 与 DefaultLane 纠缠在一起
     nextLanes |= pendingLanes & DefaultLane;
   }
 
