@@ -39,6 +39,8 @@ function createSyntheticEvent(Interface: EventInterfaceType) {
    * Synthetic events (and subclasses) implement the DOM Level 3 Events API by
    * normalizing browser quirks. Subclasses do not necessarily have to implement a
    * DOM interface; custom application-specific events can also subclass this.
+   *
+   * react 似乎会监听全部事件，不管你有没有主动监听对应事件。
    */
   function SyntheticBaseEvent(
     reactName: string | null,
@@ -47,11 +49,17 @@ function createSyntheticEvent(Interface: EventInterfaceType) {
     nativeEvent: {[propName: string]: mixed},
     nativeEventTarget: null | EventTarget,
   ) {
+    // 原生事件在 react 中的名称
     this._reactName = reactName;
+    // 触发事件的 fiber 对象
     this._targetInst = targetInst;
+    // 事件类型
     this.type = reactEventType;
+    // 原生事件
     this.nativeEvent = nativeEvent;
+    // 触发原生事件的对象
     this.target = nativeEventTarget;
+    // ?
     this.currentTarget = null;
 
     for (const propName in Interface) {
@@ -80,6 +88,9 @@ function createSyntheticEvent(Interface: EventInterfaceType) {
   }
 
   assign(SyntheticBaseEvent.prototype, {
+    /**
+     * 阻止默认事件
+     */
     preventDefault: function () {
       this.defaultPrevented = true;
       const event = this.nativeEvent;
@@ -91,11 +102,15 @@ function createSyntheticEvent(Interface: EventInterfaceType) {
         event.preventDefault();
         // $FlowFixMe - flow is not aware of `unknown` in IE
       } else if (typeof event.returnValue !== 'unknown') {
+        // 兼容 IE 全系列
         event.returnValue = false;
       }
       this.isDefaultPrevented = functionThatReturnsTrue;
     },
 
+    /**
+     * 停止冒泡
+     */
     stopPropagation: function () {
       const event = this.nativeEvent;
       if (!event) {
@@ -111,6 +126,7 @@ function createSyntheticEvent(Interface: EventInterfaceType) {
         // any references to cancelBubble throw "Member not found".  A
         // typeof check of "unknown" circumvents this issue (and is also
         // IE specific).
+        // 兼容 IE, 但是我看了以下兼容性, 两个 api 对 IE 都是 不支持 6-8
         event.cancelBubble = true;
       }
 
@@ -124,6 +140,7 @@ function createSyntheticEvent(Interface: EventInterfaceType) {
      */
     persist: function () {
       // Modern event system doesn't use pooling.
+      // 从 v17 开始，e.persist() 将不再生效，因为 SyntheticEvent 不再放入事件池中。
     },
 
     /**
