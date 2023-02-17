@@ -193,7 +193,9 @@ const ReactElement = function (type, key, ref, self, source, owner, props) {
       value: source,
     });
     if (Object.freeze) {
+      // __DEV__ 环境中 不仅仅 props 无法修改
       Object.freeze(element.props);
+      // 整个 JSX 对象都是无法修改的
       Object.freeze(element);
     }
   }

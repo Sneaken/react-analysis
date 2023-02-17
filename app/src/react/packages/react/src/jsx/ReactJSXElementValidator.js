@@ -373,6 +373,7 @@ export function jsxWithValidation(
               validateChildKeys(children[i], type);
             }
 
+            // 我感觉似乎也没地方能修改
             if (Object.freeze) {
               Object.freeze(children);
             }
@@ -414,6 +415,7 @@ export function jsxWithValidation(
 // even with the prod transform. This means that jsxDEV is purely
 // opt-in behavior for better messages but that we won't stop
 // giving you warnings if you use production apis.
+// 感觉上来看 __DEV__ 环境也没看到有啥区别
 export function jsxWithValidationStatic(type, props, key) {
   if (__DEV__) {
     return jsxWithValidation(type, props, key, true);
