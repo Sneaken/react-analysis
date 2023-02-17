@@ -21,6 +21,8 @@ import {
 // 这些都是事件的优先级，不是调度的优先级
 export opaque type EventPriority = Lane;
 
+// 具体可以在 react-dom/getEventPriority 函数中找到事件对应的优先级
+
 // 离散事件的优先级, 例如 click, input, focus, blur, touchstart
 export const DiscreteEventPriority: EventPriority = SyncLane;
 // 连续事件的优先级, 例如 drag, mousemove, scroll, touchmove, wheel

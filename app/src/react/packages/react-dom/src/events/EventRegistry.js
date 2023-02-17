@@ -21,6 +21,7 @@ if (enableCreateEventHandleAPI) {
 
 /**
  * Mapping from registration name to event name
+ * React 事件 到 原生事件的映射
  */
 export const registrationNameDependencies = {};
 
@@ -48,7 +49,7 @@ export function registerTwoPhaseEvent(
 
 /**
  *
- * @param registrationName
+ * @param registrationName reactName
  * @param dependencies
  */
 export function registerDirectEvent(

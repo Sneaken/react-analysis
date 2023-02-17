@@ -204,6 +204,9 @@ export const mediaEventTypes: Array<DOMEventName> = [
 // We should not delegate these events to the container, but rather
 // set them on the actual target element itself. This is primarily
 // because these events do not consistently bubble in the DOM.
+// v17 中新增的特性，用于解决合成事件和原生事件在处理事件委托时的表现不一致的问题，
+// 这些事件的行为比较特殊，需要被特殊处理。
+// 在 React 中，它们被视为非委托事件
 export const nonDelegatedEvents: Set<DOMEventName> = new Set([
   'cancel',
   'close',
@@ -381,8 +384,8 @@ export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
   if (!(rootContainerElement: any)[listeningMarker]) {
     (rootContainerElement: any)[listeningMarker] = true;
     allNativeEvents.forEach((domEventName) => {
-      // We handle selectionchange separately because it
-      // doesn't bubble and needs to be on the document.
+      // We handle selectionchange separately because it doesn't bubble and needs to be on the document.
+      // selectionchange 不可取消也不会冒泡，并且只能绑定在 document 上, 所以在这里过滤一下
       if (domEventName !== 'selectionchange') {
         if (!nonDelegatedEvents.has(domEventName)) {
           listenToNativeEvent(domEventName, false, rootContainerElement);
@@ -395,10 +398,11 @@ export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
         ? rootContainerElement
         : (rootContainerElement: any).ownerDocument;
     if (ownerDocument !== null) {
-      // The selectionchange event also needs deduplication
-      // but it is attached to the document.
+      // The selectionchange event also needs deduplication, but it is attached to the document.
+      // listeningMarker 是用来判断 DOM 上是否已经存在事件监听函数
       if (!(ownerDocument: any)[listeningMarker]) {
         (ownerDocument: any)[listeningMarker] = true;
+        // 在 document 上 监听 selectionchange 事件
         listenToNativeEvent('selectionchange', false, ownerDocument);
       }
     }
@@ -417,8 +421,8 @@ function addTrappedEventListener(
     domEventName,
     eventSystemFlags,
   );
-  // If passive option is not supported, then the event will be
-  // active and not passive.
+  // If passive option is not supported, then the event will be active and not passive.
+  // 各个浏览器的默认值似乎并不同一
   let isPassiveListener = undefined;
   if (passiveBrowserEventsSupported) {
     // Browsers introduced an intervention, making these events

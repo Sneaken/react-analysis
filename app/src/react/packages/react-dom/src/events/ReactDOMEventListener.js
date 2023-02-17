@@ -13,16 +13,16 @@ import type {Container, SuspenseInstance} from '../client/ReactDOMHostConfig';
 import type {DOMEventName} from '../events/DOMEventNames';
 import {enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay} from 'shared/ReactFeatureFlags';
 import {
+  attemptSynchronousHydration,
+  clearIfContinuousEvent,
+  hasQueuedDiscreteEvents,
   isDiscreteEventThatRequiresHydration,
   queueDiscreteEvent,
-  hasQueuedDiscreteEvents,
-  clearIfContinuousEvent,
   queueIfContinuousEvent,
-  attemptSynchronousHydration,
 } from './ReactDOMEventReplaying';
 import {
-  getNearestMountedFiber,
   getContainerFromFiber,
+  getNearestMountedFiber,
   getSuspenseInstanceFromFiber,
 } from 'react-reconciler/src/ReactFiberTreeReflection';
 import {HostRoot, SuspenseComponent} from 'react-reconciler/src/ReactWorkTags';
@@ -30,8 +30,8 @@ import {type EventSystemFlags, IS_CAPTURE_PHASE} from './EventSystemFlags';
 
 import getEventTarget from './getEventTarget';
 import {
-  getInstanceFromNode,
   getClosestInstanceFromNode,
+  getInstanceFromNode,
 } from '../client/ReactDOMComponentTree';
 
 import {dispatchEventForPluginEventSystem} from './DOMPluginEventSystem';
@@ -45,11 +45,11 @@ import {
   UserBlockingPriority as UserBlockingSchedulerPriority,
 } from 'react-reconciler/src/Scheduler';
 import {
-  DiscreteEventPriority,
   ContinuousEventPriority,
   DefaultEventPriority,
-  IdleEventPriority,
+  DiscreteEventPriority,
   getCurrentUpdatePriority,
+  IdleEventPriority,
   setCurrentUpdatePriority,
 } from 'react-reconciler/src/ReactEventPriorities';
 import ReactSharedInternals from 'shared/ReactSharedInternals';
@@ -92,12 +92,15 @@ export function createEventListenerWrapperWithPriority(
   let listenerWrapper;
   switch (eventPriority) {
     case DiscreteEventPriority:
+      // 离散事件
       listenerWrapper = dispatchDiscreteEvent;
       break;
     case ContinuousEventPriority:
+      // 连续事件
       listenerWrapper = dispatchContinuousEvent;
       break;
     case DefaultEventPriority:
+    // 默认事件
     default:
       listenerWrapper = dispatchEvent;
       break;
