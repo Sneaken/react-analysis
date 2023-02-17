@@ -15,6 +15,33 @@ import type {
 
 import {queueExplicitHydrationTarget} from '../events/ReactDOMEventReplaying';
 import {REACT_ELEMENT_TYPE} from 'shared/ReactSymbols';
+import {
+  isContainerMarkedAsRoot,
+  markContainerAsRoot,
+  unmarkContainerAsRoot,
+} from './ReactDOMComponentTree';
+import {listenToAllSupportedEvents} from '../events/DOMPluginEventSystem';
+import {
+  COMMENT_NODE,
+  DOCUMENT_FRAGMENT_NODE,
+  DOCUMENT_NODE,
+  ELEMENT_NODE,
+} from '../shared/HTMLNodeType';
+
+import {
+  createContainer,
+  createHydrationContainer,
+  findHostInstanceWithNoPortals,
+  flushSync,
+  isAlreadyRendering,
+  registerMutableSourceForHydration,
+  updateContainer,
+} from 'react-reconciler/src/ReactFiberReconciler';
+import {ConcurrentRoot} from 'react-reconciler/src/ReactRootTags';
+import {
+  allowConcurrentByDefault,
+  disableCommentsAsDOMContainers,
+} from 'shared/ReactFeatureFlags';
 
 export type RootType = {
   render(children: ReactNodeList): void,
@@ -44,34 +71,6 @@ export type HydrateRootOptions = {
   onRecoverableError?: (error: mixed) => void,
   ...
 };
-
-import {
-  isContainerMarkedAsRoot,
-  markContainerAsRoot,
-  unmarkContainerAsRoot,
-} from './ReactDOMComponentTree';
-import {listenToAllSupportedEvents} from '../events/DOMPluginEventSystem';
-import {
-  ELEMENT_NODE,
-  COMMENT_NODE,
-  DOCUMENT_NODE,
-  DOCUMENT_FRAGMENT_NODE,
-} from '../shared/HTMLNodeType';
-
-import {
-  createContainer,
-  createHydrationContainer,
-  updateContainer,
-  findHostInstanceWithNoPortals,
-  registerMutableSourceForHydration,
-  flushSync,
-  isAlreadyRendering,
-} from 'react-reconciler/src/ReactFiberReconciler';
-import {ConcurrentRoot} from 'react-reconciler/src/ReactRootTags';
-import {
-  allowConcurrentByDefault,
-  disableCommentsAsDOMContainers,
-} from 'shared/ReactFeatureFlags';
 
 /* global reportError */
 const defaultOnRecoverableError =
@@ -237,6 +236,7 @@ export function createRoot(
     container.nodeType === COMMENT_NODE
       ? (container.parentNode: any)
       : container;
+  // 监听所有已注册的事件
   listenToAllSupportedEvents(rootContainerElement);
 
   return new ReactDOMRoot(root);

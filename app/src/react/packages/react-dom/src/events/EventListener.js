@@ -6,7 +6,13 @@
  *
  * @flow
  */
-
+/**
+ * 监听冒泡事件
+ * @param target
+ * @param eventType
+ * @param listener
+ * @return {Function}
+ */
 export function addEventBubbleListener(
   target: EventTarget,
   eventType: string,
@@ -16,6 +22,13 @@ export function addEventBubbleListener(
   return listener;
 }
 
+/**
+ * 监听捕获事件
+ * @param target
+ * @param eventType
+ * @param listener
+ * @return {Function}
+ */
 export function addEventCaptureListener(
   target: EventTarget,
   eventType: string,
@@ -25,6 +38,14 @@ export function addEventCaptureListener(
   return listener;
 }
 
+/**
+ * 监听一个设置了 passive flag 的捕获事件
+ * @param target
+ * @param eventType
+ * @param listener
+ * @param passive
+ * @return {Function}
+ */
 export function addEventCaptureListenerWithPassiveFlag(
   target: EventTarget,
   eventType: string,
@@ -38,6 +59,14 @@ export function addEventCaptureListenerWithPassiveFlag(
   return listener;
 }
 
+/**
+ * 监听一个设置了 passive flag 的冒泡事件
+ * @param target
+ * @param eventType
+ * @param listener
+ * @param passive
+ * @return {Function}
+ */
 export function addEventBubbleListenerWithPassiveFlag(
   target: EventTarget,
   eventType: string,
@@ -50,6 +79,13 @@ export function addEventBubbleListenerWithPassiveFlag(
   return listener;
 }
 
+/**
+ * 移除事件监听函数
+ * @param target
+ * @param eventType
+ * @param listener
+ * @param capture
+ */
 export function removeEventListener(
   target: EventTarget,
   eventType: string,
