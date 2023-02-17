@@ -10,6 +10,7 @@
 import type {AnyNativeEvent} from '../PluginModuleType';
 import type {DOMEventName} from '../DOMEventNames';
 import type {DispatchQueue} from '../DOMPluginEventSystem';
+import {accumulateTwoPhaseListeners} from '../DOMPluginEventSystem';
 import type {EventSystemFlags} from '../EventSystemFlags';
 
 import {canUseDOM} from 'shared/ExecutionEnvironment';
@@ -22,12 +23,12 @@ import getActiveElement from '../../client/getActiveElement';
 import {getNodeFromInstance} from '../../client/ReactDOMComponentTree';
 import {hasSelectionCapabilities} from '../../client/ReactInputSelection';
 import {DOCUMENT_NODE} from '../../shared/HTMLNodeType';
-import {accumulateTwoPhaseListeners} from '../DOMPluginEventSystem';
 
 const skipSelectionChangeEvent =
   canUseDOM && 'documentMode' in document && document.documentMode <= 11;
 
 function registerEvents() {
+  // 注册文本选择事件｜下拉框选择事件
   registerTwoPhaseEvent('onSelect', [
     'focusout',
     'contextmenu',

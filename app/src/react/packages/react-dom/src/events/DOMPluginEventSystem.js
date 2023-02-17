@@ -10,8 +10,11 @@
 import type {DOMEventName} from './DOMEventNames';
 import {
   type EventSystemFlags,
-  SHOULD_NOT_DEFER_CLICK_FOR_FB_SUPPORT_MODE,
+  IS_CAPTURE_PHASE,
+  IS_EVENT_HANDLE_NON_MANAGED_NODE,
   IS_LEGACY_FB_SUPPORT_MODE,
+  IS_NON_DELEGATED,
+  SHOULD_NOT_DEFER_CLICK_FOR_FB_SUPPORT_MODE,
   SHOULD_NOT_PROCESS_POLYFILL_EVENT_PLUGINS,
 } from './EventSystemFlags';
 import type {AnyNativeEvent} from './PluginModuleType';
@@ -22,17 +25,12 @@ import type {
 import type {Fiber} from 'react-reconciler/src/ReactInternalTypes';
 
 import {allNativeEvents} from './EventRegistry';
-import {
-  IS_CAPTURE_PHASE,
-  IS_EVENT_HANDLE_NON_MANAGED_NODE,
-  IS_NON_DELEGATED,
-} from './EventSystemFlags';
 import {isReplayingEvent} from './CurrentReplayingEvent';
 
 import {
-  HostRoot,
-  HostPortal,
   HostComponent,
+  HostPortal,
+  HostRoot,
   HostText,
   ScopeComponent,
 } from 'react-reconciler/src/ReactWorkTags';
@@ -40,31 +38,30 @@ import {
 import getEventTarget from './getEventTarget';
 import {
   getClosestInstanceFromNode,
-  getEventListenerSet,
   getEventHandlerListeners,
+  getEventListenerSet,
 } from '../client/ReactDOMComponentTree';
-import {COMMENT_NODE} from '../shared/HTMLNodeType';
+import {COMMENT_NODE, DOCUMENT_NODE} from '../shared/HTMLNodeType';
 import {batchedUpdates} from './ReactDOMUpdateBatching';
 import getListener from './getListener';
 import {passiveBrowserEventsSupported} from './checkPassiveEvents';
 
 import {
-  enableLegacyFBSupport,
   enableCreateEventHandleAPI,
+  enableLegacyFBSupport,
   enableScopeAPI,
 } from 'shared/ReactFeatureFlags';
 import {
   invokeGuardedCallbackAndCatchFirstError,
   rethrowCaughtError,
 } from 'shared/ReactErrorUtils';
-import {DOCUMENT_NODE} from '../shared/HTMLNodeType';
 import {createEventListenerWrapperWithPriority} from './ReactDOMEventListener';
 import {
-  removeEventListener,
-  addEventCaptureListener,
   addEventBubbleListener,
   addEventBubbleListenerWithPassiveFlag,
+  addEventCaptureListener,
   addEventCaptureListenerWithPassiveFlag,
+  removeEventListener,
 } from './EventListener';
 import * as BeforeInputEventPlugin from './plugins/BeforeInputEventPlugin';
 import * as ChangeEventPlugin from './plugins/ChangeEventPlugin';
@@ -86,6 +83,7 @@ type DispatchEntry = {|
 export type DispatchQueue = Array<DispatchEntry>;
 
 // TODO: remove top-level side effect.
+// 所有的事件都会被注册监听
 SimpleEventPlugin.registerEvents();
 EnterLeaveEventPlugin.registerEvents();
 ChangeEventPlugin.registerEvents();

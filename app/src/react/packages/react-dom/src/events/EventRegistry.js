@@ -11,6 +11,7 @@ import type {DOMEventName} from './DOMEventNames';
 
 import {enableCreateEventHandleAPI} from 'shared/ReactFeatureFlags';
 
+// 收集所有注册过的原生事件
 export const allNativeEvents: Set<DOMEventName> = new Set();
 
 if (enableCreateEventHandleAPI) {
@@ -32,6 +33,11 @@ export const registrationNameDependencies = {};
 export const possibleRegistrationNames = __DEV__ ? {} : (null: any);
 // Trust the developer to only use possibleRegistrationNames in __DEV__
 
+/**
+ * 注册冒泡事件和捕获事件
+ * @param registrationName
+ * @param dependencies
+ */
 export function registerTwoPhaseEvent(
   registrationName: string,
   dependencies: Array<DOMEventName>,
@@ -40,6 +46,11 @@ export function registerTwoPhaseEvent(
   registerDirectEvent(registrationName + 'Capture', dependencies);
 }
 
+/**
+ *
+ * @param registrationName
+ * @param dependencies
+ */
 export function registerDirectEvent(
   registrationName: string,
   dependencies: Array<DOMEventName>,
@@ -65,6 +76,7 @@ export function registerDirectEvent(
     }
   }
 
+  // 收集原生事件
   for (let i = 0; i < dependencies.length; i++) {
     allNativeEvents.add(dependencies[i]);
   }

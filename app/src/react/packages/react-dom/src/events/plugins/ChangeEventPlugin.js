@@ -9,6 +9,10 @@
 import type {AnyNativeEvent} from '../PluginModuleType';
 import type {DOMEventName} from '../DOMEventNames';
 import type {DispatchQueue} from '../DOMPluginEventSystem';
+import {
+  accumulateTwoPhaseListeners,
+  processDispatchQueue,
+} from '../DOMPluginEventSystem';
 import type {EventSystemFlags} from '../EventSystemFlags';
 
 import {registerTwoPhaseEvent} from '../EventRegistry';
@@ -28,13 +32,10 @@ import {
   enableCustomElementPropertySupport,
 } from 'shared/ReactFeatureFlags';
 import {batchedUpdates} from '../ReactDOMUpdateBatching';
-import {
-  processDispatchQueue,
-  accumulateTwoPhaseListeners,
-} from '../DOMPluginEventSystem';
 import isCustomComponent from '../../shared/isCustomComponent';
 
 function registerEvents() {
+  // 注册 onChange 事件
   registerTwoPhaseEvent('onChange', [
     'change',
     'click',

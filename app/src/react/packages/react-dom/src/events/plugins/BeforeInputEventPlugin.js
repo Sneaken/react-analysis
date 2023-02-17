@@ -11,6 +11,7 @@ import type {DOMEventName} from '../../events/DOMEventNames';
 import type {Fiber} from 'react-reconciler/src/ReactInternalTypes';
 import type {AnyNativeEvent} from '../../events/PluginModuleType';
 import type {DispatchQueue} from '../DOMPluginEventSystem';
+import {accumulateTwoPhaseListeners} from '../DOMPluginEventSystem';
 import type {EventSystemFlags} from '../EventSystemFlags';
 
 import {canUseDOM} from 'shared/ExecutionEnvironment';
@@ -25,7 +26,6 @@ import {
   SyntheticCompositionEvent,
   SyntheticInputEvent,
 } from '../SyntheticEvent';
-import {accumulateTwoPhaseListeners} from '../DOMPluginEventSystem';
 
 const END_KEYCODES = [9, 13, 27, 32]; // Tab, Return, Esc, Space
 const START_KEYCODE = 229;
@@ -55,12 +55,14 @@ const SPACEBAR_CODE = 32;
 const SPACEBAR_CHAR = String.fromCharCode(SPACEBAR_CODE);
 
 function registerEvents() {
+  // 注册输入事件
   registerTwoPhaseEvent('onBeforeInput', [
     'compositionend',
     'keypress',
     'textInput',
     'paste',
   ]);
+  // 以下和输入法相关
   registerTwoPhaseEvent('onCompositionEnd', [
     'compositionend',
     'focusout',

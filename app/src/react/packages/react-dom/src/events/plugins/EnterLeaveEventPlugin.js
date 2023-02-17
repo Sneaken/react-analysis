@@ -10,6 +10,7 @@
 import type {AnyNativeEvent} from '../PluginModuleType';
 import type {DOMEventName} from '../DOMEventNames';
 import type {DispatchQueue} from '../DOMPluginEventSystem';
+import {accumulateEnterLeaveTwoPhaseListeners} from '../DOMPluginEventSystem';
 import type {EventSystemFlags} from '../EventSystemFlags';
 
 import {registerDirectEvent} from '../EventRegistry';
@@ -20,15 +21,19 @@ import {
   getNodeFromInstance,
   isContainerMarkedAsRoot,
 } from '../../client/ReactDOMComponentTree';
-import {accumulateEnterLeaveTwoPhaseListeners} from '../DOMPluginEventSystem';
 import type {KnownReactSyntheticEvent} from '../ReactSyntheticEventType';
 
 import {HostComponent, HostText} from 'react-reconciler/src/ReactWorkTags';
 import {getNearestMountedFiber} from 'react-reconciler/src/ReactFiberTreeReflection';
 
 function registerEvents() {
+  // 只注册冒泡阶段是事件
+  // 注册鼠标事件
+  // 只支持鼠标设备
   registerDirectEvent('onMouseEnter', ['mouseout', 'mouseover']);
   registerDirectEvent('onMouseLeave', ['mouseout', 'mouseover']);
+  // 注册指针事件
+  // 支持鼠标、触控屏、笔等
   registerDirectEvent('onPointerEnter', ['pointerout', 'pointerover']);
   registerDirectEvent('onPointerLeave', ['pointerout', 'pointerover']);
 }

@@ -8,14 +8,14 @@
  */
 
 import type {DOMEventName} from './DOMEventNames';
-
-import {registerTwoPhaseEvent} from './EventRegistry';
 import {
   ANIMATION_END,
   ANIMATION_ITERATION,
   ANIMATION_START,
   TRANSITION_END,
 } from './DOMEventNames';
+
+import {registerTwoPhaseEvent} from './EventRegistry';
 
 import {enableCreateEventHandleAPI} from 'shared/ReactFeatureFlags';
 
@@ -31,6 +31,11 @@ export const topLevelEventsToReactNames: Map<DOMEventName, string | null> =
 // Exceptions that don't match this convention are listed separately.
 //
 // prettier-ignore
+// 大部分事件都在这里，在 React 中被成为顶级事件，
+// 分为三类：
+// - 离散事件， 如 click, keyup, change
+// - 用户阻塞事件. 如 dragEnter, mouseMove, scroll
+// - 连续事件, 如 error, progress, load
 const simpleEventPluginEvents = [
   'abort',
   'auxClick',
@@ -115,6 +120,7 @@ function registerSimpleEvent(domEventName, reactName) {
 }
 
 export function registerSimpleEvents() {
+  // 注册简易事件
   for (let i = 0; i < simpleEventPluginEvents.length; i++) {
     const eventName = ((simpleEventPluginEvents[i]: any): string);
     const domEventName = ((eventName.toLowerCase(): any): DOMEventName);
@@ -122,11 +128,16 @@ export function registerSimpleEvents() {
     registerSimpleEvent(domEventName, 'on' + capitalizedEvent);
   }
   // Special cases where event names don't match.
+  // 注册动画事件
   registerSimpleEvent(ANIMATION_END, 'onAnimationEnd');
   registerSimpleEvent(ANIMATION_ITERATION, 'onAnimationIteration');
   registerSimpleEvent(ANIMATION_START, 'onAnimationStart');
+  // 注册双击事件
   registerSimpleEvent('dblclick', 'onDoubleClick');
+  // 注册聚焦事件
   registerSimpleEvent('focusin', 'onFocus');
+  // 注册失焦事件
   registerSimpleEvent('focusout', 'onBlur');
+  // 注册过渡结束
   registerSimpleEvent(TRANSITION_END, 'onTransitionEnd');
 }
