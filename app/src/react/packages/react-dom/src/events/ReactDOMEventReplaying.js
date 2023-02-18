@@ -13,29 +13,29 @@ import type {DOMEventName} from '../events/DOMEventNames';
 import type {EventSystemFlags} from './EventSystemFlags';
 import type {FiberRoot} from 'react-reconciler/src/ReactInternalTypes';
 import type {EventPriority} from 'react-reconciler/src/ReactEventPriorities';
+import {isHigherEventPriority} from 'react-reconciler/src/ReactEventPriorities';
 
 import {enableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay} from 'shared/ReactFeatureFlags';
 import {
-  unstable_scheduleCallback as scheduleCallback,
   unstable_NormalPriority as NormalPriority,
+  unstable_scheduleCallback as scheduleCallback,
 } from 'scheduler';
 import {
-  getNearestMountedFiber,
   getContainerFromFiber,
+  getNearestMountedFiber,
   getSuspenseInstanceFromFiber,
 } from 'react-reconciler/src/ReactFiberTreeReflection';
 import {
   findInstanceBlockingEvent,
   return_targetInst,
 } from './ReactDOMEventListener';
-import {setReplayingEvent, resetReplayingEvent} from './CurrentReplayingEvent';
+import {resetReplayingEvent, setReplayingEvent} from './CurrentReplayingEvent';
 import {dispatchEventForPluginEventSystem} from './DOMPluginEventSystem';
 import {
-  getInstanceFromNode,
   getClosestInstanceFromNode,
+  getInstanceFromNode,
 } from '../client/ReactDOMComponentTree';
 import {HostRoot, SuspenseComponent} from 'react-reconciler/src/ReactWorkTags';
-import {isHigherEventPriority} from 'react-reconciler/src/ReactEventPriorities';
 import {isRootDehydrated} from 'react-reconciler/src/ReactFiberShellHydration';
 
 let _attemptSynchronousHydration: (fiber: Object) => void;
@@ -98,20 +98,28 @@ type QueuedReplayableEvent = {|
   targetContainers: Array<EventTarget>,
 |};
 
+// 是否已经安排了事件回放的尝试
 let hasScheduledReplayAttempt = false;
 
 // The queue of discrete events to be replayed.
+// 存储离散事件的队列，这些事件在浏览器中不需要与其他事件合成。
 const queuedDiscreteEvents: Array<QueuedReplayableEvent> = [];
 
 // Indicates if any continuous event targets are non-null for early bailout.
+// 是否有任何连续事件在事件队列中，包括 mousemove、touchmove 和 scroll 等。
 const hasAnyQueuedContinuousEvents: boolean = false;
 // The last of each continuous event type. We only need to replay the last one
 // if the last target was dehydrated.
+// 存储待处理的 focus 事件
 let queuedFocus: null | QueuedReplayableEvent = null;
+// 存储待处理的 drag 事件
 let queuedDrag: null | QueuedReplayableEvent = null;
+// 存储待处理的 mouse 事件
 let queuedMouse: null | QueuedReplayableEvent = null;
 // For pointer events there can be one latest event per pointerId.
+// 存储冒泡阶段中待处理的指针事件，键是指针的标识符，值是相应的事件对象
 const queuedPointers: Map<number, QueuedReplayableEvent> = new Map();
+// 存储捕获阶段中待处理的指针事件，键是指针的标识符，值是相应的事件对象
 const queuedPointerCaptures: Map<number, QueuedReplayableEvent> = new Map();
 // We could consider replaying selectionchange and touchmoves too.
 

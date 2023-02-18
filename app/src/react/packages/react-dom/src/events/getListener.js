@@ -20,6 +20,13 @@ function isInteractive(tag: string): boolean {
   );
 }
 
+/**
+ * 当标签是 button/input/select/textarea 时，根据 disabled 来判断是否要阻止鼠标事件
+ * @param name
+ * @param type
+ * @param props
+ * @return {boolean}
+ */
 function shouldPreventMouseEvent(
   name: string,
   type: string,
@@ -44,6 +51,7 @@ function shouldPreventMouseEvent(
 }
 
 /**
+ * 收集事件事件回调
  * @param {object} inst The instance, which is the source of events.
  * @param {string} registrationName Name of listener (e.g. `onClick`).
  * @return {?function} The stored callback.
@@ -63,11 +71,15 @@ export default function getListener(
     return null;
   }
   const listener = props[registrationName];
+  // 判断需要阻止鼠标事件
   if (shouldPreventMouseEvent(registrationName, inst.type, props)) {
     return null;
   }
 
   if (listener && typeof listener !== 'function') {
+    // 如果 listener 不合法，会出现两次错误
+    // 一次是在 completeWork 设置 DOM 属性的时候 （console.error）
+    // 一次是在事件触发的时候（throw error）
     throw new Error(
       `Expected \`${registrationName}\` listener to be a function, instead got a value of \`${typeof listener}\` type.`,
     );

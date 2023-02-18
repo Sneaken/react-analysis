@@ -70,9 +70,12 @@ function HooksInOtherHook({ name = "HooksInOtherHook" }) {
 
 const fallback = <div>loading</div>;
 
-const Portal = document.createElement("div");
-Portal.id = "Portal";
-document.body.appendChild(Portal);
+let Portal = document.getElementById("Portal");
+if (!Portal) {
+  Portal = document.createElement("div");
+  Portal.id = "Portal";
+  document.body.appendChild(Portal);
+}
 
 function Modal({ children }) {
   return createPortal(children, Portal);
@@ -190,15 +193,22 @@ function BeginWork({ name = "BeginWork" }) {
   // }, [count]);
   return (
     <Suspense fallback={fallback}>
-      <Button
-        onClick={() => {
-          setCount(count + 1);
-        }}
-      >
-        {count}
-      </Button>
-      <div key={count}>{count}</div>
-      <div key={count + 2}>{count}</div>
+      {/*<Button*/}
+      {/*  onClick={() => {*/}
+      {/*    setCount(count + 1);*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  {count}*/}
+      {/*</Button>*/}
+      <Modal>
+        <div
+          onClick={() => {
+            console.log(2);
+          }}
+        >
+          Modal
+        </div>
+      </Modal>
     </Suspense>
   );
 }

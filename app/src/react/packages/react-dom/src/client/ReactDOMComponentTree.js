@@ -73,17 +73,23 @@ export function isContainerMarkedAsRoot(node: Container): boolean {
   return !!node[internalContainerInstanceKey];
 }
 
-// Given a DOM node, return the closest HostComponent or HostText fiber ancestor.
-// If the target node is part of a hydrated or not yet rendered subtree, then
-// this may also return a SuspenseComponent or HostRoot to indicate that.
-// Conceptually the HostRoot fiber is a child of the Container node. So if you
-// pass the Container node as the targetNode, you will not actually get the
-// HostRoot back. To get to the HostRoot, you need to pass a child of it.
-// The same thing applies to Suspense boundaries.
+/**
+ * Given a DOM node, return the closest HostComponent or HostText fiber ancestor.
+ * If the target node is part of a hydrated or not yet rendered subtree, then
+ * this may also return a SuspenseComponent or HostRoot to indicate that.
+ * Conceptually the HostRoot fiber is a child of the Container node. So if you
+ * pass the Container node as the targetNode, you will not actually get the
+ * HostRoot back. To get to the HostRoot, you need to pass a child of it.
+ * The same thing applies to Suspense boundaries.
+ * 获取距离触发事件的 DOM 最近的 fiber 对象
+ * @param targetNode
+ * @return {*|null}
+ */
 export function getClosestInstanceFromNode(targetNode: Node): null | Fiber {
   let targetInst = (targetNode: any)[internalInstanceKey];
   if (targetInst) {
     // Don't return HostRoot or SuspenseComponent here.
+    // 获取 DOM 上挂载的 fiber 信息
     return targetInst;
   }
   // If the direct event target isn't a React owned DOM node, we need to look

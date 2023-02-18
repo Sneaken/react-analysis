@@ -17,25 +17,32 @@ import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFrom
 import {
   ClassComponent,
   HostComponent,
-  HostRoot,
   HostPortal,
+  HostRoot,
   HostText,
   SuspenseComponent,
 } from './ReactWorkTags';
-import {NoFlags, Placement, Hydrating} from './ReactFiberFlags';
+import {Hydrating, NoFlags, Placement} from './ReactFiberFlags';
 
 const ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
 
+/**
+ * 获取距离该 fiber 最近的已初始化过的 fiber 节点
+ * @param fiber
+ * @return {Fiber|null}
+ */
 export function getNearestMountedFiber(fiber: Fiber): null | Fiber {
   let node = fiber;
   let nearestMounted = fiber;
   if (!fiber.alternate) {
+    // mounted
     // If there is no alternate, this might be a new tree that isn't inserted
     // yet. If it is, then it will have a pending insertion effect on it.
     let nextNode = node;
     do {
       node = nextNode;
       if ((node.flags & (Placement | Hydrating)) !== NoFlags) {
+        // 如果这个fiber 是一个插入的节点，那么最近的已经初始化过的节点一定是它的父节点
         // This is an insertion or in-progress hydration. The nearest possible
         // mounted fiber is the parent but we need to continue to figure out
         // if that one is still mounted.
@@ -44,17 +51,16 @@ export function getNearestMountedFiber(fiber: Fiber): null | Fiber {
       nextNode = node.return;
     } while (nextNode);
   } else {
+    // update的时候那肯定是自己
     while (node.return) {
       node = node.return;
     }
   }
   if (node.tag === HostRoot) {
-    // TODO: Check if this was a nested HostRoot when used with
-    // renderContainerIntoSubtree.
+    // TODO: Check if this was a nested HostRoot when used with renderContainerIntoSubtree.
     return nearestMounted;
   }
-  // If we didn't hit the root, that means that we're in an disconnected tree
-  // that has been unmounted.
+  // If we didn't hit the root, that means that we're in an disconnected tree that has been unmounted.
   return null;
 }
 

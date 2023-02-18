@@ -32,7 +32,6 @@ import {
   HostPortal,
   HostRoot,
   HostText,
-  ScopeComponent,
 } from 'react-reconciler/src/ReactWorkTags';
 
 import getEventTarget from './getEventTarget';
@@ -46,11 +45,7 @@ import {batchedUpdates} from './ReactDOMUpdateBatching';
 import getListener from './getListener';
 import {passiveBrowserEventsSupported} from './checkPassiveEvents';
 
-import {
-  enableCreateEventHandleAPI,
-  enableLegacyFBSupport,
-  enableScopeAPI,
-} from 'shared/ReactFeatureFlags';
+import {enableLegacyFBSupport} from 'shared/ReactFeatureFlags';
 import {
   invokeGuardedCallbackAndCatchFirstError,
   rethrowCaughtError,
@@ -83,7 +78,9 @@ type DispatchEntry = {|
 export type DispatchQueue = Array<DispatchEntry>;
 
 // TODO: remove top-level side effect.
-// 所有的事件都会被注册监听
+// 收集所有能注册的事件
+// 主要填充 allNativeEvents（所有能注册的原生事件名称），
+//         registrationNameDependencies（React 事件依赖了哪些原生事件）
 SimpleEventPlugin.registerEvents();
 EnterLeaveEventPlugin.registerEvents();
 ChangeEventPlugin.registerEvents();
@@ -205,8 +202,8 @@ export const mediaEventTypes: Array<DOMEventName> = [
 // set them on the actual target element itself. This is primarily
 // because these events do not consistently bubble in the DOM.
 // v17 中新增的特性，用于解决合成事件和原生事件在处理事件委托时的表现不一致的问题，
-// 这些事件的行为比较特殊，需要被特殊处理。
-// 在 React 中，它们被视为非委托事件
+// 这些事件的行为（原生事件不支持冒泡阶段）比较特殊，需要被特殊处理。
+// 在 React 中，它们被视为非委托（代理）事件
 export const nonDelegatedEvents: Set<DOMEventName> = new Set([
   'cancel',
   'close',
@@ -228,29 +225,45 @@ function executeDispatch(
 ): void {
   const type = event.type || 'unknown-event';
   event.currentTarget = currentTarget;
+  // 生产环境就是使用 event 作为参数，调用 listener
   invokeGuardedCallbackAndCatchFirstError(type, listener, undefined, event);
   event.currentTarget = null;
 }
 
+/**
+ * 按顺序派发事件
+ * @param event
+ * @param dispatchListeners
+ * @param inCapturePhase
+ */
 function processDispatchQueueItemsInOrder(
   event: ReactSyntheticEvent,
-  dispatchListeners: Array<DispatchListener>,
+  dispatchListeners: Array<DispatchListener>, // 按冒泡阶段的顺序收集的回调列表
   inCapturePhase: boolean,
 ): void {
   let previousInstance;
   if (inCapturePhase) {
+    // 捕获阶段 就逆序
     for (let i = dispatchListeners.length - 1; i >= 0; i--) {
       const {instance, currentTarget, listener} = dispatchListeners[i];
+      // 如果上一个事件调用过 e.stopPropagation，
+      // 那么此时 event.isPropagationStopped() 才会 return true
       if (instance !== previousInstance && event.isPropagationStopped()) {
+        // 如果停止冒泡就 return
         return;
       }
+      // 正式派发事件
       executeDispatch(event, listener, currentTarget);
       previousInstance = instance;
     }
   } else {
+    // 冒泡阶段 就顺序
     for (let i = 0; i < dispatchListeners.length; i++) {
       const {instance, currentTarget, listener} = dispatchListeners[i];
+      // 如果上一个事件调用过 e.stopPropagation，
+      // 那么此时 event.isPropagationStopped() 才会 return true
       if (instance !== previousInstance && event.isPropagationStopped()) {
+        // 如果停止冒泡就 return
         return;
       }
       executeDispatch(event, listener, currentTarget);
@@ -281,6 +294,7 @@ function dispatchEventsForPlugins(
   targetContainer: EventTarget,
 ): void {
   const nativeEventTarget = getEventTarget(nativeEvent);
+  // 每个事件插件都可能会往这个队列推事件
   const dispatchQueue: DispatchQueue = [];
   extractEvents(
     dispatchQueue,
@@ -382,14 +396,17 @@ const listeningMarker = '_reactListening' + Math.random().toString(36).slice(2);
 
 export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
   if (!(rootContainerElement: any)[listeningMarker]) {
+    // 避免对同一个容器重复委托事件
     (rootContainerElement: any)[listeningMarker] = true;
     allNativeEvents.forEach((domEventName) => {
       // We handle selectionchange separately because it doesn't bubble and needs to be on the document.
       // selectionchange 不可取消也不会冒泡，并且只能绑定在 document 上, 所以在这里过滤一下
       if (domEventName !== 'selectionchange') {
         if (!nonDelegatedEvents.has(domEventName)) {
+          // 如果存在冒泡阶段的事件才监听冒泡事件
           listenToNativeEvent(domEventName, false, rootContainerElement);
         }
+        // 监听捕获事件
         listenToNativeEvent(domEventName, true, rootContainerElement);
       }
     });
@@ -416,6 +433,7 @@ function addTrappedEventListener(
   isCapturePhaseListener: boolean,
   isDeferredListenerForLegacyFBSupport?: boolean,
 ) {
+  // 构造 listener
   let listener = createEventListenerWrapperWithPriority(
     targetContainer,
     domEventName,
@@ -470,8 +488,11 @@ function addTrappedEventListener(
     };
   }
   // TODO: There are too many combinations here. Consolidate them.
+  // 注册监听事件
+  // 如果是捕获阶段
   if (isCapturePhaseListener) {
     if (isPassiveListener !== undefined) {
+      // 支持 passive
       unsubscribeListener = addEventCaptureListenerWithPassiveFlag(
         targetContainer,
         domEventName,
@@ -479,6 +500,7 @@ function addTrappedEventListener(
         isPassiveListener,
       );
     } else {
+      // 不支持
       unsubscribeListener = addEventCaptureListener(
         targetContainer,
         domEventName,
@@ -486,7 +508,9 @@ function addTrappedEventListener(
       );
     }
   } else {
+    // 如果是冒泡阶段
     if (isPassiveListener !== undefined) {
+      // 支持 passive
       unsubscribeListener = addEventBubbleListenerWithPassiveFlag(
         targetContainer,
         domEventName,
@@ -535,12 +559,14 @@ export function dispatchEventForPluginEventSystem(
   domEventName: DOMEventName,
   eventSystemFlags: EventSystemFlags,
   nativeEvent: AnyNativeEvent,
-  targetInst: null | Fiber,
-  targetContainer: EventTarget,
+  targetInst: null | Fiber, // 触发事件的 fiber
+  targetContainer: EventTarget, // 事件是由哪个根容器注册的，可能是 rootContainer 也不能是 portalContainer
 ): void {
   let ancestorInst = targetInst;
   if (
+    // 是否应该处理这个事件
     (eventSystemFlags & IS_EVENT_HANDLE_NON_MANAGED_NODE) === 0 &&
+    // 是否是委托事件
     (eventSystemFlags & IS_NON_DELEGATED) === 0
   ) {
     const targetContainerNode = ((targetContainer: any): Node);
@@ -578,6 +604,7 @@ export function dispatchEventForPluginEventSystem(
 
       mainLoop: while (true) {
         if (node === null) {
+          // 避免派发事件
           return;
         }
         const nodeTag = node.tag;
@@ -592,6 +619,10 @@ export function dispatchEventForPluginEventSystem(
             // So we should be able to stop now. However, we don't know if this portal
             // was part of *our* root.
             let grandNode = node.return;
+            // 在某些情况下，该节点的 fiber 对象可能不存在 return 属性。
+            // 这种情况通常发生在组件嵌套时，当子组件使用了 React 的 Context API 时，会导致 HostPortal 节点的 fiber 对象没有 return 属性。
+            // 具体原因是 Context API 的实现中会创建一些类似 HostPortal 的节点来传递 context，但这些节点并不是通过常规的 React 渲染流程创建的，
+            // 所以它们的 fiber 对象没有 return 属性。
             while (grandNode !== null) {
               const grandTag = grandNode.tag;
               if (grandTag === HostRoot || grandTag === HostPortal) {
@@ -602,6 +633,7 @@ export function dispatchEventForPluginEventSystem(
                   // This is the rootContainer we're looking for and we found it as
                   // a parent of the Portal. That means we can ignore it because the
                   // Portal will bubble through to us.
+                  // 避免派发事件
                   return;
                 }
               }
@@ -616,6 +648,7 @@ export function dispatchEventForPluginEventSystem(
           while (container !== null) {
             const parentNode = getClosestInstanceFromNode(container);
             if (parentNode === null) {
+              // 避免派发事件
               return;
             }
             const parentTag = parentNode.tag;
@@ -631,6 +664,17 @@ export function dispatchEventForPluginEventSystem(
     }
   }
 
+  // 所以什么时候才会派发事件？
+  // 1. 我需要处理这个委托事件
+  // 2. 能正常冒泡到挂载事件的根容器上
+
+  // 在 React 中，当事件被触发时，通常会被包装为合成事件并传递给事件处理函数。
+  // 合成事件是 React 实现的一种模拟浏览器原生事件系统的方式，它封装了底层的浏览器事件并提供了一些兼容性和性能方面的优化。
+  // 当应用中存在大量的事件处理函数时，每个事件处理函数可能都会触发重新渲染，导致性能问题。
+  // 为了解决这个问题，React 实现了批量更新机制。
+  // 批量更新机制可以将多个事件处理函数的更新合并为一个更新，从而减少重复的计算和渲染，提高性能。
+  // batchedUpdates 函数用于将 dispatchEventsForPlugins 函数的执行放到一个批量更新的队列中，等到当前的 JavaScript 执行栈执行完毕后再进行更新。
+  // 这样可以避免因为频繁的事件处理函数执行而导致的多次重复渲染，提高应用的性能。
   batchedUpdates(() =>
     dispatchEventsForPlugins(
       domEventName,
@@ -648,22 +692,35 @@ function createDispatchListener(
   currentTarget: EventTarget,
 ): DispatchListener {
   return {
-    instance,
-    listener,
-    currentTarget,
+    instance, // fiber
+    listener, // 对应事件监听器
+    currentTarget, // DOM
   };
 }
 
+/**
+ * 按事件冒泡的顺序收集所有挂载的事件
+ * @param targetFiber
+ * @param reactName
+ * @param nativeEventType
+ * @param inCapturePhase
+ * @param accumulateTargetOnly
+ * @param nativeEvent
+ * @return {Array<DispatchListener>}
+ */
 export function accumulateSinglePhaseListeners(
   targetFiber: Fiber | null,
   reactName: string | null,
   nativeEventType: string,
   inCapturePhase: boolean,
-  accumulateTargetOnly: boolean,
+  accumulateTargetOnly: boolean, // 是不是冒泡阶段的滚动事件
   nativeEvent: AnyNativeEvent,
 ): Array<DispatchListener> {
+  // 捕获阶段的事件名称
   const captureName = reactName !== null ? reactName + 'Capture' : null;
+  // react 事件的名称
   const reactEventName = inCapturePhase ? captureName : reactName;
+  // 是按冒泡阶段的顺序收集的事件
   let listeners: Array<DispatchListener> = [];
 
   let instance = targetFiber;
@@ -676,28 +733,6 @@ export function accumulateSinglePhaseListeners(
     if (tag === HostComponent && stateNode !== null) {
       lastHostComponent = stateNode;
 
-      // createEventHandle listeners
-      if (enableCreateEventHandleAPI) {
-        const eventHandlerListeners =
-          getEventHandlerListeners(lastHostComponent);
-        if (eventHandlerListeners !== null) {
-          eventHandlerListeners.forEach((entry) => {
-            if (
-              entry.type === nativeEventType &&
-              entry.capture === inCapturePhase
-            ) {
-              listeners.push(
-                createDispatchListener(
-                  instance,
-                  entry.callback,
-                  (lastHostComponent: any),
-                ),
-              );
-            }
-          });
-        }
-      }
-
       // Standard React on* listeners, i.e. onClick or onClickCapture
       if (reactEventName !== null) {
         const listener = getListener(instance, reactEventName);
@@ -707,57 +742,11 @@ export function accumulateSinglePhaseListeners(
           );
         }
       }
-    } else if (
-      enableCreateEventHandleAPI &&
-      enableScopeAPI &&
-      tag === ScopeComponent &&
-      lastHostComponent !== null &&
-      stateNode !== null
-    ) {
-      // Scopes
-      const reactScopeInstance = stateNode;
-      const eventHandlerListeners =
-        getEventHandlerListeners(reactScopeInstance);
-      if (eventHandlerListeners !== null) {
-        eventHandlerListeners.forEach((entry) => {
-          if (
-            entry.type === nativeEventType &&
-            entry.capture === inCapturePhase
-          ) {
-            listeners.push(
-              createDispatchListener(
-                instance,
-                entry.callback,
-                (lastHostComponent: any),
-              ),
-            );
-          }
-        });
-      }
     }
     // If we are only accumulating events for the target, then we don't
     // continue to propagate through the React fiber tree to find other
     // listeners.
-    if (accumulateTargetOnly) {
-      break;
-    }
-    // If we are processing the onBeforeBlur event, then we need to take
-    // into consideration that part of the React tree might have been hidden
-    // or deleted (as we're invoking this event during commit). We can find
-    // this out by checking if intercept fiber set on the event matches the
-    // current instance fiber. In which case, we should clear all existing
-    // listeners.
-    if (enableCreateEventHandleAPI && nativeEvent.type === 'beforeblur') {
-      // $FlowFixMe: internal field
-      const detachedInterceptFiber = nativeEvent._detachedInterceptFiber;
-      if (
-        detachedInterceptFiber !== null &&
-        (detachedInterceptFiber === instance ||
-          detachedInterceptFiber === instance.alternate)
-      ) {
-        listeners = [];
-      }
-    }
+    if (accumulateTargetOnly) break;
     instance = instance.return;
   }
   return listeners;

@@ -1342,6 +1342,7 @@ function completeWork(
       popHostContainer(workInProgress);
       updateHostContainer(current, workInProgress);
       if (current === null) {
+        // Portal 在 mount 的时候，注册事件
         preparePortalMount(workInProgress.stateNode.containerInfo);
       }
       bubbleProperties(workInProgress);

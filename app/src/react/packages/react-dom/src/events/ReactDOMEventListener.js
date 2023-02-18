@@ -83,20 +83,30 @@ export function createEventListenerWrapper(
   );
 }
 
+/**
+ * 创建一个带有优先级的事件监听器
+ * @param targetContainer
+ * @param domEventName
+ * @param eventSystemFlags
+ * @return {*}
+ */
 export function createEventListenerWrapperWithPriority(
-  targetContainer: EventTarget,
-  domEventName: DOMEventName,
-  eventSystemFlags: EventSystemFlags,
+  targetContainer: EventTarget, // 一般来说是 rootContainer 容器 ｜ document（当 domEventName 是 selectionchange）| 或者是 Portal 的那个容器
+  domEventName: DOMEventName, // dom 事件的名称
+  eventSystemFlags: EventSystemFlags, // 默认是 0
 ): Function {
+  // 每次事件触发的时候，获取 React 对应的事件优先级
   const eventPriority = getEventPriority(domEventName);
   let listenerWrapper;
   switch (eventPriority) {
     case DiscreteEventPriority:
       // 离散事件
+      // 实际调用的都是 dispatchEvent, 只是设置的更新优先级不同
       listenerWrapper = dispatchDiscreteEvent;
       break;
     case ContinuousEventPriority:
       // 连续事件
+      // 实际调用的都是 dispatchEvent, 只是设置的更新优先级不同
       listenerWrapper = dispatchContinuousEvent;
       break;
     case DefaultEventPriority:
@@ -105,6 +115,7 @@ export function createEventListenerWrapperWithPriority(
       listenerWrapper = dispatchEvent;
       break;
   }
+  // 提前绑定参数
   return listenerWrapper.bind(
     null,
     domEventName,
@@ -150,10 +161,10 @@ function dispatchContinuousEvent(
 }
 
 export function dispatchEvent(
-  domEventName: DOMEventName,
-  eventSystemFlags: EventSystemFlags,
-  targetContainer: EventTarget,
-  nativeEvent: AnyNativeEvent,
+  domEventName: DOMEventName, // 原生事件名称
+  eventSystemFlags: EventSystemFlags, // 事件标记
+  targetContainer: EventTarget, // 绑定事件的容器
+  nativeEvent: AnyNativeEvent, // 实时触发时传入的真实事件对象
 ): void {
   if (!_enabled) {
     return;
@@ -271,6 +282,7 @@ function dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEve
   targetContainer: EventTarget,
   nativeEvent: AnyNativeEvent,
 ) {
+  // 事件是否在哪里被打断
   let blockedOn = findInstanceBlockingEvent(
     domEventName,
     eventSystemFlags,
@@ -278,6 +290,7 @@ function dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEve
     nativeEvent,
   );
   if (blockedOn === null) {
+    // 如果没有被打断
     dispatchEventForPluginEventSystem(
       domEventName,
       eventSystemFlags,
@@ -353,8 +366,16 @@ function dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEve
 
 export let return_targetInst = null;
 
-// Returns a SuspenseInstance or Container if it's blocked.
-// The return_targetInst field above is conceptually part of the return value.
+/**
+ * Returns a SuspenseInstance or Container if it's blocked.
+ * The return_targetInst field above is conceptually part of the return value.
+ * blockingEvent 指的是某些事件可以阻止浏览器的默认行为和事件传递
+ * @param domEventName
+ * @param eventSystemFlags
+ * @param targetContainer
+ * @param nativeEvent
+ * @return {Container|SuspenseInstance|null}
+ */
 export function findInstanceBlockingEvent(
   domEventName: DOMEventName,
   eventSystemFlags: EventSystemFlags,
@@ -365,17 +386,22 @@ export function findInstanceBlockingEvent(
 
   return_targetInst = null;
 
+  // 获取事件的 target 对象
   const nativeEventTarget = getEventTarget(nativeEvent);
+  // 获取距离触发事件的 DOM 最近的 fiber
   let targetInst = getClosestInstanceFromNode(nativeEventTarget);
 
   if (targetInst !== null) {
+    // 距离这个 fiber 最近的已经初始化的节点
     const nearestMounted = getNearestMountedFiber(targetInst);
     if (nearestMounted === null) {
+      // 如果不存在，说明这颗树实在卸载
       // This tree has been unmounted already. Dispatch without a target.
       targetInst = null;
     } else {
       const tag = nearestMounted.tag;
       if (tag === SuspenseComponent) {
+        // 获取 Suspense 实例
         const instance = getSuspenseInstanceFromFiber(nearestMounted);
         if (instance !== null) {
           // Queue the event to be replayed later. Abort dispatching since we
@@ -405,6 +431,7 @@ export function findInstanceBlockingEvent(
       }
     }
   }
+  // 一般情况下 targetInst 就是触发事件的 DOM 上挂载的那一个 fiber 对象
   return_targetInst = targetInst;
   // We're not blocked on anything.
   return null;

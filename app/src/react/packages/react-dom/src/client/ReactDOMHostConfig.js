@@ -1225,6 +1225,7 @@ export function getInstanceFromNode(node: HTMLElement): null | Object {
 }
 
 export function preparePortalMount(portalInstance: Instance): void {
+  // 在这里注册事件
   listenToAllSupportedEvents(portalInstance);
 }
 

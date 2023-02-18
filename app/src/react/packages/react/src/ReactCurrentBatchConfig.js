@@ -10,6 +10,7 @@
 import type {BatchConfigTransition} from 'react-reconciler/src/ReactFiberTracingMarkerComponent.new';
 
 type BatchConfig = {
+  // 标记 本次批处理 是否处于 transition 上下文
   transition: BatchConfigTransition | null,
 };
 /**

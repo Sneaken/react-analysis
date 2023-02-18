@@ -11,21 +11,23 @@ import type {DOMEventName} from '../../events/DOMEventNames';
 import type {Fiber} from 'react-reconciler/src/ReactInternalTypes';
 import type {AnyNativeEvent} from '../../events/PluginModuleType';
 import type {DispatchQueue} from '../DOMPluginEventSystem';
+import {accumulateSinglePhaseListeners} from '../DOMPluginEventSystem';
 import type {EventSystemFlags} from '../EventSystemFlags';
+import {IS_CAPTURE_PHASE} from '../EventSystemFlags';
 
 import {
-  SyntheticEvent,
-  SyntheticKeyboardEvent,
-  SyntheticFocusEvent,
-  SyntheticMouseEvent,
-  SyntheticDragEvent,
-  SyntheticTouchEvent,
   SyntheticAnimationEvent,
+  SyntheticClipboardEvent,
+  SyntheticDragEvent,
+  SyntheticEvent,
+  SyntheticFocusEvent,
+  SyntheticKeyboardEvent,
+  SyntheticMouseEvent,
+  SyntheticPointerEvent,
+  SyntheticTouchEvent,
   SyntheticTransitionEvent,
   SyntheticUIEvent,
   SyntheticWheelEvent,
-  SyntheticClipboardEvent,
-  SyntheticPointerEvent,
 } from '../../events/SyntheticEvent';
 
 import {
@@ -35,19 +37,11 @@ import {
   TRANSITION_END,
 } from '../DOMEventNames';
 import {
-  topLevelEventsToReactNames,
   registerSimpleEvents,
+  topLevelEventsToReactNames,
 } from '../DOMEventProperties';
-import {
-  accumulateSinglePhaseListeners,
-  accumulateEventHandleNonManagedNodeListeners,
-} from '../DOMPluginEventSystem';
-import {IS_EVENT_HANDLE_NON_MANAGED_NODE} from '../EventSystemFlags';
 
 import getEventCharCode from '../getEventCharCode';
-import {IS_CAPTURE_PHASE} from '../EventSystemFlags';
-
-import {enableCreateEventHandleAPI} from 'shared/ReactFeatureFlags';
 
 function extractEvents(
   dispatchQueue: DispatchQueue,
@@ -159,60 +153,39 @@ function extractEvents(
   }
 
   const inCapturePhase = (eventSystemFlags & IS_CAPTURE_PHASE) !== 0;
-  if (
-    enableCreateEventHandleAPI &&
-    eventSystemFlags & IS_EVENT_HANDLE_NON_MANAGED_NODE
-  ) {
-    const listeners = accumulateEventHandleNonManagedNodeListeners(
-      // TODO: this cast may not make sense for events like
-      // "focus" where React listens to e.g. "focusin".
-      ((reactEventType: any): DOMEventName),
-      targetContainer,
-      inCapturePhase,
-    );
-    if (listeners.length > 0) {
-      // Intentionally create event lazily.
-      const event = new SyntheticEventCtor(
-        reactName,
-        reactEventType,
-        null,
-        nativeEvent,
-        nativeEventTarget,
-      );
-      dispatchQueue.push({event, listeners});
-    }
-  } else {
-    // Some events don't bubble in the browser.
-    // In the past, React has always bubbled them, but this can be surprising.
-    // We're going to try aligning closer to the browser behavior by not bubbling
-    // them in React either. We'll start by not bubbling onScroll, and then expand.
-    const accumulateTargetOnly =
-      !inCapturePhase &&
-      // TODO: ideally, we'd eventually add all events from
-      // nonDelegatedEvents list in DOMPluginEventSystem.
-      // Then we can remove this special list.
-      // This is a breaking change that can wait until React 18.
-      domEventName === 'scroll';
+  // Some events don't bubble in the browser.
+  // In the past, React has always bubbled them, but this can be surprising.
+  // We're going to try aligning closer to the browser behavior by not bubbling
+  // them in React either. We'll start by not bubbling onScroll, and then expand.
+  const accumulateTargetOnly =
+    !inCapturePhase &&
+    // TODO: ideally, we'd eventually add all events from
+    // nonDelegatedEvents list in DOMPluginEventSystem.
+    // Then we can remove this special list.
+    // This is a breaking change that can wait until React 18.
+    domEventName === 'scroll';
 
-    const listeners = accumulateSinglePhaseListeners(
-      targetInst,
+  const listeners = accumulateSinglePhaseListeners(
+    targetInst,
+    reactName,
+    nativeEvent.type,
+    inCapturePhase,
+    accumulateTargetOnly,
+    nativeEvent,
+  );
+  if (listeners.length > 0) {
+    // 只有在代码中实际挂载了监听事件才会制造合成事件
+    // Intentionally create event lazily.
+    // 惰性地制造合成事件
+    const event = new SyntheticEventCtor(
       reactName,
-      nativeEvent.type,
-      inCapturePhase,
-      accumulateTargetOnly,
+      reactEventType,
+      null,
       nativeEvent,
+      nativeEventTarget,
     );
-    if (listeners.length > 0) {
-      // Intentionally create event lazily.
-      const event = new SyntheticEventCtor(
-        reactName,
-        reactEventType,
-        null,
-        nativeEvent,
-        nativeEventTarget,
-      );
-      dispatchQueue.push({event, listeners});
-    }
+    // 派发事件
+    dispatchQueue.push({event, listeners});
   }
 }
 
