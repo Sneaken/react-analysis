@@ -129,6 +129,7 @@ ReactDOMHydrationRoot.prototype.render = ReactDOMRoot.prototype.render =
         }
       }
     }
+    // 更新容器内容
     updateContainer(children, root, null, null);
   };
 
@@ -203,26 +204,33 @@ export function createRoot(
     if (options.unstable_strictMode === true) {
       isStrictMode = true;
     }
-    if (
-      allowConcurrentByDefault &&
-      options.unstable_concurrentUpdatesByDefault === true
-    ) {
-      concurrentUpdatesByDefaultOverride = true;
-    }
+
     if (options.identifierPrefix !== undefined) {
       identifierPrefix = options.identifierPrefix;
     }
     if (options.onRecoverableError !== undefined) {
+      // onRecoverableError 是一个回调函数，它在 React 内部捕获到一个可恢复的错误时被调用。
+      // 可恢复错误通常是指一些不致命的错误，可以被 React 自身捕获并处理，而不会导致应用崩溃。
+      // onRecoverableError 提供了一种机制，允许应用程序在出现可恢复错误时做出响应。
+      // 它的主要作用是让应用程序记录错误并向开发人员报告，以便诊断和修复问题。
+      // 在调试模式下，React 还会使用 console.error 输出错误信息。
+      // 在生产环境下，如果 onRecoverableError 返回了 false，那么 React 会继续执行，忽略该错误，不会抛出异常。
+      // 如果 onRecoverableError 返回了 true，React 会中止当前的更新过程，直接退出当前函数，进入错误边界处理逻辑。
       onRecoverableError = options.onRecoverableError;
     }
     if (options.transitionCallbacks !== undefined) {
+      // transitionCallbacks 是一个对象，用于存储在组件生命周期钩子函数执行过程中产生的副作用函数。
+      // 这些函数会在 React 的过渡系统（Transition System）中被执行。
+      // 当组件的生命周期函数被执行时，这些函数会被保存到 transitionCallbacks 中，并在 commitMount() 中执行。
+      // React 16 中引入了过渡系统，用于在组件的生命周期过程中执行过渡动画等副作用操作。
+      // 在 React 18 中，过渡系统被重构，更名为 “Effect System”，但它的核心思想没有改变：为组件的生命周期钩子函数提供一种可靠的副作用执行机制。
       transitionCallbacks = options.transitionCallbacks;
     }
   }
 
   const root = createContainer(
     container,
-    ConcurrentRoot,
+    ConcurrentRoot, // tag
     null,
     isStrictMode,
     concurrentUpdatesByDefaultOverride,
@@ -230,8 +238,10 @@ export function createRoot(
     onRecoverableError,
     transitionCallbacks,
   );
+  // 给容器DOM上标记 FiberRoot 的 fiber 对象
   markContainerAsRoot(root.current, container);
 
+  // 一个能注册事件的节点
   const rootContainerElement: Document | Element | DocumentFragment =
     container.nodeType === COMMENT_NODE
       ? (container.parentNode: any)

@@ -42,7 +42,6 @@ import {
 import type {TypeOfMode} from './ReactTypeOfMode';
 import {
   ConcurrentMode,
-  ConcurrentUpdatesByDefaultMode,
   DebugTracingMode,
   NoMode,
   ProfileMode,
@@ -58,15 +57,12 @@ import type {
 } from './ReactFiberOffscreenComponent';
 
 import {
-  allowConcurrentByDefault,
-  createRootStrictEffectsByDefault,
   enableCache,
   enableDebugTracing,
   enableLegacyHidden,
   enableProfilerTimer,
   enableScopeAPI,
   enableStrictEffects,
-  enableSyncDefaultUpdates,
   enableTransitionTracing,
 } from 'shared/ReactFeatureFlags';
 import {NoFlags, Placement, StaticMask} from './ReactFiberFlags';
@@ -462,17 +458,6 @@ export function createHostRootFiber(
       if (enableStrictEffects) {
         mode |= StrictEffectsMode;
       }
-    } else if (enableStrictEffects && createRootStrictEffectsByDefault) {
-      mode |= StrictLegacyMode | StrictEffectsMode;
-    }
-    if (
-      // We only use this flag for our repo tests to check both behaviors.
-      // TODO: Flip this flag and rename it something like "forceConcurrentByDefaultForTesting"
-      !enableSyncDefaultUpdates ||
-      // Only for internal experiments.
-      (allowConcurrentByDefault && concurrentUpdatesByDefaultOverride)
-    ) {
-      mode |= ConcurrentUpdatesByDefaultMode;
     }
   } else {
     mode = NoMode;

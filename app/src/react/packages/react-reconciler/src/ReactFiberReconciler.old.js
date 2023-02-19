@@ -9,20 +9,28 @@
 
 import type {
   Fiber,
+  FiberRoot,
   SuspenseHydrationCallbacks,
   TransitionTracingCallbacks,
 } from './ReactInternalTypes';
-import type {FiberRoot} from './ReactInternalTypes';
 import type {RootTag} from './ReactRootTags';
 import type {
-  Instance,
-  TextInstance,
   Container,
+  Instance,
   PublicInstance,
+  RendererInspectionConfig,
+  TextInstance,
 } from './ReactFiberHostConfig';
-import type {RendererInspectionConfig} from './ReactFiberHostConfig';
+import {getPublicInstance} from './ReactFiberHostConfig';
 import type {ReactNodeList} from 'shared/ReactTypes';
 import type {Lane} from './ReactFiberLane.old';
+import {
+  getHighestPriorityPendingLanes,
+  higherPriorityLane,
+  NoTimestamp,
+  SelectiveHydrationLane,
+  SyncLane,
+} from './ReactFiberLane.old';
 import type {SuspenseState} from './ReactFiberSuspenseComponent.old';
 
 import {
@@ -31,8 +39,8 @@ import {
 } from './ReactFiberTreeReflection';
 import {get as getInstance} from 'shared/ReactInstanceMap';
 import {
-  HostComponent,
   ClassComponent,
+  HostComponent,
   HostRoot,
   SuspenseComponent,
 } from './ReactWorkTags';
@@ -40,12 +48,11 @@ import getComponentNameFromFiber from 'react-reconciler/src/getComponentNameFrom
 import isArray from 'shared/isArray';
 import {enableSchedulingProfiler} from 'shared/ReactFeatureFlags';
 import ReactSharedInternals from 'shared/ReactSharedInternals';
-import {getPublicInstance} from './ReactFiberHostConfig';
 import {
-  findCurrentUnmaskedContext,
-  processChildContext,
   emptyContextObject,
+  findCurrentUnmaskedContext,
   isContextProvider as isLegacyContextProvider,
+  processChildContext,
 } from './ReactFiberContext.old';
 import {createFiberRoot} from './ReactFiberRoot.old';
 import {isRootDehydrated} from './ReactFiberShellHydration';
@@ -55,18 +62,18 @@ import {
   onScheduleRoot,
 } from './ReactFiberDevToolsHook.old';
 import {
-  requestEventTime,
-  requestUpdateLane,
-  scheduleUpdateOnFiber,
-  scheduleInitialHydrationOnRoot,
-  flushRoot,
   batchedUpdates,
-  flushSync,
-  isAlreadyRendering,
-  flushControlled,
   deferredUpdates,
   discreteUpdates,
+  flushControlled,
   flushPassiveEffects,
+  flushRoot,
+  flushSync,
+  isAlreadyRendering,
+  requestEventTime,
+  requestUpdateLane,
+  scheduleInitialHydrationOnRoot,
+  scheduleUpdateOnFiber,
 } from './ReactFiberWorkLoop.old';
 import {enqueueConcurrentRenderForLane} from './ReactFiberConcurrentUpdates.old';
 import {
@@ -75,30 +82,24 @@ import {
   entangleTransitions,
 } from './ReactFiberClassUpdateQueue.old';
 import {
-  isRendering as ReactCurrentFiberIsRendering,
   current as ReactCurrentFiberCurrent,
+  isRendering as ReactCurrentFiberIsRendering,
   resetCurrentFiber as resetCurrentDebugFiberInDEV,
   setCurrentFiber as setCurrentDebugFiberInDEV,
 } from './ReactCurrentFiber';
 import {StrictLegacyMode} from './ReactTypeOfMode';
 import {
-  SyncLane,
-  SelectiveHydrationLane,
-  NoTimestamp,
-  getHighestPriorityPendingLanes,
-  higherPriorityLane,
-} from './ReactFiberLane.old';
-import {
   getCurrentUpdatePriority,
   runWithPriority,
 } from './ReactEventPriorities.old';
 import {
+  findHostInstancesForRefresh,
   scheduleRefresh,
   scheduleRoot,
   setRefreshHandler,
-  findHostInstancesForRefresh,
 } from './ReactFiberHotReloading.old';
 import ReactVersion from 'shared/ReactVersion';
+
 export {registerMutableSourceForHydration} from './ReactMutableSource.old';
 export {createPortal} from './ReactPortal';
 export {
@@ -325,6 +326,7 @@ export function updateContainer(
   callback: ?Function,
 ): Lane {
   if (__DEV__) {
+    // devTools hook
     onScheduleRoot(container, element);
   }
   const current = container.current;

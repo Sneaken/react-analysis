@@ -14,7 +14,9 @@ import type {
   TransitionTracingCallbacks,
 } from './ReactInternalTypes';
 import type {RootTag} from './ReactRootTags';
+import {ConcurrentRoot, LegacyRoot} from './ReactRootTags';
 import type {Cache} from './ReactFiberCacheComponent.old';
+import {createCache, retainCache} from './ReactFiberCacheComponent.old';
 import type {
   PendingSuspenseBoundaries,
   Transition,
@@ -23,23 +25,19 @@ import type {
 import {noTimeout, supportsHydration} from './ReactFiberHostConfig';
 import {createHostRootFiber} from './ReactFiber.old';
 import {
+  createLaneMap,
   NoLane,
   NoLanes,
   NoTimestamp,
   TotalLanes,
-  createLaneMap,
 } from './ReactFiberLane.old';
 import {
-  enableSuspenseCallback,
   enableCache,
   enableProfilerCommitHooks,
   enableProfilerTimer,
   enableUpdaterTracking,
-  enableTransitionTracing,
 } from 'shared/ReactFeatureFlags';
 import {initializeUpdateQueue} from './ReactFiberClassUpdateQueue.old';
-import {LegacyRoot, ConcurrentRoot} from './ReactRootTags';
-import {createCache, retainCache} from './ReactFiberCacheComponent.old';
 
 export type RootState = {
   element: any,
@@ -92,18 +90,6 @@ function FiberRootNode(
     this.mutableSourceEagerHydrationData = null;
   }
 
-  if (enableSuspenseCallback) {
-    this.hydrationCallbacks = null;
-  }
-
-  if (enableTransitionTracing) {
-    this.transitionCallbacks = null;
-    const transitionLanesMap = (this.transitionLanes = []);
-    for (let i = 0; i < TotalLanes; i++) {
-      transitionLanesMap.push(null);
-    }
-  }
-
   if (enableProfilerTimer && enableProfilerCommitHooks) {
     this.effectDuration = 0;
     this.passiveEffectDuration = 0;
@@ -152,21 +138,17 @@ export function createFiberRoot(
     identifierPrefix,
     onRecoverableError,
   ): any);
-  if (enableSuspenseCallback) {
-    root.hydrationCallbacks = hydrationCallbacks;
-  }
-
-  if (enableTransitionTracing) {
-    root.transitionCallbacks = transitionCallbacks;
-  }
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
+  // 在这里创建 FiberRoot 的 fiber 对象
+  // mode 是在这里确定的
   const uninitializedFiber = createHostRootFiber(
     tag,
     isStrictMode,
     concurrentUpdatesByDefaultOverride,
   );
+  // 这边的 fiber 节点还没初始化
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
 
@@ -202,6 +184,7 @@ export function createFiberRoot(
     uninitializedFiber.memoizedState = initialState;
   }
 
+  // 初始化更新队列
   initializeUpdateQueue(uninitializedFiber);
 
   return root;
