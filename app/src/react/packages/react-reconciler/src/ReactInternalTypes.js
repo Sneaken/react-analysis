@@ -95,7 +95,10 @@ export type Fiber = {|
   type: any,
 
   // The local state associated with this fiber.
-  // 跟当前Fiber相关本地状态（FC 组件就是 DOM 节点， CC 组件就是 类实例）
+  // 跟当前Fiber相关本地状态
+  // FunctionComponent: DOM
+  // ClassComponent: Class Instance
+  // HostRoot: FiberRoot
   stateNode: any,
 
   // Conceptual aliases
@@ -232,38 +235,50 @@ export type Fiber = {|
 
 type BaseFiberRootProperties = {|
   // The type of root (legacy, batched, concurrent, etc.)
+  // LegacyRoot ｜ ConcurrentRoot
   tag: RootTag,
 
   // Any additional information from the host associated with this root.
+  // 由宿主环境提供的容器节点
   containerInfo: any,
   // Used only by persistent updates.
+  // 用于持久更新的一个属性，表示这个 FiberRootNode 下挂载的待更新子节点
   pendingChildren: any,
   // The currently active root fiber. This is the mutable root of the tree.
+  // 当前树的根节点 Fiber 对象，表示当前工作在这个树上
   current: Fiber,
-
+  // 一个 Map 对象，存储等待的异步更新（即React中所谓的“ping”）
   pingCache: WeakMap<Wakeable, Set<mixed>> | Map<Wakeable, Set<mixed>> | null,
 
   // A finished work-in-progress HostRoot that's ready to be committed.
+  // 表示已经完成工作的Fiber树的根节点
   finishedWork: Fiber | null,
   // Timeout handle returned by setTimeout. Used to cancel a pending timeout, if
   // it's superseded by a new one.
   timeoutHandle: TimeoutHandle | NoTimeout,
   // Top context object, used by renderSubtreeIntoContainer
+  // 用于 renderSubtreeIntoContainer 方法的上下文对象
   context: Object | null,
+  // 表示等待更新到下一次更新时要设置的上下文
   pendingContext: Object | null,
 
   // Used by useMutableSource hook to avoid tearing during hydration.
+  // 一个数组，存储惰性的数据源
   mutableSourceEagerHydrationData?: Array<
     MutableSource<any> | MutableSourceVersion,
   > | null,
 
   // Node returned by Scheduler.scheduleCallback. Represents the next rendering
   // task that the root will work on.
+  // 下一个要渲染的任务的节点，表示下一个任务是什么，也就是下一个要渲染的组件是什么
   callbackNode: *,
+  // 表示回调函数的优先级，即任务的优先级
   callbackPriority: Lane,
   // 交互发生的时间
   eventTimes: LaneMap<number>,
+  // 存储过期时间的时间戳
   expirationTimes: LaneMap<number>,
+  // 一个 Map 对象，存储已经隐藏的更新。
   hiddenUpdates: LaneMap<Array<ConcurrentUpdate> | null>,
   // 当前 FiberRootNode 下 "待执行的 update 对应的 lanes" 的集合
   pendingLanes: Lanes,
@@ -273,14 +288,19 @@ type BaseFiberRootProperties = {|
   pingedLanes: Lanes,
   // 当前 FiberRootNode 下 "由于过期，需要同步，不可中断执行 render 阶段的 update 对应 lane" 的集合
   expiredLanes: Lanes,
+  // 存储当前正在使用 Mutable Sources 的 update 所对应的所有 lane 的集合
   mutableReadLanes: Lanes,
+  // 已经完成的更新所对应的所有 lane 的集合
 
   finishedLanes: Lanes,
-
+  // 当前 FiberRootNode 与其他 FiberRootNode 共享的 lane 集合
   entangledLanes: Lanes,
+  // 保存所有当前 FiberRootNode 与其他 FiberRootNode 之间关联的 lane 的集合
   entanglements: LaneMap<Lanes>,
 
+  // 可复用的内存池
   pooledCache: Cache | null,
+  // 已经归还到内存池中的 lane 集合
   pooledCacheLanes: Lanes,
 
   // TODO: In Fizz, id generation is specific to each server config. Maybe we
@@ -288,8 +308,10 @@ type BaseFiberRootProperties = {|
   // there's no other place to store the prefix except for an internal field on
   // the public createRoot object, which the fiber tree does not currently have
   // a reference to.
+  // 一个字符串，用于在生成唯一标识符时作为前缀
   identifierPrefix: string,
 
+  // 处理可恢复错误的回调函数，当React在开发模式下遇到可恢复错误时，将调用此函数。
   onRecoverableError: (
     error: mixed,
     errorInfo: {digest?: ?string, componentStack?: ?string},
@@ -299,7 +321,9 @@ type BaseFiberRootProperties = {|
 // The following attributes are only used by DevTools and are only present in DEV builds.
 // They enable DevTools Profiler UI to show which Fiber(s) scheduled a given commit.
 type UpdaterTrackingOnlyFiberRootProperties = {|
+  // 一个集合，包含了所有已经执行过 unbatchedUpdates 的 Fiber 节点，这些节点的更新在未来可能会被批处理
   memoizedUpdaters: Set<Fiber>,
+  // 一个包含 LaneMap 的集合，其中键是 Lanes，值是一个包含了所有 pending 更新的 Fiber 集合，这些更新在未来会被批处理。
   pendingUpdatersLaneMap: LaneMap<Set<Fiber>>,
 |};
 
@@ -311,6 +335,14 @@ export type SuspenseHydrationCallbacks = {
 
 // The follow fields are only used by enableSuspenseCallback for hydration.
 type SuspenseCallbackOnlyFiberRootProperties = {|
+  // 一个可选的对象，包含挂起时要执行的回调。
+  // 如果这个对象不是 null，那么 Fiber Root 表示的根节点就是一个服务器渲染的根节点，而不是客户端根节点。
+  // 当从服务器渲染的标记中解水合一个具有 suspense 标记的子树时，将使用这些回调来确定何时解水合该子树。
+  // 如果这个对象是 null，则 Fiber Root 表示的根节点是客户端根节点，且不需要执行回调。
+  //
+  // 在 React 中，当一个 <Suspense> 组件的子组件在渲染过程中被挂起时，React 需要暂停渲染，直到该组件完成加载。
+  // 如果这个 <Suspense> 组件是在服务器上渲染的，那么 React 会在服务端将其标记为挂起状态，然后在客户端解水合该组件时恢复渲染。
+  // 在这个过程中，需要使用 hydrationCallbacks 属性来通知 React 何时可以解水合这个组件。
   hydrationCallbacks: null | SuspenseHydrationCallbacks,
 |};
 
@@ -365,7 +397,10 @@ export type TransitionTracingCallbacks = {
 
 // The following fields are only used in transition tracing in Profile builds
 type TransitionTracingOnlyFiberRootProperties = {|
+  // 如果开启了 transitionTracing，则包含一个 transitionTracing 的 callback 函数，
+  // 这个函数会在每次执行状态更新时被调用，用于跟踪这次更新的状态过渡。
   transitionCallbacks: null | TransitionTracingCallbacks,
+  // 保存了所有涉及到状态过渡的lanes，这个数组的每个元素都是一个数组，包含了在这个 transition 内被打上的所有 lanes
   transitionLanes: Array<Array<Transition> | null>,
 |};
 
