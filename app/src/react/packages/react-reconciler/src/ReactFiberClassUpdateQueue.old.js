@@ -119,33 +119,50 @@ import assign from 'shared/assign';
 export type Update<State> = {|
   // TODO: Temporary field. Will remove this by storing a map of
   // transition -> event time on the root.
+  // 更新操作的时间戳
   eventTime: number,
+  // 更新操作的优先级
   lane: Lane,
-
+  // 更新操作的类型
   tag: 0 | 1 | 2 | 3,
+  // 更新操作所要更新的组件状态的新值。
   payload: any,
+  // 更新操作的回调函数，当更新操作执行完毕后会被调用。
   callback: (() => mixed) | null,
-
+  // 指向下一个 Update
   next: Update<State> | null,
 |};
 
 export type SharedQueue<State> = {|
+  // 指向下一个待处理的更新对象
   pending: Update<State> | null,
+  // 用于并发模式（concurrent mode）的更新对象，包含的更新将优先处理。
   interleaved: Update<State> | null,
+  // 更新所涉及的 "lanes" 集合，表示更新的优先级，用于并发模式的调度。
   lanes: Lanes,
 |};
 
 export type UpdateQueue<State> = {|
+  // 组件上一次更新之后的 state
   baseState: State,
+  // 更新队列中的第一个更新
   firstBaseUpdate: Update<State> | null,
+  // 更新队列中的最后一个更新
   lastBaseUpdate: Update<State> | null,
+  // 为 concurrent 模式设计的共享更新队列，被用来在多个 Fiber 节点之间共享更新信息
   shared: SharedQueue<State>,
+  // 保存更新的副作用（例如在 useEffect 中使用的函数），组件 commit 阶段执行副作用的时候用到
   effects: Array<Update<State>> | null,
 |};
 
+// Update 的 tag
+// 更新状态
 export const UpdateState = 0;
+// 替换状态
 export const ReplaceState = 1;
+// 强制更新
 export const ForceUpdate = 2;
+// 捕获更新，这种更新是为了收集渲染期间的副作用而不是为了更新状态。
 export const CaptureUpdate = 3;
 
 // Global state that is reset at the beginning of calling `processUpdateQueue`.
