@@ -12,7 +12,6 @@ import type {Fiber, FiberRoot} from './ReactInternalTypes';
 import type {Lane, Lanes} from './ReactFiberLane.old';
 import {
   addFiberToLanesMap,
-  addTransitionToLanesMap,
   claimNextRetryLane,
   claimNextTransitionLane,
   getHighestPriorityLane,
@@ -162,7 +161,6 @@ import {
   HostRoot,
   IndeterminateComponent,
   MemoComponent,
-  Profiler,
   SimpleMemoComponent,
   SuspenseComponent,
   SuspenseListComponent,
@@ -621,37 +619,6 @@ export function scheduleUpdateOnFiber(
     }
 
     warnIfUpdatesNotWrappedWithActDEV(fiber);
-
-    if (enableProfilerTimer && enableProfilerNestedUpdateScheduledHook) {
-      if (
-        (executionContext & CommitContext) !== NoContext &&
-        root === rootCommittingMutationOrLayoutEffects
-      ) {
-        if (fiber.mode & ProfileMode) {
-          let current = fiber;
-          while (current !== null) {
-            if (current.tag === Profiler) {
-              const {id, onNestedUpdateScheduled} = current.memoizedProps;
-              if (typeof onNestedUpdateScheduled === 'function') {
-                onNestedUpdateScheduled(id);
-              }
-            }
-            current = current.return;
-          }
-        }
-      }
-    }
-
-    if (enableTransitionTracing) {
-      const transition = ReactCurrentBatchConfig.transition;
-      if (transition !== null) {
-        if (transition.startTime === -1) {
-          transition.startTime = now();
-        }
-
-        addTransitionToLanesMap(root, transition, lane);
-      }
-    }
 
     if (root === workInProgressRoot) {
       // Received an update to a tree that's in the middle of rendering. Mark

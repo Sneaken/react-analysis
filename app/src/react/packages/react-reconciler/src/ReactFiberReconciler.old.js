@@ -334,6 +334,7 @@ export function updateContainer(
   const lane = requestUpdateLane(current);
 
   if (enableSchedulingProfiler) {
+    // devTools
     markRenderScheduled(lane);
   }
 
@@ -361,6 +362,7 @@ export function updateContainer(
     }
   }
 
+  // 创建一个 update
   const update = createUpdate(eventTime, lane);
   // Caution: React DevTools currently depends on this property
   // being called "element".
