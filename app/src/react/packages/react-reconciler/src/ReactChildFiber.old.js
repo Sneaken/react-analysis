@@ -703,7 +703,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // 如果是数组或者可迭代对象
       if (isArray(newChild) || getIteratorFn(newChild)) {
         if (key !== null) {
-          // 如果 更新前存在 key, 说明结构便了
+          // 如果 更新前存在 key, 说明结构变了
           // 跳出 去第二轮遍历
           return null;
         }
