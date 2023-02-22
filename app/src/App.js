@@ -1,7 +1,7 @@
-import BeginWork from "./examples/BeginWork";
+import ClassComponent from "./examples/ClassComponent";
 
 function App() {
-  return <BeginWork />;
+  return <ClassComponent />;
 }
 
 export default App;
