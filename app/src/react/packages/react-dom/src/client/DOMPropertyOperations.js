@@ -7,24 +7,23 @@
  * @flow
  */
 
+import type {PropertyInfo} from '../shared/DOMProperty';
 import {
+  BOOLEAN,
   getPropertyInfo,
+  isAttributeNameSafe,
+  OVERLOADED_BOOLEAN,
   shouldIgnoreAttribute,
   shouldRemoveAttribute,
-  isAttributeNameSafe,
-  BOOLEAN,
-  OVERLOADED_BOOLEAN,
 } from '../shared/DOMProperty';
 import sanitizeURL from '../shared/sanitizeURL';
 import {
   disableJavaScriptURLs,
-  enableTrustedTypesIntegration,
   enableCustomElementPropertySupport,
+  enableTrustedTypesIntegration,
 } from 'shared/ReactFeatureFlags';
 import {checkAttributeStringCoercion} from 'shared/CheckStringCoercion';
 import {getFiberCurrentPropsFromNode} from './ReactDOMComponentTree';
-
-import type {PropertyInfo} from '../shared/DOMProperty';
 
 /**
  * Get the value for a property on a node. Only used in DEV for SSR validation.
@@ -160,12 +159,14 @@ export function setValueForProperty(
     return;
   }
 
+  // 从条件上看的出这是试验性的功能
   if (
     enableCustomElementPropertySupport &&
     isCustomComponentTag &&
     name[0] === 'o' &&
     name[1] === 'n'
   ) {
+    // web components 触发的事件可能无法通过 fiber tree 正确的传递
     let eventName = name.replace(/Capture$/, '');
     const useCapture = name !== eventName;
     eventName = eventName.slice(2);
@@ -173,6 +174,8 @@ export function setValueForProperty(
     const prevProps = getFiberCurrentPropsFromNode(node);
     const prevValue = prevProps != null ? prevProps[name] : null;
     if (typeof prevValue === 'function') {
+      // 前提：组件是 web component 并且组件在 update
+      // 卸载事件
       node.removeEventListener(eventName, prevValue, useCapture);
     }
     if (typeof value === 'function') {
@@ -187,6 +190,8 @@ export function setValueForProperty(
       }
 
       // $FlowFixMe value can't be casted to EventListener.
+      // 前提：组件是 web component
+      // 挂载事件
       node.addEventListener(eventName, (value: EventListener), useCapture);
       return;
     }
