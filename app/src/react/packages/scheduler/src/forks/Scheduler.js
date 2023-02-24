@@ -9,36 +9,36 @@
 /* eslint-disable no-var */
 
 import {
-  enableSchedulerDebugging,
-  enableProfiling,
+  continuousYieldMs,
   enableIsInputPending,
   enableIsInputPendingContinuous,
+  enableProfiling,
+  enableSchedulerDebugging,
   frameYieldMs,
-  continuousYieldMs,
   maxYieldMs,
 } from '../SchedulerFeatureFlags';
 
-import {push, pop, peek} from '../SchedulerMinHeap';
+import {peek, pop, push} from '../SchedulerMinHeap';
 
 // TODO: Use symbols?
 import {
-  ImmediatePriority,
-  UserBlockingPriority,
-  NormalPriority,
-  LowPriority,
   IdlePriority,
+  ImmediatePriority,
+  LowPriority,
+  NormalPriority,
+  UserBlockingPriority,
 } from '../SchedulerPriorities';
 import {
-  markTaskRun,
-  markTaskYield,
-  markTaskCompleted,
-  markTaskCanceled,
-  markTaskErrored,
   markSchedulerSuspended,
   markSchedulerUnsuspended,
+  markTaskCanceled,
+  markTaskCompleted,
+  markTaskErrored,
+  markTaskRun,
   markTaskStart,
-  stopLoggingProfilingEvents,
+  markTaskYield,
   startLoggingProfilingEvents,
+  stopLoggingProfilingEvents,
 } from '../SchedulerProfiling';
 
 let getCurrentTime;
@@ -342,6 +342,7 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
 
   var expirationTime = startTime + timeout;
 
+  // 一个新的任务
   var newTask = {
     id: taskIdCounter++,
     callback,

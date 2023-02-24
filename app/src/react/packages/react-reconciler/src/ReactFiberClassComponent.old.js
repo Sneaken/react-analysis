@@ -9,25 +9,38 @@
 
 import type {Fiber} from './ReactInternalTypes';
 import type {Lanes} from './ReactFiberLane.old';
+import {NoLanes} from './ReactFiberLane.old';
 import type {UpdateQueue} from './ReactFiberClassUpdateQueue.old';
+import {
+  checkHasForceUpdateAfterProcessing,
+  cloneUpdateQueue,
+  createUpdate,
+  enqueueUpdate,
+  entangleTransitions,
+  ForceUpdate,
+  initializeUpdateQueue,
+  processUpdateQueue,
+  ReplaceState,
+  resetHasForceUpdateBeforeProcessing,
+} from './ReactFiberClassUpdateQueue.old';
 import type {Flags} from './ReactFiberFlags';
-
-import * as React from 'react';
 import {
   LayoutStatic,
   MountLayoutDev,
-  Update,
   Snapshot,
+  Update,
 } from './ReactFiberFlags';
+
+import * as React from 'react';
 import {
   debugRenderPhaseSideEffectsForStrictMode,
   disableLegacyContext,
   enableDebugTracing,
-  enableSchedulingProfiler,
-  warnAboutDeprecatedLifecycles,
-  enableStrictEffects,
   enableLazyContextPropagation,
+  enableSchedulingProfiler,
+  enableStrictEffects,
   enableSuspenseLayoutEffectSemantics,
+  warnAboutDeprecatedLifecycles,
 } from 'shared/ReactFeatureFlags';
 import ReactStrictModeWarnings from './ReactStrictModeWarnings.old';
 import {isMounted} from './ReactFiberTreeReflection';
@@ -43,31 +56,17 @@ import {resolveDefaultProps} from './ReactFiberLazyComponent.old';
 import {
   DebugTracingMode,
   NoMode,
-  StrictLegacyMode,
   StrictEffectsMode,
+  StrictLegacyMode,
 } from './ReactTypeOfMode';
-
-import {
-  enqueueUpdate,
-  entangleTransitions,
-  processUpdateQueue,
-  checkHasForceUpdateAfterProcessing,
-  resetHasForceUpdateBeforeProcessing,
-  createUpdate,
-  ReplaceState,
-  ForceUpdate,
-  initializeUpdateQueue,
-  cloneUpdateQueue,
-} from './ReactFiberClassUpdateQueue.old';
-import {NoLanes} from './ReactFiberLane.old';
 import {
   cacheContext,
+  emptyContextObject,
   getMaskedContext,
   getUnmaskedContext,
   hasContextChanged,
-  emptyContextObject,
 } from './ReactFiberContext.old';
-import {readContext, checkIfContextChanged} from './ReactFiberNewContext.old';
+import {checkIfContextChanged, readContext} from './ReactFiberNewContext.old';
 import {
   requestEventTime,
   requestUpdateLane,
@@ -231,6 +230,7 @@ const classComponentUpdater = {
     }
 
     if (enableSchedulingProfiler) {
+      // devTools
       markStateUpdateScheduled(fiber, lane);
     }
   },
@@ -655,6 +655,7 @@ function constructClassInstance(
 
   let instance = new ctor(props, context);
   // Instantiate twice to help detect side-effects.
+  // 严格模式下会实例化两次
   if (__DEV__) {
     if (
       debugRenderPhaseSideEffectsForStrictMode &&

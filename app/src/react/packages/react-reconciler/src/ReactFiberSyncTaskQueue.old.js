@@ -45,6 +45,8 @@ export function flushSyncCallbacksOnlyInLegacyMode() {
   // list of generic callbacks. Then we can have two: one for legacy roots, one
   // for concurrent roots. And this method would only flush the legacy ones.
   if (includesLegacySyncCallbacks) {
+    // 这里是永远不可能执行到的
+    // 因为 includesLegacySyncCallbacks 没法变成 true
     flushSyncCallbacks();
   }
 }

@@ -110,7 +110,7 @@ export function enqueueConcurrentHookUpdateAndEagerlyBailout<S, A>(
 
 export function enqueueConcurrentClassUpdate<State>(
   fiber: Fiber,
-  queue: ClassQueue<State>,
+  queue: ClassQueue<State>, // fiber.updateQueue.shared
   update: ClassUpdate<State>,
   lane: Lane,
 ) {

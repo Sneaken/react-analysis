@@ -166,7 +166,7 @@ export function createFiberRoot(
     root.pooledCache = initialCache;
     retainCache(initialCache);
     const initialState: RootState = {
-      element: initialChildren,
+      element: initialChildren, // 客户端渲染的时候是 null
       isDehydrated: hydrate,
       cache: initialCache,
       transitions: null,
@@ -186,6 +186,9 @@ export function createFiberRoot(
 
   // 初始化更新队列
   initializeUpdateQueue(uninitializedFiber);
+
+  // rootFiber 此时初始化了几个值?
+  // mode, tag, stateNode, memoizedState, updateQueue
 
   return root;
 }

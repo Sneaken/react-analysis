@@ -137,6 +137,7 @@ export type SharedQueue<State> = {|
   // 指向下一个待处理的更新对象
   pending: Update<State> | null,
   // 用于并发模式（concurrent mode）的更新对象，包含的更新将优先处理。
+  // 环形链表，链表头是最新的 update
   interleaved: Update<State> | null,
   // 更新所涉及的 "lanes" 集合，表示更新的优先级，用于并发模式的调度。
   lanes: Lanes,

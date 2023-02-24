@@ -272,6 +272,13 @@ type BaseFiberRootProperties = {|
   // Node returned by Scheduler.scheduleCallback. Represents the next rendering
   // task that the root will work on.
   // 下一个要渲染的任务的节点，表示下一个任务是什么，也就是下一个要渲染的组件是什么
+  // 是一个 task
+  //     id: number
+  //     callback
+  //     priorityLevel: 0 | 1 | 2 | 3 | 4 | 5
+  //     startTime: number
+  //     expirationTime: number
+  //     sortIndex: number
   callbackNode: *,
   // 表示回调函数的优先级，即任务的优先级
   callbackPriority: Lane,

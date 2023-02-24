@@ -260,11 +260,11 @@ type ExecutionContext = number;
 // 未处于 React 上下文
 export const NoContext = /*             */ 0b000;
 // 处于 批量更新 上下文
-const BatchedContext = /*               */ 0b001;
+const BatchedContext = /*               */ 0b001; // 1
 // 处于 render 阶段
-const RenderContext = /*                */ 0b010;
+const RenderContext = /*                */ 0b010; // 2
 // 处于 commit 阶段
-const CommitContext = /*                */ 0b100;
+const CommitContext = /*                */ 0b100; // 4
 
 type RootExitStatus = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 // 表示根组件正在运行
@@ -594,6 +594,9 @@ export function scheduleUpdateOnFiber(
   markRootUpdated(root, lane, eventTime);
 
   if (
+    // 正常触发更新的时候 不应该是在 RenderContext,
+    // 理论上由事件触发的是 BatchedContext
+    // 其余情况是 NoContext
     (executionContext & RenderContext) !== NoLanes &&
     root === workInProgressRoot
   ) {
@@ -741,6 +744,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
       existingCallbackNode !== fakeActCallbackNode
     )
   ) {
+    // 优先级没有发生改变，不需要调度
     if (__DEV__) {
       // If we're going to re-use an existing task, it needs to exist.
       // Assume that discrete update microtasks are non-cancellable and null.
@@ -785,6 +789,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
         // of `act`.
         ReactCurrentActQueue.current.push(flushSyncCallbacks);
       } else {
+        // 一般都是走微任务调度
         scheduleMicrotask(() => {
           // In Safari, appending an iframe forces microtasks to run.
           // https://github.com/facebook/react/issues/22459
@@ -806,6 +811,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
     }
     newCallbackNode = null;
   } else {
+    // 其他情况走宏任务调度
     // 将 EventPriority 转换为 Scheduler 的优先级
     let schedulerPriorityLevel;
     switch (lanesToEventPriority(nextLanes)) {
