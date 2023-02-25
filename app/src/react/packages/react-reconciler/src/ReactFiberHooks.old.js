@@ -137,7 +137,7 @@ export type UpdateQueue<S, A> = {|
   // 正在等待处理的更新
   // 是一个环状链表，始终指向链表的最后一个
   pending: Update<S, A> | null,
-  // 一个插入的更新，即可能在更新处理期间被插入的更新
+  // 一个插入的更新，即可能在更新处理期间被插入的更新 在创建 wip 之后推入 pending
   interleaved: Update<S, A> | null,
   lanes: Lanes,
   // 触发更新的操作
@@ -471,6 +471,7 @@ export function renderWithHooks<Props, SecondArg>(
         : HooksDispatcherOnUpdate;
   }
 
+  // 所以 children 其实是一个 ReactElement
   let children = Component(props, secondArg);
 
   // Check if there was a render phase update

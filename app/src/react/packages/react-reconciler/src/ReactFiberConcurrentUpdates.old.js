@@ -59,9 +59,11 @@ export function finishQueueingConcurrentUpdates() {
           lastPendingUpdate.next = (firstInterleavedUpdate: any);
           lastInterleavedUpdate.next = (firstPendingUpdate: any);
         }
+        // 存在待处理的更新了
         queue.pending = (lastInterleavedUpdate: any);
       }
     }
+    // 清空队列
     concurrentQueues = null;
   }
 }

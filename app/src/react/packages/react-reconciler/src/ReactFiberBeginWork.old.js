@@ -176,7 +176,6 @@ import {
 import {shouldError, shouldSuspend} from './ReactFiberReconciler';
 import {pushHostContainer, pushHostContext} from './ReactFiberHostContext.old';
 import {
-  checkIfContextChanged,
   lazilyPropagateParentContextChanges,
   prepareToReadContext,
   propagateContextChange,
@@ -3478,18 +3477,7 @@ function checkScheduledUpdateOrContext(
   // Before performing an early bailout, we must check if there are pending
   // updates or context.
   const updateLanes = current.lanes;
-  if (includesSomeLane(updateLanes, renderLanes)) {
-    return true;
-  }
-  // No pending update, but because context is propagated lazily, we need
-  // to check for a context change before we bail out.
-  if (enableLazyContextPropagation) {
-    const dependencies = current.dependencies;
-    if (dependencies !== null && checkIfContextChanged(dependencies)) {
-      return true;
-    }
-  }
-  return false;
+  return includesSomeLane(updateLanes, renderLanes);
 }
 
 function attemptEarlyBailoutIfNoScheduledUpdate(
@@ -3730,15 +3718,20 @@ function beginWork(
     const newProps = workInProgress.pendingProps;
 
     if (
+      // props 发生改变
       oldProps !== newProps ||
+      // 上下文是否发生改变
       hasLegacyContextChanged() ||
       // Force a re-render if the implementation changed due to hot reload:
+      // 热加载可能会发生改变
       (__DEV__ ? workInProgress.type !== current.type : false)
     ) {
       // If props or context changed, mark the fiber as having performed work.
       // This may be unset if the props are determined to be equal later (memo).
       didReceiveUpdate = true;
     } else {
+      // props 没有发生改变
+      // context 也没发生改变
       // Neither props nor legacy context changes. Check if there's a pending
       // update or context change.
       const hasScheduledUpdateOrContext = checkScheduledUpdateOrContext(
@@ -3749,9 +3742,11 @@ function beginWork(
         !hasScheduledUpdateOrContext &&
         // If this is the second pass of an error or suspense boundary, there
         // may not be work scheduled on `current`, so we check for this flag.
+        // 如果没有发生异常 或者 组件没有被 suspense 组件挂起
         (workInProgress.flags & DidCapture) === NoFlags
       ) {
         // No pending updates or context. Bail out now.
+        // 命中优化策略
         didReceiveUpdate = false;
         return attemptEarlyBailoutIfNoScheduledUpdate(
           current,
@@ -3762,6 +3757,7 @@ function beginWork(
       if ((current.flags & ForceUpdateForLegacySuspense) !== NoFlags) {
         // This is a special case that only exists for legacy mode.
         // See https://github.com/facebook/react/pull/19216.
+        // 如果强制更新
         didReceiveUpdate = true;
       } else {
         // An update was scheduled on this fiber, but there are no new props

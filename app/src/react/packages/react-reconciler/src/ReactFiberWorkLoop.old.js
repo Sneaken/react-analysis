@@ -1535,6 +1535,7 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes): Fiber {
   workInProgressRootConcurrentErrors = null;
   workInProgressRootRecoverableErrors = null;
 
+  // 加入更新
   finishQueueingConcurrentUpdates();
 
   if (__DEV__) {
