@@ -981,6 +981,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (oldFiber === null) {
+      // 组件初始化的时候
       // 新节点没遍历完，但是 oldFiber 遍历完了 (oldChildren 后面有新节点追加进来)
       // 意味着有新节点被插入，需要遍历其余 newChildren 依次生成 fiberNode。
       // If we don't have any more existing children we can choose a fast path
