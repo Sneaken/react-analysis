@@ -2298,6 +2298,7 @@ function dispatchSetState<S, A>(
     }
   }
 
+  // 每次触发更新都会生成一个 lane
   const lane = requestUpdateLane(fiber);
 
   const update: Update<S, A> = {

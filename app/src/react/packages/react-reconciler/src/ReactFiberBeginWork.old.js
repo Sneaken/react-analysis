@@ -3387,17 +3387,7 @@ function bailoutOnAlreadyFinishedWork(
     // The children don't have any work either. We can skip them.
     // TODO: Once we add back resuming, we should check if the children are
     // a work-in-progress set. If so, we need to transfer their effects.
-
-    if (enableLazyContextPropagation && current !== null) {
-      // Before bailing out, check if there are any context changes in
-      // the children.
-      lazilyPropagateParentContextChanges(current, workInProgress, renderLanes);
-      if (!includesSomeLane(renderLanes, workInProgress.childLanes)) {
-        return null;
-      }
-    } else {
-      return null;
-    }
+    return null;
   }
 
   // This fiber doesn't have work, but its subtree does. Clone the child
