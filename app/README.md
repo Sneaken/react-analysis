@@ -68,3 +68,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+### how to debug in WebStorm
+
+1. run start
+2. set breakpoints
+3. Command + Shift + Click `Local: http://localhost:3000` (此步骤以后将会自动生成 Debug 配置，后续直接以debug模式执行这个配置即可)
+
+具体表现在 启动一个 空的 user-data 的 chrome 浏览器来进入到调试模式。
