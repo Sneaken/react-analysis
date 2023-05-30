@@ -1,7 +1,7 @@
-import ClassComponent from "./examples/ClassComponent";
+import DisplayNull from "./examples/DisplayNull";
 
 function App() {
-  return <ClassComponent />;
+  return <DisplayNull />;
 }
 
 export default App;
